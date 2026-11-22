@@ -1,6 +1,6 @@
 // Golden fixtures for the native port of the render-helper post transforms (traverse, a, img,
 // iframe, text, linkify, clean-reply, markdown-to-html), postBodySummary, catchPostImage and the
-// helpers, produced by @ecency/render-helper 2.5.57 itself. All inputs are synthetic: example
+// helpers, produced by @ecency/render-helper 2.5.58 itself. All inputs are synthetic: example
 // accounts, example hosts and made-up ids. JS never runs in the app.
 //
 //   cd tools/render && npm ci
@@ -612,6 +612,427 @@ const cardBodies2557 = [
   '\\![a [b] https://example.com/x.png](https://example.com/a.png) ![d](https://example.com/b.png)',
   '\\![https://example.com/a.png](https://example.com/a b.png) ![d](https://example.com/b.png)',
 ]
+// Card and post image bodies of 2.5.58 (#2180, #2182, #2183, #2185, #2191, #2194), from the upstream specs'
+// inputs (card-and-summary-2182-2183.spec.ts, card-image-2185.spec.ts) with example hosts.
+const cardBodies2558 = (() => {
+  const A = 'https://example.com/a.png', B = 'https://example.com/b.png', C = 'https://example.com/c.png', D = 'https://example.com/d.png'
+  const S = 'https://example.com/s.png', Z = 'https://z.example/z.png', LONG = `https://example.com/${'a'.repeat(2100)}.png`
+  const TAIL = `\n\n<img data-src="${D}" src="${S}">`
+  const H = 'https://i.ecency.com/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk.png', W = 'https://i.ecency.com/600x400/https://example.com/a.png'
+  return [
+    '![x](<https://e.example/a.png?a=1&copy=2>)',
+    '![x](https://e.example/a.png?a=1&copy=2)',
+    '<img src="https://e.example/a.png?a=1&copy=2">',
+    'https://e.example/a.png?a=1&copy=2',
+    'https://example.com/a.png?name=cat(dog))',
+    `[y]: ${A}\n\n![x](${B})`,
+    `Read [the docs][y] first.\n\n[y]: ${A}\n\n![x](${B})`,
+    `t[^1]\n\n[^1]: ${A}\n\n![x](${B})`,
+    `*[HTML]: ${A}\n\n![x](${B})`,
+    `[x](https://example.net/q "${A}") ![x](${B})`,
+    `[see ${A} here](https://example.net/q) ![x](${B})`,
+    `[see ${A} here](https://example.net/q)\n\n<img src="${B}">`,
+    `[Image source ${A}](${A}) ![d](${B})`,
+    `[x]((${A})) ![x](${B})`,
+    `[x](${A}(${C})) ![d](${B})`,
+    `<iframe src="https://example.net">${A}</iframe> ![x](${B})`,
+    `<${A}?a=1&amp;b=2>\n\n![z](${B})`,
+    `${A}?a=1&amp;amp;b=2\n\n![z](${B})`,
+    `<a href="${A}?a=1&copy">${A}?a=1&copy</a>\n\n![z](${B})`,
+    `${LONG}`,
+    `${LONG} ![x](${B})`,
+    `![x](${LONG}) <img src="${LONG}">`,
+    `<${A}?a=1.>`,
+    `<${A}?a=1,>`,
+    `[x](<${A}>(${B})`,
+    `[x](<${A}>x) ![d](${B})`,
+    `[x](<${A}>"t") ![d](${B})`,
+    `[x]( ${A}\n\n) ![d](${B})`,
+    `[x](\n${A}\n\n"t") ![d](${B})`,
+    `[x](<${A}>\n\n) ![d](${B})`,
+    `[a\n\nb]( ${A}) ![d](${B})`,
+    `[a\n\nb](\n${A}) ![d](${B})`,
+    `[a\n\nb](${A}) ![x](${B})`,
+    `[x][y](${A})\n\n[y]: https://example.net/z\n\n![x](${B})`,
+    `[![x](https://example.com/${'a'.repeat(2100)}[.png)](${C}) ![d](${B})`,
+    `![x](${LONG}) [x][y]\n\n[y]: ${B}`,
+    `![x](${LONG}) [x](https://example.net/q "${B}")`,
+    `![x](${LONG}) [see ${B} here](https://example.net/q)`,
+    `![x](${LONG})\n\n*[HTML]: ${B}`,
+    `![x](${LONG}) <iframe src="https://example.net">${B}</iframe>`,
+    `_${A}_ ![x](${LONG})(${B})`,
+    `| a | b |\n|---|---|\n| ![a|b](${LONG}) | x | ${B}`,
+    // A bare URL before a markdown image that is not a line of prose.
+    `    ${A}\n\n![x](${B})`,
+    `<div>\n${A}\n</div>\n\n![x](${B})`,
+    `[see\n${A}\nhere](https://example.net/q)\n\n![x](${B})`,
+    `<${A}?a=1&amp;b=2>`,
+    `<https://example.com/\ud800a.png>`,
+    // A bare URL before a markdown image, even one that opens a line: the
+    // scans cannot tell it from one the render shows as no image.
+    `${A}\n\n![x](${B})`,
+    `   ${A} ![x](${B})`,
+    `[${A}](${A})\n\n![x](${B})`,
+    `[x\n\n${A}\n\n![x](${B})`,
+    `<center>${A}</center>\n\n![x](${B})`,
+    `<div>text</div>\n<p> <br> </p>\n<center> ${A}</center>\n\n<center>![x](${B})</center>`,
+    // Final review.
+    `<img,src="${A}">\n\n![d](${B})`,
+    `<img alt="x" :src="${A}">\n\n![d](${B})`,
+    `<img data-src="${C}"src="${A}">`,
+    `[${A}](<${A}>)\n\n![d](${B})`,
+    `[${A}](<${A}>)\n\n${B}`,
+    `![x](${LONG})\n\n\`c\` ${A}\n\n![d](${B})`,
+    `<img alt="a src='${C}'" src="${A}">\n\n![x](${LONG})`,
+    `\`c\` ${A}\n\n![x](${LONG}) ![d](${B})`,
+    // Third review.
+    `<img/src="${A}">\n\n![d](${B})`,
+    `<img alt="x"src="${A}">\n\n![d](${B})`,
+    `[x](https://example.net/q(${A}))\n${A}`,
+    `<center [>\n${A}](https://example.net/q)\n\n![d](${B})`,
+    `\`\`\`\ncode\n\n${A}\n\n![d](${B})`,
+    `~~~~\n~~~\n${A}\n~~~\n~~~~\n\n![d](${B})`,
+    `<center>${A}*</center>\n\n![d](${B})`,
+    // Second review: a line that only looks like prose.
+    `<center><a href="https://example.net/q">${A}</a></center>\n\n![d](${B})`,
+    `\\[x\n${A}\n\n![x](${B})`,
+    `[y]:\n${A}\n\n![d](${B})`,
+    `[y]:\n[${A}](${A})\n\n![d](${B})`,
+    `[x](https://example.net/q "t\n${A}")\n\n![d](${B})`,
+    `[y]: https://example.net/q "t\n${A}"\n\n![d](${B})`,
+    `t[^1]\n\n[^1]: note\n${A}\n\n![d](${B})`,
+    `t[^1]\n\n[^1]: note\n\n    ${A}\n\n![d](${B})`,
+    `\`text\n${A}\`\n\n![d](${B})`,
+    `\`\`\`\`\n\`\`\`\n${A}\n\`\`\`\n\`\`\`\`\n\n![d](${B})`,
+    `<iframe src="https://example.net">\n\n${A}\n\n</iframe>\n\n![d](${B})`,
+    `<head>\n${A}\n</head>\n\n![d](${B})`,
+    `<head>\n\n${A}\n\n</head>\n\n![d](${B})`,
+    `<a href="https://example.net/q">\n${A}\n</a>\n\n![d](${B})`,
+    `x]\n${A}\n\n![d](${B})`,
+    `[text <span title="]">\n${A}](https://example.net/q)\n\n![d](${B})`,
+    `\\![x](<${A}>(${C}))`,
+    `\\![x](<${A}>x) ![d](${B})`,
+    `[x]( ${A}(${C})`,
+    `[x](\n${A}(${C})`,
+    `<img data-src="${A}" src=""> ![x](${LONG})`,
+    `![x](${LONG}) <img data-src="${B}" src="">`,
+    `<img class="lazy" data-src="${A}" src="${B}">`,
+    `![x](${LONG}) https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\n![d](${B})`,
+    `| a | b |\n|---|---|\n| ![a|b](${LONG}) | x | https://www.youtube.com/watch?v=dQw4w9WgXcQ`,
+    // Regression rerun: a `;` after a bare URL, a `-src` after the first image.
+    `[${A}&quot;][r]\n\n[r]: ${A}&quot;`,
+    `[${A}&amp;][r]\n\n[r]: ${A}&amp;`,
+    `[${A}&copy;][r]\n\n[r]: ${A}&copy;`,
+    `\`c\` <img\nsrc="${A}&quot;">`,
+    `![x](https://example.com/${'a'.repeat(1984)}.png)\n\n<img data-src="${C}">`,
+    `![x](${A})\n\n<img data-src="${C}" src="${B}">`,
+    `${A}&foo;`,
+    `${A}\\&amp;`,
+    `x ${A}&quot; y`,
+    `~~${A}&quot;~~~~`,
+    `${A}&foo;\n\n![d](${B})`,
+    `![x](https://example.com/${'a'.repeat(2014)}${'%41'.repeat(10)}.png) ![d](${B})`,
+    // Reserved escapes, a legacy host's encoded inner URL: shown although long as written.
+    `![x](https://example.com/x%2F%7e${'a'.repeat(2018)}.png) ![d](${B})`,
+    `![x](https://example.com/%3Fq%3D%41%41${'a'.repeat(2013)}.png) ![d](${B})`,
+    `![x](https://images.hive.blog/0x0/https%3A%2F%2Fexample.com%2F${'a'.repeat(1989)}.png)\n\n![d](${B})`,
+    `![x](https://images.hive.blog/0x0/https%3A%2F%2Fexample.com%2F${'a'.repeat(2016)}.png)\n\n![d](${B})`,
+    // A lone surrogate: no lookup throws.
+    `![x](https://example.com/%20\ud800${'a'.repeat(2034)}.png) ![d](${B})`,
+    // The candidate's whole line decides a closer, not the text before it.
+    `\`\`\`\ncode\n\`\`\`js\nmore\n\`\`\`<img src="${B}">`,
+    // A closer behind a container the opener was not in, or indented four.
+    `\`\`\`\ncode\n\`\`\`js\n> \`\`\`\n![x](${A})`,
+    `\`\`\`\ncode\n    \`\`\`\n![x](${A})\n\`\`\`\n\n![d](${B})`,
+    `\`\`\`\ncode\n- \`\`\`\n![x](${A})\n\`\`\`\n\n![d](${B})`,
+    `\`\`\`\ncode\n\`\`\`![x](${A})\n\`\`\`\n\n![d](${B})`,
+    // Multi-byte escapes decode shorter than two per escape.
+    `![x](https://example.com/%C3%A9${'a'.repeat(2023)}.png) ![d](${B})`,
+    `![x](https://example.com/%E2%82%AC${'a'.repeat(2022)}.png) ![d](${B})`,
+    `![x](https://example.com/${'%C3%A9'.repeat(100)}${'a'.repeat(1876)}.png) ![d](${B})`,
+    `![x](https://example.com/${'%F0%9F%98%80'.repeat(20)}${'a'.repeat(1814)}.png) ![d](${B})`,
+    // A closer indented up to three spaces closes whatever the opener's indent.
+    `\`\`\`\na\n   \`\`\`\n\`\`\`\nb\n\`\`\`\n\`\`\`\n<img src="${B}">`,
+    `\`\`\`\na\n   \`\`\`\n\`\`\`\nb\n\`\`\`\n\`\`\`\n![x](${A})`,
+    `\`\`\`\n\n   \`\`\`\nx\n\`\`\`\n\`\`A\`\`\n\n![d](${B})`,
+    // A fence holding a blank line, then inline code before the URL.
+    `\`\`\`\ncode\n\n\`\`\`\n\`\`${A}\`\`\n\n![d](${B})`,
+    // A list fence closed by its indented closer, then a fence the list
+    // marker line does not close.
+    `- \`\`\`\n  a\n  \`\`\`\n\n\`\`\`\n- \`\`\`\n![x](${A})`,
+    // A marker indented four or by a tab is indented code, not an opener.
+    `\t\`\`\`\n</pre>   \`\`\`\n    \t\`\`\`\n    \`\`\`\n![x](${A})\`\`\`\t\n`,
+    `\t\`\`\`\n\n\n<code>--- \`\`\`\n\`\`\`\t\nhttps://youtu.be/dQw4w9WgXcQ`,
+    `text\n\n    \`\`\`\n    indented code\n\n\`\`\`\n${A}\n\`\`\`\n\n![d](${B})`,
+    `    \`\`\`\n\n\`\`\`\n![x](${A})`,
+    `    \`\`\`\n\n\`\`\`\nhttps://youtu.be/dQw4w9WgXcQ`,
+    // An info string holding a backtick opens nothing.
+    `\`\`\` a\`b\n\n\`\`\`\n![x](${A})\n\`\`\`\n\n![d](${B})`,
+    `~~~ a\`b\n\n~~~\n![x](${A})\n~~~\n\n![d](${B})`,
+    // A list item's fence, then a marker under its indent.
+    `1. x\n   \`\`\`\n   a\n\`\`\`\n![x](${A})\n\`\`\`\n\n![d](${B})`,
+    // A src inside another attribute's value is not the image's src.
+    `<img alt="x src='${A}'" src="${B}">`,
+    `<img title='a src="${A}"' src="${B}">`,
+    `<img alt="a > src='${A}'" src="${B}">`,
+    // A tag the render shows as text reads nothing past its own text.
+    `<img alt="a>b"\n\n![d](${B})\n\n<img src="${C}">`,
+    `Intro text.\n\n<img alt="1 > 0" width="100"\n\n![d](${B})\n\nMore\n\n<img src="${C}">`,
+    `<img alt="a>b"\n![d](${B}) <img src="${C}">`,
+    `<img alt="a>b"\n\n${B}\n\n<img src="${C}">`,
+    `<img alt="it's" title='a>b'\n\n![d](${B})\n\n<img src="${C}">`,
+    `<img alt="<img src='${A}'>"src="${B}">`,
+    `<img title="<img src='${A}'>"src="${B}">\n\n![d](${C})`,
+    `<IMG=data-src = "${A}"\n\n<img src='${B}'>`,
+    `<img='x src="${A}"'\n\n<img src="${B}">`,
+    `<IMG = ">"x src='${A}'"`,
+    `<img src="${A}"x="1"\n\n![d](${B})`,
+    `<img src="${A}" alt="x"y\n\n![d](${B})`,
+    `<img @a src="${A}">\n\n![d](${B})`,
+    `<img 1x src="${A}">\n\n![d](${B})`,
+    // Inline, a tag outside the grammar is text.
+    `text <img src="${A}"x="1">\n\n![d](${B})`,
+    `text <img @a src="${A}">\n\n![d](${B})`,
+    // The first src decides, empty or not.
+    `<img src="" src="${A}">\n\n![d](${B})`,
+    // A tag across a blank line is text: the paragraph ends there.
+    `<img alt="a>b"\n\n src="${A}">\n\n![d](${B})`,
+    `<img alt="a>b"\n\n src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="x"\n\n src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n\nb" src="${A}">\n\n![d](${B})`,
+    `<img\n\nsrc="${A}">\n\n![d](${B})`,
+    `<img alt="x"\n  \n src="${A}">\n\n![d](${B})`,
+    // A line inside a tag that starts a block ends the paragraph (#2194).
+    `<img alt="a\n---\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n===\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n# h\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n* x\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n> x\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n<div>\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n<table>\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n\`\`\`\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `> <img alt="a\n>\n> b" src="https://example.com/cover">\n\n![d](${B})`,
+    `> <img alt="a\n> \n> b" src="https://example.com/cover">\n\n![d](${B})`,
+    // A tag on a line that is a block of one line (heading, table row,
+    // footnote) ends at its line break.
+    `# <img alt="a\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `## <img alt="a\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `| h |\n|---|\n| <img alt="a\nb" src="https://example.com/cover"> |\n\n![d](${B})`,
+    `[^1]: <img alt="a\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    // A definition, delimiter row or footnote line inside a tag.
+    `<img alt="a\n: b" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="x"\n:\n src="https://example.com/cover">\n\n![d](${B})`,
+    `<img\n: src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a | c\n:--|--:\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `x | <img alt="a\n:--|--:\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `<img alt="a\n[^1]: x\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    // Inside a footnote definition, a tag across any line break.
+    `[^1]: <img alt="a\rb" src="https://example.com/cover">\n\n![d](${B})`,
+    `[^1]: <img alt="a\r\rb" src="https://example.com/cover">\n\n![d](${B})`,
+    `[^1]: <img alt="a\rb" src="https://example.com/cover"> ![d](${B})`,
+    `[^1]: x\n<img alt="a\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    `[^1]: x\n  <img alt="a\nb" src="https://example.com/cover">\n\n![d](${B})`,
+    // A fence marker with text after it closes nothing.
+    `\`\`\`\n\`\`\` not a closer\n![x](${A})\n\`\`\`\n\n![d](${B})`,
+    `~~~\n~~~ x\n![x](${A})\n~~~\n\n![d](${B})`,
+    `\`\`\`\n\`\`\` x\n\`\`\`\n${A}\n\`\`\`\n\n![d](${B})`,
+    `\`\`\`\n\`\`\` x\n\`\`\`\n\`a\`\n\`\`\`\n\n${A}\n\n![d](${B})`,
+    // 2. Bare image URLs the scans never read.
+    `https://example.com/a(1).png\n\n![d](${B})`,
+    `_${A}_ ![x](${B})`,
+    `==${A}== ![x](${B})`,
+    `[${A}] ![x](${B})`,
+    `x${A} ![x](${B})`,
+    `=${A} ![x](${B})`,
+    `\`x\` ${A}\n\n![d](${B})`,
+    `text\n    ${A}\n\n![d](${B})`,
+    `- x\n\n    ${A}\n\n![d](${B})`,
+    `<a href="https://example.net/q">y\n${A}\n\n![d](${B})`,
+    `<div\n${A}\n>x</div>\n\n![d](${B})`,
+    // 3. A spaced HTML src.
+    `<img src=" ${A} ">\n\n![z](${B})`,
+    `<img src=" https://images.hive.blog/600x400/https%3A%2F%2Fe.com%2Fa.png "> ![b](${B})`,
+    // 4. A video poster before a markdown image.
+    `https://www.youtube.com/watch?v=dQw4w9WgXcQ ![x](${B})`,
+    // 5. A URL the render shows as no image, nothing after it.
+    `[x](https://example.net/q "${A}")`,
+    `[see ${A} here](https://example.net/q)`,
+    `[y]: ${A}`,
+    `[^1]: ${A}`,
+    `*[HTML]: ${A}`,
+    `<iframe src="https://example.net">${A}</iframe>`,
+    // 6. A legacy sized proxy URL written bare.
+    `https://images.hive.blog/1536x0/https://files.example/x.png`,
+    `https://images.hive.blog/1536x0/https://files.example/x.png\n\n![d](${B})`,
+    // 7. Trailing characters.
+    `${A}*`,
+    `${A}_`,
+    `${A}~`,
+    `${A}'`,
+    `${A}\\`,
+    `${A}*\n\n![d](${B})`,
+    `${A}'\n\n![d](${B})`,
+    // An existing proxy URL over the proxy's length limit is kept as is.
+    `![x](${PROXY_BASE}/p/${'Z'.repeat(2100)}) ![d](${B})`,
+    `![x](${PROXY_BASE}/u/${'z'.repeat(2100)}.png) ![d](${B})`,
+    // A bare URL over the limit, then another URL or image.
+    `https://e.example/${'a'.repeat(2040)}.png\n\n${Z}`,
+    `https://e.example/${'a'.repeat(2040)}.png\n\n[${Z}](${Z})`,
+    `https://e.example/${'a'.repeat(2040)}.png\n\nhttps://youtu.be/abcdefghijk`,
+    `https://e.example/${'a'.repeat(2040)}.png\n\n![z](${Z})`,
+    `<div>\n\n${LONG}\n\n![d](${B})`,
+    `<center>\n\n${LONG}\n\n![d](${B})`,
+    // Image syntax the render does not show as the first image.
+    `<img src=${C}>\n\n![x](${A})${TAIL}`,
+    `https://youtu.be/abcdefghijk\n\n![x](${A})${TAIL}`,
+    `[^1]: ![x](${A})\n\nt[^1]${TAIL}`,
+    `[t](https://l.example/ "![x](${A})")${TAIL}`,
+    `[r]: https://r.example/ "![x](${A})"\n\n[t][r]${TAIL}`,
+    `<div title="![x](${A})">t</div>${TAIL}`,
+    `<iframe src="https://example.net">![x](${A})</iframe>${TAIL}`,
+    `<img alt="![x](${A})">${TAIL}`,
+    `\`\`\`\ncode\n![x](${A})${TAIL}`,
+    `[^1]: ![x](${A})\n\nt[^1]`,
+    `[t](https://l.example/ "![x](${A})") ![d](${B})`,
+    // A reference image after another image, or after text the scans cannot read.
+    `[r]: ${A}\n\n![b](${B})\n\n![][r]`,
+    `[r]: ${A}\n\n_${C}_ ![][r]`,
+    // Third review: a `]:` that is not a definition, a duplicate label, a spaced reference.
+    `Sources\n[1]: ${A}\n\n![d](${B})`,
+    `Sources\n[1]: ${A}\n\n${B}`,
+    `note]: ${A}\n\n![d](${B})`,
+    `[r]: ${A} trailing words\n\n![d](${B})`,
+    `[r]: ${A}<img src="${B}">`,
+    `text\n*[HTML]: ${A}\n\n![d](${B})`,
+    `![x] [r]\n\n[r]: ${A}\n\n![d](${B})`,
+    `[r]: https://example.net/q\n[r]: ${A}\n\n![x][r]\n\n![d](${B})`,
+    `![x][r]\n\n[r]: https://i.ecency.com/768x0/${A}\n\n![d](${B})`,
+    // A video URL the render does not turn into a poster.
+    `[video]: https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\n![cover](${B})\n\nWatch the [video].`,
+    `[Watch https://www.youtube.com/watch?v=dQw4w9WgXcQ here](https://example.net/q)\n\n![d](${B})`,
+    `[x](https://example.net/q "https://www.youtube.com/watch?v=dQw4w9WgXcQ")\n\n![d](${B})`,
+    `\`\`https://www.youtube.com/watch?v=dQw4w9WgXcQ\`\`\n\n![d](${B})`,
+    // Bare URL contexts.
+    `\`\`${A}\`\`\n\n![d](${B})`,
+    `Use \`\`${A}\`\` as the URL.\n\n![d](${B})`,
+    `'${A}' ![d](${B})`,
+    `++${A}++\n\n![d](${B})`,
+    `^${A}^\n\n![d](${B})`,
+    `|${A}|x|\n|-|-|\n|y|z|\n\n![d](${B})`,
+    `${A}\`![x](${B})`,
+    `<a\nhref="https://example.net/q">${A}</a>\n\n![d](${B})`,
+    `<div title="[${A}](${A})">x</div>\n\n![d](${B})`,
+    `\\[${A}](${A})\n\n![d](${B})`,
+    `<div><${A}>\n\n![d](${B})`,
+    `<hr><${A}>\n\n![d](${B})`,
+    `[^1]: ${A}\n\n![d](${B})`,
+    `[r]: ${A}\n\n![r](${C})`,
+    `<a href="https://example.net/q"><a href="${A}">${A}</a></a>\n\n![d](${B})`,
+    `_${A}_ https://www.youtube.com/watch?v=dQw4w9WgXcQ`,
+    // Second review round.
+    `[r]: https://example.com/r.png\n\n![x](${A})`,
+    `[r]: https://example.com/r.png\n\n${A}`,
+    `https://i.ecency.com/768x0/${A}`,
+    `<center>https://i.ecency.com/768x0/${A}</center>\n\n![d](${B})`,
+    `[https://i.ecency.com/768x0/${A}](https://i.ecency.com/768x0/${A})`,
+    `![x][é]\n\n[É]: ${A}\n\n![d](${B})`,
+    `![x][foo\nbar]\n\n[foo bar]: ${A}\n\n![d](${B})`,
+    `text\n[a]: https://example.net/q\n[r]: ${A}\n\n![d](${B})`,
+    `[a]: https://example.net/q junk words\n[r]: ${A}\n\n![d](${B})`,
+    `[r]: ${A}\n"title" junk\n\n![d](${B})`,
+    `<div class="text-justify">\n![x][r]\n</div>\n\n[r]: ${A}\n\n![d](${B})`,
+    `\\![x][r]\n\n[r]: ${A}\n\n![d](${B})`,
+    `<div title="![x][r]">y</div>\n\n[r]: ${A}\n\n![d](${B})`,
+    `[t](https://example.net/q "![x][r]")\n\n[r]: ${A}\n\n![d](${B})`,
+    `[r]: ${A}\n[q]: https://example.net/q\n\n![x][q] ![y][r]\n\n![d](${B})`,
+    `<a href="https://example.net/q"><a href="https://example.net/q">y</a>${A}</a>\n\n![d](${B})`,
+    `<a title="[${A}](${A})" href="https://example.net/q">y</a>\n\n![d](${B})`,
+    `<div>https://example.com/c.jpg</span>![x](${A})`,
+    `<col>https://www.youtube.com/watch?v=dQw4w9WgXcQ</col>![d](${B})`,
+    `[]( https://www.youtube.com/watch?v=dQw4w9WgXcQ ) ![d](${B})`,
+    `<a href="https://example.net/q"><a href="https://example.net/q">y</a>https://www.youtube.com/watch?v=dQw4w9WgXcQ</a>\n\n![d](${B})`,
+    `<a x="[https://www.youtube.com/watch?v=dQw4w9WgXcQ](https://www.youtube.com/watch?v=dQw4w9WgXcQ)">y</a><img src="${B}">`,
+    `<?x <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">https://www.youtube.com/watch?v=dQw4w9WgXcQ</a> ?>\n\n![d](${B})`,
+    `</style>https://www.youtube.com/watch?v=dQw4w9WgXcQ</span>![y](${B})`,
+    // Third review round.
+    `${A}[x] ![d](${B})`,
+    `${A}[1]: https://example.net/q\n\n![d](${B})`,
+    `[]( [${A}](${A}) ) ![d](${B})`,
+    `[]( [https://www.youtube.com/watch?v=dQw4w9WgXcQ](https://www.youtube.com/watch?v=dQw4w9WgXcQ) ) ![d](${B})`,
+    `<blockquote>${A}</textarea>\n\n\`\`\`\n![x](${A})`,
+    `![r]<pre>https://example.com/c.jpg</a>![y](${B})`,
+    // Fourth review round: brackets after a bare URL.
+    `${A}[ \n\n![d](${B})`,
+    `${A}[x\ny]\n\n![d](${B})`,
+    `${A}[[x]]\n\n![d](${B})`,
+    `${A}[${'x'.repeat(120)}]\n\n![d](${B})`,
+    `${A}[x][y]\n\n![d](${B})`,
+    `${A}[x][]\n\n![d](${B})`,
+    `${A}[x](\n\n![d](${B})`,
+    `${A}[x](y z)\n\n![d](${B})`,
+    `${A}[^1]\n\n![d](${B})`,
+    `${A}[^1]\n\n[^1]: note\n\n![d](${B})`,
+    `${A}[r]\n\ntext\n[r]: https://example.net/q\n\n![d](${B})`,
+    `${A}[r]\n\n[r]: https://example.net/q junk words\n\n![d](${B})`,
+    `${A}[r]\n\n\`\`\`\n[r]: https://example.net/q\n\`\`\`\n\n![d](${B})`,
+    `${A}[r]\n\n[r]: https://example.net/q\n\n![d](${B})`,
+    `${A}[x](https://example.net/q)\n\n![d](${B})`,
+    `${A}[r]\n\n\`\`\`\n\n[r]: https://example.net/q\n\n\`\`\`\n\n![d](${B})`,
+    `![x](https://example.com/${'a'.repeat(2044)}%20b.png) ![d](${B})`,
+    `![x](https://example.com/${'a'.repeat(2044)}%C3%A9.png)\n\n![d](${B})`,
+    `<center>${A}</center>\n\n![x](${B})`,
+    `<center>\n\n${A}\n\n</center>\n\n![x](${B})`,
+    `| a |\n|---|\n| ${A} |\n\n![x](${B})`,
+    `${A}\n\n![x](${B})`,
+    `intro\n\n${A}\n\n![x](${B})`,
+    `${A}`,
+    `<center>${A}</center>`,
+    `<div>${A}</div>\n\n![x](${B})`,
+    `<img src=" ${A} ">\n\n![x](${B})`,
+    `<img alt="x src='${B}'" src="${A}">\n\n![x](${B})`,
+    `<img xsrc="${B}" src="${A}">\n\n![x](${B})`,
+    // A tag across lines that start nothing is read (real posts write these).
+    `<img \nsrc="${A}">\n\n![x](${B})`,
+    `<img \n src="${A}"/>\n\n![x](${B})`,
+    // Code before the paragraph, or fenced in it, is not the URL's code.
+    `\`x\`\n\n${A}\n\n![x](${B})`,
+    `\`\`\`\nx\n\`\`\`\n${A}\n\n![x](${B})`,
+    // A fence in a quote, closed behind the same prefix.
+    `> \`\`\`\n> code\n> \`\`\`\n\n![x](${A})`,
+    // A linked image.
+    `<a href="${A}"><img src="${A}"></a>`,
+    `<center><a href="https://example.com/full.jpg"><img src="${A}"></a></center>\n\n![x](${B})`,
+    '![](https://images.ecency.com/DQmTest/thumbnail.png)',
+    '![](https://images.hive.blog/DQmTest/a.png)',
+    '<img src="https://steemitimages.com/DQmTest/a.png">',
+    // #2191: a proxy URL is the same src bare or in markdown
+    W, `![x](${W})`, `<center>${W}</center>\n\n![x](${B})`, H, `![x](${H})`, `<img src=" ${W} ">`, `<img src="${H} ">`,
+    // #2182: an over-long first image, with and without a percent escape
+    ...[2024, 2100, 3000].map((n) => `![x](https://example.com/${'a'.repeat(n)}.png) ![y](https://example.com/b.png)`),
+    `![x](https://example.com/${'a'.repeat(2100)}%41.png) ![y](https://example.com/b.png)`,
+    // #2185: a long bare URL, an IPFS one, as a link
+    `https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png\n\n![x](${B})`, `[https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png](https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png)\n\n![x](${B})`,
+  ]
+})()
+// Rules of 2.5.58 (#2182, #2183, #2185, #2191): an image link the proxy refuses stays a link, an IPFS one too, and the
+// render goes on; a spaced or legacy proxy src; one paragraph of many links (linkify rebuilds it once). Kept out of FRAGMENTS.
+const rules2558 = {
+  refused_bare: `https://example.org/${'a'.repeat(2040)}.png\n\nhttps://z.example/z.png`,
+  refused_link: `[https://example.org/${'a'.repeat(2040)}.png](https://example.org/${'a'.repeat(2040)}.png) ![y](https://example.com/b.png)`,
+  refused_ipfs: `https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png\n\n![x](https://example.com/b.png)`,
+  kept_proxy_long: `![x](https://images.ecency.com/p/${'Z'.repeat(2100)}) ![d](https://example.com/b.png)`,
+  spaced_src: '<img src=" https://example.com/a.png ">',
+  spaced_legacy_src: '<img src=" https://images.hive.blog/600x400/https%3A%2F%2Fexample.com%2Fa.png "> ![b](https://example.com/b.png)',
+  proxy_bare_sized: 'https://i.ecency.com/600x400/https://example.com/a.png',
+  proxy_bare_p: 'https://i.ecency.com/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk.png',
+  legacy_p: '![x](https://images.hive.blog/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk?format=match&mode=fit)',
+  legacy_p_bare: 'https://steemitimages.com/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk?format=match&mode=fit',
+  legacy_space: '![x](https://images.hive.blog/0x0/https://example.com/p/a%20b.png)',
+  linkify_many: 'see https://example.com/a and www.example.com/b, or mail a@example.com\n\n' + '**x** user&#64;example&#46;com '.repeat(40),
+  linkify_nested: '[outer [inner](https://example.com/i) https://example.com/text](https://example.com/o) https://example.com/end',
+  linkify_html: '<a href="https://example.com/z">https://example.com/inside</a> https://example.com/after and a@b.co and https://example.com/(paren) and ftp://example.com/f',
+  linkify_lists: '> quote https://example.com/q\n\n- item https://example.com/l\n- item2 x@y.io',
+}
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
 for (const [name, body] of Object.entries(bylines2542)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2552)) bodies.push([name, body])
@@ -619,6 +1040,7 @@ for (const [name, body] of Object.entries(rules2554)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2555)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2556)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2557)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2558)) bodies.push([name, body])
 
 // ---- render configurations ---------------------------------------------------------------------
 
@@ -718,6 +1140,10 @@ const summaryBodies = [
   ['summary_footer', 'Hello\n\nPosted using [Partiko iOS](https://partiko.app)'],
   ['summary_overlong', '&#' + '9'.repeat(400) + '; text'],
   ['summary_lt', 'a < b > c <not closed'],
+  // 2.5.58 (#2182): a lone surrogate reads as U+FFFD instead of emptying the summary
+  ['summary_surrogate_dest', 'text\n\n[y](<https://example.com/\ud800?q=1>)'],
+  ['summary_surrogate_bare', 'https://example.com/\ud800x.png'],
+  ['summary_surrogate_prose', 'see https://example.com/\udc00x.png now'],
 ]
 const summaryCases = []
 summaryBodies.forEach(([name, md], i) => {
@@ -808,6 +1234,18 @@ cardBodies2557.forEach((body, i) => {
   imageCases.push({ name: `c2557str_${i}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
   imageCases.push({ name: `c2557strfast_${i}`, kind: 'string', body, meta: null, w: 300, h: 0, fast: true, expected: rh.catchPostImage(body, 300, 0, 'match', { fast: true }) })
 })
+// 2.5.58: a body over 1,500 characters (a refused URL) is pinned on the full and fast lookups and the raw URL only.
+;[...new Set(cardBodies2558)].forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `card2558-${i}`, last_update: '2026-11-22T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `c2558_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `c2558fast_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: true, expected: rh.catchPostImage(entry, 0, 0, 'match', { fast: true }) })
+  imageCases.push({ name: `c2558raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+  if (body.length > 1500) return
+  imageCases.push({ name: `c2558card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `c2558sized_${i}`, kind: 'entry', body, meta: '{}', w: 600, h: 500, fast: false, expected: rh.catchPostImage(entry, 600, 500, 'match') })
+  imageCases.push({ name: `c2558str_${i}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
+  imageCases.push({ name: `c2558strfast_${i}`, kind: 'string', body, meta: null, w: 300, h: 0, fast: true, expected: rh.catchPostImage(body, 300, 0, 'match', { fast: true }) })
+})
 cardBodies2556.forEach((body, i) => {
   const entry = { author: 'example-user', permlink: `card2556-${i}`, last_update: '2026-11-21T00:00:00', body, json_metadata: '{}' }
   imageCases.push({ name: `c2556_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
@@ -856,7 +1294,9 @@ const helperInputs = {
     'https://example.com/i.png?sig=ab%2Bcd%3D&u=a%26b', 'https://example.com/a%zz%23.png', ' https://example.com/a%2Fb.png ', 'https://example.com/%E2%82',
     'https://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa.png', 'https://images.hive.blog/640x0/https%3A%2F%2Fexample.com%2Fa%20b.png',
     'https://IMAGES.ECENCY.COM/0x0/HTTPS%3a%2f%2fexample.com%2Fa.png', 'https://i.ecency.com/10x20/https%3A//example.com/a%23.png',
-    'https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png', 'https://steemitimages.com/0x0/https://example.com/a%23b.png', '%25', '%2525', '%'],
+    'https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png', 'https://steemitimages.com/0x0/https://example.com/a%23b.png', '%25', '%2525', '%',
+    // 2.5.58 (#2183): trimmed before the legacy branch is chosen
+    ' https://images.hive.blog/600x400/https%3A%2F%2Fexample.com%2Fa.png ', '\thttps://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa%20b.png\n'],
   // 2.5.56 (#2176): the destination helpers the card and the render share
   plainDestination: ['https://example.com/café a%20b.png', 'a\\b"c<d>[e]^f`g{h|i}', 'https://example.com/ok.png', '50%%20off a', 'a%zz b', 'a\u00a0b', 'a\u2028b', '%',
     'a b%20c', 'café %E2%82', 'https://example.com/a%2Fb c'],
