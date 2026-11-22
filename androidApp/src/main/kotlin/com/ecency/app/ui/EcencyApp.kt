@@ -936,7 +936,7 @@ private fun TabsRoot(
                     CreateFab(onClick = { push(AppScreen.of(RouteName.EDITOR)) }, modifier = Modifier.align(Alignment.BottomEnd))
                 }
                 tab == AppTab.WAVES -> WavesTabScreen(env, root, username, now, actions, waves)
-                tab == AppTab.WALLET && username != null -> WalletTab(env, username, root.get("walletList") { LazyListState() }, push)
+                tab == AppTab.WALLET && username != null -> WalletTab(env, username, root.get("walletList") { LazyListState() }, push, openExternal)
                 tab == AppTab.CHATS && username != null -> ChatsTab(env, root, username, push)
                 else -> ComingSoon(tab.title)
             }
