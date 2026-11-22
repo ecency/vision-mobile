@@ -657,6 +657,8 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 false
             }
             if (current.rcWarning != warn) setState { it.copy(rcWarning = warn) }
+            // counted once per account and run (#3727)
+            if (warn) s.owner?.let { RcShortfall.precheck(it, if (s.isReply) RcShortfall.OP_COMMENT else RcShortfall.OP_POST) }
         }
     }
 

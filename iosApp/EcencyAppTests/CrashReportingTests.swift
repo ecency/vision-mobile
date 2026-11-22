@@ -29,6 +29,24 @@ final class CrashReportingTests: XCTestCase {
         XCTAssertFalse((scrubbed ?? nil)?.contains(wif) ?? false)
     }
 
+    /// #3727: an out-of-RC count is one grouped info issue, never an error alert, and carries no account.
+    func testAnOutOfRcCountIsAnInfoMessageWithNoUser() {
+        let report = CrashReport(
+            type: "rc-shortfall", message: "rc-shortfall", tags: ["rc.stage": "rejected", "rc.op": "post"],
+            fingerprint: ["rc-shortfall"], contextName: "", context: [:], isMessage: true, level: "info"
+        )
+        let event = CrashReporting.Reporter.event(report)
+        let user = User()
+        user.username = "tester"
+        event.user = user
+        let sent = CrashReporting.beforeSend(event)
+        XCTAssertEqual(sent?.level, .info)
+        XCTAssertEqual(sent?.message?.formatted, "rc-shortfall")
+        XCTAssertEqual(sent?.fingerprint ?? [], ["rc-shortfall"])
+        XCTAssertEqual(sent?.tags?["rc.op"], "post")
+        XCTAssertNil(sent?.user)
+    }
+
     func testAHandledReportIsAnEventWithItsFingerprintTagsAndAScrubbedContext() {
         // Bitcoin wiki example key, controls nothing
         let wif = "5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw"

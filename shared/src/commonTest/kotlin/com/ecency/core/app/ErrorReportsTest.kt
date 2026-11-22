@@ -188,7 +188,8 @@ class ErrorReportsTest {
         val error = AppError.fromBroadcast(BroadcastException.InsufficientResourceCredits(RuntimeException("rc")), "post.vote")
         assertEquals(null, error.code)
         assertEquals(error.message, error.text)
-        assertFalse("error_code" in reporter.reports.single().tags)
+        // the handled report; the out-of-RC count is its own event (#3727)
+        assertFalse("error_code" in reporter.reports.single { it.contextName == "handled" }.tags)
         assertEquals(null, AppError.from(AllNodesFailedException("bridge.get_ranked_posts", emptyList()), "feed.load").code)
     }
 
@@ -197,7 +198,7 @@ class ErrorReportsTest {
         AppError.from(rejected("refused"), "editor.publish")
         AppError.from(rejected("refused"), "post.vote")
         AppError.fromBroadcast(BroadcastException.InsufficientResourceCredits(RuntimeException("rc")), "post.vote")
-        val prints = reporter.reports.map { it.fingerprint }
+        val prints = reporter.reports.filter { it.contextName == "handled" }.map { it.fingerprint }
         assertEquals(3, prints.distinct().size)
         assertEquals(listOf("editor.publish", "post.vote", "post.vote"), prints.map { it[1] })
         assertEquals(listOf("rejected", "rejected", "resource_credits"), prints.map { it[2] })

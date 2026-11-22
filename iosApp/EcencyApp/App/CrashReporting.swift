@@ -169,7 +169,8 @@ enum CrashReporting {
         }
 
         static func event(_ report: CrashReport) -> Event {
-            let event = Event(level: report.level == "warning" ? .warning : .error)
+            // "info": counts such as rc-shortfall (#3727), never an error alert
+            let event = Event(level: report.level == "warning" ? .warning : report.level == "info" ? .info : .error)
             if report.isMessage {
                 event.message = SentryMessage(formatted: report.message)
             } else {
