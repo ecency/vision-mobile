@@ -263,9 +263,16 @@ final class WalletUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["governance-point-0"].exists)
         WalletShots.save("governance-sheet")
         confirm.tap()
-        // the fake chain refuses every broadcast: the sheet closes, the card stays and still offers the proxy
+        // the demo account holds no active key: signing asks for the active key upgrade (the proxy needs active)
+        let upgradeCancel = app.buttons["upgrade-cancel"]
+        XCTAssertTrue(upgradeCancel.waitForExistence(timeout: 20))
+        upgradeCancel.tap()
+        // nothing was signed: the governance sheet is back, ready to confirm again or cancel
+        expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: confirm)
+        waitForExpectations(timeout: 10)
+        app.buttons["governance-cancel"].tap()
         expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: confirm)
-        waitForExpectations(timeout: 20)
+        waitForExpectations(timeout: 10)
         let setProxy = app.buttons["governance-set-proxy"]
         XCTAssertTrue(setProxy.waitForExistence(timeout: 10))
         XCTAssertTrue(setProxy.isHittable, "the card, not a sheet over it")
