@@ -127,10 +127,10 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     private fun fromRender(body: String, w: Int, h: Int): String? {
         val html = helper.renderPostBody(body, true)
         val doc = Helper.createDoc(html) ?: return null
-        val imgs = doc.getElementsByTagName("img")
-        if (imgs.isEmpty()) return null
-        val src = imgs[0].getAttribute("src")
-        if (src.isNullOrEmpty()) return null
+        // 2.5.58 (#2182): the render leaves an image the proxy refuses without a src, so the first image shown is the
+        // first one that has a src
+        val src = doc.getElementsByTagName("img").firstNotNullOfOrNull { img -> img.getAttribute("src")?.takeIf { it.isNotEmpty() } }
+            ?: return null
         return proxifyFound(src, w, h)
     }
 

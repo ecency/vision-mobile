@@ -1032,6 +1032,11 @@ const rules2558 = {
   linkify_nested: '[outer [inner](https://example.com/i) https://example.com/text](https://example.com/o) https://example.com/end',
   linkify_html: '<a href="https://example.com/z">https://example.com/inside</a> https://example.com/after and a@b.co and https://example.com/(paren) and ftp://example.com/f',
   linkify_lists: '> quote https://example.com/q\n\n- item https://example.com/l\n- item2 x@y.io',
+  // img() guards older than 2.5.58 the fixtures had not reached: an author's no-replace class, an author srcset off
+  // the proxy, an HTML image the proxy refuses
+  author_no_replace: '<img class="no-replace video-thumbnail" src="https://example.com/a.png">',
+  foreign_srcset: '<img src="https://images.ecency.com/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk" srcset="https://example.org/a.png 1x, https://images.ecency.com/p/x 2x">',
+  refused_img_html: `<img src="https://example.org/${'a'.repeat(2040)}.png"> ![y](https://example.com/b.png)`,
 }
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
 for (const [name, body] of Object.entries(bylines2542)) bodies.push([name, body])

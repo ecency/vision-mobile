@@ -22,7 +22,13 @@ internal object Helper {
      * `decodeDomImageSrc` (2.5.46, #2092): a body image URL read from the parsed document, whose entities the
      * parser (or the markdown destination decode) already decoded exactly once: only percent-encoding is left.
      */
-    fun decodeDomImageSrc(src: String): String = try {
+    fun decodeDomImageSrc(raw: String): String {
+        // 2.5.58 (#2183): trimmed first, so surrounding spaces cannot hide the legacy branch
+        val src = Js.trim(raw)
+        return decodeTrimmedImageSrc(src)
+    }
+
+    private fun decodeTrimmedImageSrc(src: String): String = try {
         val full = Js.decodeUriComponent(src)
         // 2.5.55 (#2174): escaped delimiters (`%23`, `%2F`, `%3F`, ...) and `%25` stay escaped, so the URL names the
         // resource the author did; a legacy sized proxy path with an encoded inner URL still decodes whole.

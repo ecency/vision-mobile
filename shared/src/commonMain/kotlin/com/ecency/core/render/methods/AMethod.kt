@@ -152,22 +152,29 @@ internal object AMethod {
 
         val doc = el.ownerDocument!!
 
+        var refusedImage = false
         if (Scanners.imgTest(href) &&
             // not `.ico` in `.icons/readme` nor `.jpg` in `photo.jpg.html` (2.5.46)
             Helper.imageUrlEnd(href) != -1 &&
             Js.trim(href).replace("&amp;", "&") == Js.trim(DomUtil.serializedInnerHTML(el)).replace("&amp;", "&")
         ) {
             val imgHTML = ImgMethod.createImageHTML(href, false, ctx)
-            val parsed = XmlDomParser.parseFromString(imgHTML)
-            val replaceNode = parsed.firstChild
-            val parent = el.parentNode
-            if (replaceNode != null && parent != null) {
-                parent.replaceChild(DomUtil.importNode(doc, replaceNode, true), el)
+            // 2.5.58 (#2185): a URL the proxy refuses has no image to show, so the link goes on as an ordinary link
+            // (parsing the empty markup threw and ended the render)
+            refusedImage = imgHTML.isEmpty()
+            if (!refusedImage) {
+                val parsed = XmlDomParser.parseFromString(imgHTML)
+                val replaceNode = parsed.firstChild
+                val parent = el.parentNode
+                if (replaceNode != null && parent != null) {
+                    parent.replaceChild(DomUtil.importNode(doc, replaceNode, true), el)
+                }
+                return
             }
-            return
         }
 
-        if (Scanners.ipfsTest(href) &&
+        if (!refusedImage &&
+            Scanners.ipfsTest(href) &&
             Js.trim(href).replace("&amp;", "&") == Js.trim(DomUtil.serializedInnerHTML(el)).replace("&amp;", "&") &&
             href.indexOf('#') == -1
         ) {

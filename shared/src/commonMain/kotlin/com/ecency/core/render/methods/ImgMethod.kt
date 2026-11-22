@@ -143,28 +143,48 @@ internal object ImgMethod {
 
         val cls = el.getAttribute("class") ?: ""
         val shouldReplace = !cls.contains("no-replace")
-        val hasAlreadyProxied = src.startsWith("$base/p/") || src.startsWith("$base/u/") || isSizedProxy(src, base)
-
-        if (shouldReplace && !hasAlreadyProxied) {
-            val proxified = ctx.proxy.proxify(decodedSrc, forceProxy = true)
-            if (proxified.isNotEmpty()) {
-                el.setAttribute("src", proxified)
-                val srcset = ctx.proxy.srcSet(decodedSrc)
-                if (srcset.isNotEmpty()) {
-                    el.setAttribute("srcset", srcset)
+        if (shouldReplace) {
+            val sources = bodyImageSources(src, ctx)
+            if (sources != null) {
+                if (sources.src != src) el.setAttribute("src", sources.src)
+                if (sources.srcSet.isNotEmpty()) {
+                    el.setAttribute("srcset", sources.srcSet)
                     el.setAttribute("sizes", IMAGE_SIZES)
                 }
-                if (!ctx.forApp) wrapInPicture(el, decodedSrc, ctx)
-            }
-        } else if (shouldReplace && hasAlreadyProxied) {
-            if (src.startsWith("$base/p/")) {
-                val srcset = ctx.proxy.srcSet(src)
-                if (srcset.isNotEmpty()) {
-                    el.setAttribute("srcset", srcset)
-                    el.setAttribute("sizes", IMAGE_SIZES)
-                }
+                if (!ctx.forApp && !sources.kept) wrapInPicture(el, decodedSrc, ctx)
+            } else if (isHttpUrl(decodedSrc)) {
+                // the proxy refuses it (too long): never loaded from the author's host
+                el.removeAttribute("src")
+                el.removeAttribute("srcset")
+                el.removeAttribute("sizes")
             }
         }
+        // An author's srcset is kept only when every candidate is on the image proxy.
+        val srcset = if (shouldReplace) el.getAttribute("srcset") else null
+        if (!srcset.isNullOrEmpty() && srcset.split(',').any { !Js.trim(it).startsWith("$base/") }) {
+            el.removeAttribute("srcset")
+            el.removeAttribute("sizes")
+        }
+    }
+
+    /** img.method.ts `bodyImageSources` result: the src and srcset the body gives an image. */
+    class BodySources(val src: String, val srcSet: String, val kept: Boolean)
+
+    /**
+     * render-helper 2.5.58 `bodyImageSources` (#2191): the one rule for a markdown or HTML `<img>` and a linkified URL
+     * or promoted link, or null when the proxy refuses it. A src already on the proxy (`/p/`, `/u/`, a sized route) is
+     * kept as written, trimmed; a `/p/` one gets the sized srcset of its hash. Any other goes through `/p/`, unsized,
+     * with a srcset of sized variants of the hash it got (a legacy host's `/p/` route too).
+     */
+    fun bodyImageSources(src: String, ctx: RenderContext): BodySources? {
+        val base = Helper.trimTrailingSlash(ctx.proxy.base)
+        val written = Js.trim(src)
+        val kept = written.startsWith("$base/p/") || written.startsWith("$base/u/") || isSizedProxy(written, base)
+        if (kept) return BodySources(written, if (written.startsWith("$base/p/")) ctx.proxy.srcSet(written) else "", true)
+        val decoded = Helper.decodeDomImageSrc(src)
+        val proxified = ctx.proxy.proxify(decoded, forceProxy = true)
+        if (proxified.isEmpty()) return null
+        return BodySources(proxified, ctx.proxy.srcSet(if (proxified.startsWith("$base/p/")) proxified else decoded), false)
     }
 
     /** 2.5.45: a `"` in a value (a configured proxy base) is written as `&quot;`. */
@@ -172,11 +192,9 @@ internal object ImgMethod {
 
     fun createImageHTML(src: String, isLCP: Boolean, ctx: RenderContext): String {
         val decoded = Helper.decodeDomImageSrc(src)
-        val proxified = ctx.proxy.proxify(decoded, forceProxy = true)
-        if (proxified.isEmpty()) return ""
-        val base = Helper.trimTrailingSlash(ctx.proxy.base)
-        val isAlreadyProxied = decoded.startsWith("$base/u/") || isSizedProxy(decoded, base)
-        val srcset = if (isAlreadyProxied) "" else ctx.proxy.srcSet(decoded)
+        val sources = bodyImageSources(src, ctx) ?: return ""
+        val proxified = sources.src
+        val srcset = sources.srcSet
         val loading = if (isLCP) "eager" else "lazy"
         val fetch = if (isLCP) "fetchpriority=\"high\"" else "decoding=\"async\""
         val srcsetAttr = if (srcset.isNotEmpty()) "srcset=\"${quoteAttr(srcset)}\" sizes=\"$IMAGE_SIZES\"" else ""
