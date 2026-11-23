@@ -1321,7 +1321,8 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
 
     /** Where a failed [submit] is reported (ErrorReports): what the user was sending. */
     private fun submitWhere(s: EditorState): String = when {
-        s.isEdit -> "editor.update"
+        // a reply's edit apart from a post's, so an out-of-RC count names a comment (#3727)
+        s.isEdit -> if (s.isReply) "editor.updateReply" else "editor.update"
         s.isReply -> "editor.reply"
         s.scheduledFor != null -> "editor.schedule"
         else -> "editor.publish"

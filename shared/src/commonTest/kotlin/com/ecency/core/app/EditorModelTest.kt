@@ -2257,6 +2257,28 @@ class EditorModelTest {
     }
 
     @Test
+    fun aReplyOrAReplyEditOutOfResourceCreditsIsCountedAsAComment() = runTest {
+        // #3727, PR #3730 review: the full editor's reply sites are comments, not "other"
+        val w = World(this)
+        val reporter = RecordingReporter()
+        w.app.env.crashReporter = reporter
+        w.broadcastAnswer = { FakeTransport.error(it, -32000, "Account: $user has 12 RC, needs 3400 RC. Please wait to transact, or power up HIVE.") }
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        val reply = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        reply.setBody("Nice post", TextSelection(0))
+        reply.submit()
+        testScheduler.advanceUntilIdle()
+        w.posts["$user/re-alice-1"] = entry(user, "re-alice-1", "", "my reply", ""","parent_author":"alice"""").replace("\"depth\":0", "\"depth\":1").replace("\"parent_permlink\":\"ecency\"", "\"parent_permlink\":\"root\"")
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "re-alice-1"))
+        assertEquals(EditorKind.EDIT_REPLY, edit.current.kind)
+        edit.setBody("my reply, edited", TextSelection(0))
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        val rejected = reporter.reports.filter { it.fingerprint == listOf(RcShortfall.MESSAGE) && it.tags["rc.stage"] == "rejected" }
+        assertEquals(listOf("comment", "comment"), rejected.map { it.tags["rc.op"] })
+    }
+
+    @Test
     fun theQuestChipShowsOnANewPostAndStaysClosedOnceDismissed() = runTest {
         val w = World(this)
         w.app.authBackend.rest = { r ->

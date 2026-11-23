@@ -56,7 +56,9 @@ class RcShortfallTest {
     @Test
     fun theOperationIsNamedFromWhereItFailed() {
         val expected = mapOf(
-            "editor.publish" to "post", "crossPost.publish" to "post",
+            "editor.publish" to "post", "crossPost.publish" to "post", "editor.update" to "post",
+            // the full editor's replies and reply edits (PR #3730 review)
+            "editor.reply" to "comment", "editor.updateReply" to "comment",
             "composeReply.send" to "comment", "waveCompose.send" to "comment", "community.send" to "comment",
             "post.vote" to "vote", "poll.vote" to "vote", "postActions.reblog" to "reblog",
             // the community reblog after a publish is a reblog (the web app's rule too)

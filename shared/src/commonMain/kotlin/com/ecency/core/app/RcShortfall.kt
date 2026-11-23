@@ -50,8 +50,9 @@ object RcShortfall {
 
     /** The operation a `where` names (the sites of [AppError.from] that broadcast). */
     fun opOf(where: String): String = when {
-        where == "editor.publish" || where == "crossPost.publish" -> OP_POST
-        where == "composeReply.send" || where == "waveCompose.send" || where == "community.send" -> OP_COMMENT
+        where == "editor.publish" || where == "crossPost.publish" || where == "editor.update" -> OP_POST
+        where == "editor.reply" || where == "editor.updateReply" ||
+            where == "composeReply.send" || where == "waveCompose.send" || where == "community.send" -> OP_COMMENT
         where == "post.vote" || where == "poll.vote" -> "vote"
         // the community reblog after a publish is a reblog, as on the web
         where == "postActions.reblog" || where == "editor.reblog" -> "reblog"
