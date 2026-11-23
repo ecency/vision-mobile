@@ -92,12 +92,6 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return null
     }
 
-    /**
-     * `proxifyFound`: a found src with its references decoded, proxied as the body reads any image src
-     * ([proxifySource]).
-     */
-    private fun proxifyFound(src: String, w: Int, h: Int): String = proxifySource(Helper.decodeEntities(src), w, h)
-
     /** `onProxy` (2.5.58): a src already on the proxy (`/p/`, `/u/`, a sized route), which the body keeps as written. */
     private fun onProxy(src: String): Boolean {
         val base = proxy.base
@@ -172,8 +166,9 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         // first one that has a src
         val src = doc.getElementsByTagName("img").firstNotNullOfOrNull { img -> img.getAttribute("src")?.takeIf { it.isNotEmpty() } }
             ?: return null
-        // a kept proxy URL the proxy would not take again (over its length limit) is the rendered src as it stands
-        return proxifyFound(src, w, h).ifEmpty { src }
+        // a kept proxy URL the proxy would not take again (over its length limit) is the rendered src as it stands.
+        // 2.5.59 (#2195): the DOM already decoded its references, so they are not decoded again
+        return proxifySource(src, w, h).ifEmpty { src }
     }
 
     fun forEntry(entry: Entry, w: Int, h: Int, fast: Boolean): String? = getImage(entry, w, h, fast)
@@ -536,11 +531,12 @@ internal class CatchPostImage(private val helper: RenderHelper) {
 
     private class Spellings(val text: String, val lower: String)
 
-    private class ScanText(val text: String, val inTag: BooleanArray)
+    /** [inTag]: [markInsideTags] of [text]. */
+    private class ScanText(val text: String, val inTag: ByteArray)
 
     private class Prepared(val source: String, val cleaned: String, val image: ScanText, val video: ScanText) {
         /** `rawTagsOf`: tag marks on the code-stripped text before any anchor is blanked. */
-        var rawTags: BooleanArray? = null
+        var rawTags: ByteArray? = null
     }
 
     private class Candidate(
@@ -582,7 +578,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         // 2.5.57 (#2179): the render ends a bare URL at a lone surrogate (#2158), which the full lookup reads its own
         // way: give up rather than name another URL, unless a poster comes first and wins on source order anyway.
         if (first != null && first.kind != Candidate.DESTINATION && loneSurrogateAt(first.url) != -1 && !posterFirst) return null
-        if (posterFirst) return proxifyFound(proxy.proxify(poster!!.url), w, h)
+        if (posterFirst) return proxifySource(proxy.proxify(poster!!.url), w, h)
         if (first == null) return null
         val source = candidateSource(body, first) ?: return null
         // a URL the proxy refuses is one the render drops
@@ -610,7 +606,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
 
     private fun prepareBody(body: String): Prepared {
         val cleaned = if (body.isEmpty()) "" else stripCodeRegions(body)
-        if (cleaned.isEmpty()) return Prepared(body, cleaned, ScanText("", BooleanArray(0)), ScanText("", BooleanArray(0)))
+        if (cleaned.isEmpty()) return Prepared(body, cleaned, ScanText("", ByteArray(0)), ScanText("", ByteArray(0)))
         val imageText = blankUnequalAnchors(cleaned, false)
         val videoText = blankUnequalAnchors(cleaned, true)
         return Prepared(body, cleaned, ScanText(imageText, markInsideTags(imageText)), ScanText(videoText, markInsideTags(videoText)))
@@ -625,7 +621,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         val cleaned = prepared.cleaned
         if (cleaned.isEmpty()) return NONE
         val md = mdImageFind(cleaned)
-        val html = matchHtmlImage(cleaned)
+        val html = matchHtmlImage(cleaned) { rawTagsOf(prepared) }
         // An angle destination is whole whatever it holds, read in its plain spelling (2.5.55, #2156); a plain one
         // with `(` may have been cut short by the capture class. A plain destination's escapes resolve as an angle
         // one's do (`\)` is `)`, 2.5.56, #2176); one without a backslash is unchanged.
@@ -658,7 +654,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         val candidates = ArrayList<Candidate>()
         if (md != null && !mdUrl.isNullOrEmpty()) candidates.add(Candidate(mdUrl, md.pos, Candidate.DESTINATION, md = true))
         // 2.5.58: `data-src`, `x-src`: which attribute the render takes is its own to say, where it may come first
-        val dashSrc = html != null && html.dashed
+        // 2.5.59 (#2195): and so is an `<img` inside another tag
+        val dashSrc = html != null && (html.dashed || html.undecided)
         if (dashSrc && !(md != null && !mdUrl.isNullOrEmpty() && md.pos < html!!.index)) return AMBIGUOUS
         // the render trims the attribute (#2185)
         if (html != null && !dashSrc && isSafeUrl(Js.trim(html.src))) candidates.add(Candidate(html.src, html.index, Candidate.HTML))
@@ -671,7 +668,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         var range = 0
         for (m in urlTokens(scan.text)) {
             val idx = m.pos
-            if (scan.inTag[idx]) continue
+            if (scan.inTag.marked(idx)) continue
             val url = imageToken(m.url) ?: continue
             while (range < untrusted.size && untrusted[range][1] <= idx) range++
             if (range < untrusted.size && untrusted[range][0] <= idx) {
@@ -1177,8 +1174,12 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     /** `/^https?:\/\//i.test(text.slice(idx, idx + 8))` */
     private fun isAutolinkAt(text: String, idx: Int): Boolean = Scanners.schemeEnd(text, idx) >= 0
 
-    private fun markInsideTags(text: String): BooleanArray {
-        val marks = BooleanArray(text.length)
+    /**
+     * `markInsideTags`: nonzero ([marked]) for every character of a tag, quoted values included. 2.5.59 (#2195): the
+     * `<` that opens a tag is [TAG_START], so a `<` marked [IN_TAG] sits inside a tag already open.
+     */
+    private fun markInsideTags(text: String): ByteArray {
+        val marks = ByteArray(text.length)
         var inTag = false
         var quote = '\u0000'
         for (i in text.indices) {
@@ -1188,12 +1189,12 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                     val n = text[i + 1]
                     if ((n in 'a'..'z' || n in 'A'..'Z' || n == '/' || n == '!' || n == '?') && !isAutolinkAt(text, i + 1)) {
                         inTag = true
-                        marks[i] = true
+                        marks[i] = TAG_START
                     }
                 }
                 continue
             }
-            marks[i] = true
+            marks[i] = IN_TAG
             if (quote != '\u0000') {
                 if (c == quote) quote = '\u0000'
             } else if (c == '"' || c == '\'') {
@@ -1205,8 +1206,11 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return marks
     }
 
+    /** A [markInsideTags] mark: any part of a tag. */
+    private fun ByteArray.marked(i: Int) = this[i] != 0.toByte()
+
     private fun isStandalone(scan: ScanText, idx: Int): Boolean {
-        if (scan.inTag[idx]) return false
+        if (scan.inTag.marked(idx)) return false
         if (idx == 0) return true
         val prev = scan.text[idx - 1]
         if (prev in 'a'..'z' || prev in 'A'..'Z' || prev in '0'..'9' || prev == '_' || prev in "/.:%?&=#[-") return false
@@ -1747,8 +1751,11 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return true
     }
 
-    /** An `<img` tag `matchHtmlImage` read: where it starts, its src, and whether the name only ends in `src`. */
-    private class HtmlImage(val index: Int, val src: String, val dashed: Boolean)
+    /**
+     * An `<img` tag `matchHtmlImage` read: where it starts, its src, and whether the name only ends in `src`.
+     * [undecided]: an `<img` inside another tag, maybe in a quoted attribute: the render's to read (2.5.59, #2195).
+     */
+    private class HtmlImage(val index: Int, val src: String, val dashed: Boolean, val undecided: Boolean = false)
 
     /** `SPACE_CHARS = ' \t\n\r\f'` */
     private fun isTagSpace(c: Char) = c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\u000C'
@@ -1766,8 +1773,9 @@ internal class CatchPostImage(private val helper: RenderHelper) {
      * dashed. At the first `<img` the grammar does not read, or one across a line that ends its paragraph, the scan
      * stops with null (unreadBefore defers on that `<img`).
      */
-    private fun matchHtmlImage(text: String): HtmlImage? {
+    private fun matchHtmlImage(text: String, marksOf: () -> ByteArray): HtmlImage? {
         val footnotes = text.contains("[^")
+        var tagMarks: ByteArray? = null
         var p = Js.indexOfCi(text, "<img", 0)
         while (p >= 0) {
             // `\b`: no word character after the name
@@ -1776,6 +1784,9 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 continue
             }
             val start = p
+            // `<div title='<img src="A">'>` shows no image: the attribute is text (2.5.59, #2195)
+            val marks = tagMarks ?: marksOf().also { tagMarks = it }
+            if (marks[start] == IN_TAG) return HtmlImage(start, "", dashed = false, undecided = true)
             var i = start + 4
             var found: HtmlImage? = null
             var srcSeen = false
@@ -2070,7 +2081,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         if (lowerPrefix.lastIndexOf("<?") > lowerPrefix.lastIndexOf("?>")) return true
         val lastAnchorClose = lowerPrefix.lastIndexOf("</a")
         val nested = nestedAnchors(lowerPrefix)
-        var tagMarks: BooleanArray? = null
+        var tagMarks: ByteArray? = null
         var tagOpen: IntArray? = null
         for (m in looseUrls(source)) {
             val idx = m.pos
@@ -2090,7 +2101,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 }
             }
             // an attribute value, in a tag that opens on the same line
-            if (tagMarks[idx] && tagOpen[idx] != -1) continue
+            if (tagMarks.marked(idx) && tagOpen[idx] != -1) continue
             val close = labelCloseBefore(cleaned, idx)
             if (close != -1 && close in closes) continue
             return true
@@ -2135,7 +2146,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
 
     /** `mdImageShown` (2.5.58): whether the render shows the markdown image at [pos] where it stands. */
     private fun mdImageShown(prepared: Prepared, pos: Int): Boolean {
-        if (prepared.image.inTag[pos]) return false
+        if (prepared.image.inTag.marked(pos)) return false
         val text = prepared.cleaned
         val blank = text.lastIndexOf("\n\n", pos)
         return !inTextContext(text.substring(if (blank == -1) 0 else blank, pos))
@@ -2263,7 +2274,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
      */
     private fun jsCaseFold(c: Char): Char = com.ecency.core.render.markdown.UrlScanner.canon[c.code]
 
-    private fun rawTagsOf(prepared: Prepared): BooleanArray =
+    private fun rawTagsOf(prepared: Prepared): ByteArray =
         prepared.rawTags ?: markInsideTags(prepared.cleaned).also { prepared.rawTags = it }
 
     /** `/&amp;(?:[a-z][a-z\d]*|#\d+|#x[\da-f]+);/i`: a reference written twice. */
@@ -2324,7 +2335,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         val cleaned = prepared.cleaned
         val pos = candidate.pos
         val url = candidate.url
-        if (prepared.image.inTag[pos] || rawTagsOf(prepared)[pos]) return false
+        if (prepared.image.inTag.marked(pos) || rawTagsOf(prepared).marked(pos)) return false
         var slashes = 0
         while (pos - 1 - slashes >= 0 && source[pos - 1 - slashes] == '\\') slashes++
         if (slashes % 2 == 1) return false
@@ -2341,7 +2352,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 i++
             } else if (c == '[') {
                 depth++
-            } else if (c == ']' && !prepared.image.inTag[paraStart + i]) {
+            } else if (c == ']' && !prepared.image.inTag.marked(paraStart + i)) {
                 depth = maxOf(0, depth - 1)
             }
             i++
@@ -2433,5 +2444,9 @@ internal class CatchPostImage(private val helper: RenderHelper) {
 
     private companion object {
         const val BROKEN = -2
+
+        /** [markInsideTags]: a character inside a tag, and the `<` that opens one. */
+        const val IN_TAG: Byte = 1
+        const val TAG_START: Byte = 2
     }
 }

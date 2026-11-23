@@ -1,7 +1,7 @@
 # Upstream issues found while porting @ecency/render-helper
 
 Found during the native port (oracle: `@ecency/render-helper` 2.5.41). Each item says what the
-native port does instead, so the deviation is deliberate and tested. Status as of 2.5.58 under each.
+native port does instead, so the deviation is deliberate and tested. Status as of 2.5.59 under each.
 
 ## Iframe allow list is skipped by the sanitize-only fallback
 
@@ -223,3 +223,18 @@ function (`knownLabelCloses`, `matchHtmlImage`, `tagBreaksParagraph`, `unreadBef
 `PathologicalRenderTest.the2558CardScannersStayLinear`. The LCP preload lookup (`getEntryLcpImage`) has no native
 counterpart. Known and left upstream: malformed tag soup such as `<iframe><div class="<video>![x](A)` shows an image
 on the web page that the `forApp` render the card uses does not.
+
+## The card reads an `<img` inside an attribute, and decodes the rendered src twice (#2195)
+
+**What happened.** In 2.5.58 `matchHtmlImage` read an `<img` that starts inside another tag's quoted attribute
+(`<div title='<img src="A">'>`) as a tag, so the card named an image the body never shows. The render tier took the
+src from the parsed DOM, whose references are already decoded, and decoded them again (`proxifyFound`), so a kept
+proxy URL with `&amp;copy;` in its query became `?x=©` on the card while the body requested `?x=&copy;`.
+
+**Status (2.5.59, vision-web#2200): fixed upstream, ported.** `markInsideTags` marks the `<` that opens a tag apart
+from the rest of it (`TAG_START`, `IN_TAG`), and an `<img` marked inside a tag defers to the render as a dashed `src`
+does (`HtmlImage.undecided`). The render tier and the fast poster hand the src to `proxifySource`; `proxifyFound` is
+gone. Goldens: the 19 bodies of upstream's `card-image-2195.spec.ts` and two of its trade-off shapes (`c2559*` in
+`TransformGoldenTest`). The `undecided` defer is kept for parity although `unreadBefore` already defers on any candidate after
+such an `<img` (dropping `undecided` from the `dashSrc` check alone changes no golden; dropping the guard in
+`matchHtmlImage` fails 85).
