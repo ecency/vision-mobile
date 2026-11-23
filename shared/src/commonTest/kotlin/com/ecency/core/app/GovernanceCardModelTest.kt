@@ -594,4 +594,22 @@ class GovernanceCardModelTest {
         assertFalse(model.current.confirming, "nothing to sign: the sheet closes")
         assertTrue(model.current.visible, "the expiring card stays")
     }
+
+    @Test
+    fun aCancelledSigningWhoseNextReadFindsNothingToSignClosesTheSheet() = runTest {
+        // PR #3730 review: another device set another proxy while the key prompt waited; no read landed before the cancel
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain, postingOnly = true)
+        val model = start(this, app)
+        model.askConfirm()
+        model.confirm()
+        testScheduler.advanceUntilIdle()
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 10 * day), proxy = "someone")
+        app.env.signing.cancel()
+        testScheduler.advanceUntilIdle()
+        assertEquals(GovernanceStatus.EXPIRING, model.current.status)
+        assertNull(model.current.action)
+        assertFalse(model.current.confirming, "no sheet whose Confirm does nothing")
+        assertTrue(model.current.visible, "the expiring card stays")
+    }
 }

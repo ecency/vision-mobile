@@ -226,7 +226,7 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                         val sending = user in inFlight
                         // a read never hides a card that is sending or says thanks; an idle card follows the chain
                         val visible = sending || s.done || (status != GovernanceStatus.ACTIVE && !hidden(user, episode))
-                        s.copy(
+                        val read = s.copy(
                             status = status,
                             expiresAt = Governance.expiresAt(account),
                             proxy = account.proxy,
@@ -234,9 +234,11 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                             episode = episode,
                             visible = visible,
                             sending = sending,
-                            confirming = s.confirming && visible,
                             askingDismiss = s.askingDismiss && visible,
                         )
+                        // an idle sheet goes once the chain leaves nothing to sign (another proxy set elsewhere); a
+                        // sending one stays for its outcome
+                        read.copy(confirming = s.confirming && visible && (sending || read.action != null))
                     }
                 }
             } catch (e: CancellationException) {
