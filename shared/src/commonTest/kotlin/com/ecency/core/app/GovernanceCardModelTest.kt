@@ -2,6 +2,7 @@ package com.ecency.core.app
 
 import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.Sent
+import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.hive.KeyRole
 import com.ecency.core.secure.AuthType
 import com.ecency.core.secure.KeyVault
@@ -36,6 +37,9 @@ class GovernanceCardModelTest {
     private class Chain(val fields: MutableMap<String, String>, var failBroadcast: Boolean = false, var hangBroadcast: Boolean = false) {
         /** find_transaction's answer while a send is checked. */
         var txStatus = "unknown"
+
+        /** get_accounts fails (a node down). */
+        var readsDown = false
     }
 
     private fun governance(expiration: String, proxy: String = "", votes: List<String> = emptyList()) =
@@ -45,7 +49,7 @@ class GovernanceCardModelTest {
         val base = appWithAccounts(scope, known = setOf(alice, bob, GovernanceCardModel.PROXY))
         val app = TestApp(scope) { req ->
             when (req.method) {
-                "condenser_api.get_accounts" -> {
+                "condenser_api.get_accounts" -> if (chain.readsDown) HttpResult(500, "") else {
                     val names = req.params.jsonArray[0].jsonArray.map { it.jsonPrimitive.content }
                     FakeTransport.result(
                         req,
@@ -530,6 +534,26 @@ class GovernanceCardModelTest {
         app.env.signing.cancel()
         testScheduler.advanceUntilIdle()
         assertFalse(model.current.sending)
+        assertFalse(model.current.confirming, "no sheet whose Confirm does nothing")
+        assertFalse(model.current.visible, "the votes count: no card")
+    }
+
+    @Test
+    fun aCancelledSigningClosesASheetWithNothingToSignEvenWhenTheNextReadFails() = runTest {
+        // PR #3730 review: the card's own state says nothing is left to sign; no read is needed to close the sheet
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain, postingOnly = true)
+        val model = start(this, app)
+        model.askConfirm()
+        model.confirm()
+        testScheduler.advanceUntilIdle()
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 200 * day), proxy = "ecency")
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(GovernanceStatus.ACTIVE, model.current.status)
+        chain.readsDown = true
+        app.env.signing.cancel()
+        testScheduler.advanceUntilIdle()
         assertFalse(model.current.confirming, "no sheet whose Confirm does nothing")
         assertFalse(model.current.visible, "the votes count: no card")
     }
