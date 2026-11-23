@@ -113,7 +113,8 @@ enum class ProposalDismiss { FOREVER, LATER }
  *   says thanks for the rest of the run, the vote is remembered as processed. Failure: "Fail!: <message>".
  * - An account change resets the card for the new account.
  * - Not for a new account the Getting started card still asks things of (#3728): the card waits for a later run of
- *   the app, after the checklist was finished or dismissed; never in the same run as the checklist.
+ *   the app, after the checklist was finished or dismissed; never in the same run as the checklist. Known from the
+ *   account read, or from Getting started showing in this run (a failed read decides nothing).
  */
 class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
     StateModel<ProposalCardState>(ProposalCardState(), env.dispatchers) {
@@ -124,11 +125,21 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
     /** Accounts the Getting started card asked things of in this run (#3728): no proposal card for them until the next. */
     private val onboarding = HashSet<String>()
 
+    /** Accounts found established in this run: their account is not read again for the card. */
+    private val established = HashSet<String>()
+
     fun start() {
         if (started) return
         started = true
         scope.launch {
             env.events.collect { e -> if (e is AppEvent.SessionChanged || e is AppEvent.DataWiped) reload() }
+        }
+        // Getting started showing is itself the answer, whatever this model's own reads did (#3728)
+        scope.launch {
+            env.wavesOnboarding.state.collect { s ->
+                val user = s.account ?: return@collect
+                if (s.visible && onboarding.add(user)) setState { if (it.username == user) it.copy(visible = false) else it }
+            }
         }
         reload()
     }
@@ -146,10 +157,22 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 val user = env.session.current.username
                 setState { if (it.username == user) it else ProposalCardState(username = user) }
                 if (user == null) return@launch
-                // first, so a later read failing or finding no proposal cannot let the card into this run
-                if (user !in onboarding) {
-                    val account = env.api.accounts.getAccount(user) ?: return@launch
-                    if (env.wavesOnboarding.pendingFor(user, account.created, account.postCount)) onboarding += user
+                // first, so a later read failing or finding no proposal cannot let the card into this run. A failed
+                // account read decides nothing: the card is still read, and Getting started's own state keeps it out
+                if (user !in onboarding && user !in established) {
+                    val account = try {
+                        env.api.accounts.getAccount(user)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        ErrorReports.quiet(e, "proposal.account")
+                        null
+                    }
+                    when {
+                        account == null -> Unit
+                        env.wavesOnboarding.pendingFor(user, account.created, account.postCount) -> onboarding += user
+                        else -> established += user
+                    }
                 }
                 if (user in onboarding) return@launch
                 val proposal = env.proposalApi.proposals().filter { it.creator == ECENCY && it.status != "expired" }.maxByOrNull { it.id }
@@ -157,7 +180,7 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 val voted = env.proposalApi.votedIds(user)
                 if (env.session.current.username != user) return@launch
                 setState { s ->
-                    if (s.username != user) s else s.copy(proposalId = proposal.id, visible = proposal.id !in voted && !hiddenByChoice(proposal.id, user))
+                    if (s.username != user) s else s.copy(proposalId = proposal.id, visible = proposal.id !in voted && !hiddenByChoice(proposal.id, user) && user !in onboarding)
                 }
             } catch (e: CancellationException) {
                 throw e

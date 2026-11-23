@@ -200,10 +200,13 @@ class PlatformModelsTest {
     /** list_proposals fails while this is set (a node down at launch). */
     private var proposalsDown = false
 
+    /** get_accounts fails while this is set. */
+    private var accountsDown = false
+
     private suspend fun proposalApp(scope: TestScope, voted: List<Long> = emptyList(), signedIn: Boolean = true, newAccount: Boolean = false) = app(scope, signedIn) { req ->
         when (req.method) {
             "database_api.list_proposals" -> if (proposalsDown) HttpResult(500, "") else FakeTransport.result(req, proposals)
-            "condenser_api.get_accounts" -> FakeTransport.result(
+            "condenser_api.get_accounts" -> if (accountsDown) HttpResult(500, "") else FakeTransport.result(
                 req,
                 "[" + AppTestKeys.accountJson(alice).replace("\"post_count\":1", "\"post_count\":${if (newAccount) 1 else 50}") + "]",
             )
@@ -260,6 +263,36 @@ class PlatformModelsTest {
         app.env.proposalVote.refresh()
         testScheduler.advanceUntilIdle()
         assertFalse(app.env.proposalVote.current.visible, "Getting started was asked of it in this run")
+    }
+
+    @Test
+    fun anEstablishedAccountWhoseAccountReadFailsStillGetsTheCard() = runTest {
+        // PR #3730 review: the account read only tells whether Getting started applies; it never decides alone
+        accountsDown = true
+        val app = proposalApp(this)
+        app.env.proposalVote.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.proposalVote.current.visible)
+    }
+
+    @Test
+    fun onceGettingStartedShowedTheCardStaysOutOfThisRunWhateverTheReads() = runTest {
+        // PR #3730 review: the first account read failed, so only Getting started's own state can tell
+        accountsDown = true
+        val app = proposalApp(this, newAccount = true)
+        app.authBackend.rest = { r -> if (r.url.endsWith("/private-api/quests")) HttpResult(200, """{"daily":[],"streak":{"current":0}}""") else null }
+        app.env.proposalVote.start()
+        testScheduler.advanceUntilIdle()
+        accountsDown = false
+        app.env.wavesOnboarding.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.wavesOnboarding.current.visible, "Getting started shows")
+        assertFalse(app.env.proposalVote.current.visible, "not beside Getting started")
+        app.env.wavesOnboarding.dismiss()
+        app.env.proposalVote.refresh()
+        testScheduler.advanceUntilIdle()
+        assertFalse(app.env.proposalVote.current.visible, "nor later in the same run")
+        assertTrue(ProposalVoteModel(app.env).also { it.start(); testScheduler.advanceUntilIdle() }.current.visible, "a later run asks")
     }
 
     @Test
