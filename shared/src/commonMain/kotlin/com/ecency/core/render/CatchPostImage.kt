@@ -1751,8 +1751,10 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return true
     }
 
-    /** An `<img` tag `matchHtmlImage` read: where it starts, its src, and whether the name only ends in `src`. */
-    /** [undecided]: an `<img` inside another tag, maybe in a quoted attribute: the render's to read (2.5.59, #2195). */
+    /**
+     * An `<img` tag `matchHtmlImage` read: where it starts, its src, and whether the name only ends in `src`.
+     * [undecided]: an `<img` inside another tag, maybe in a quoted attribute: the render's to read (2.5.59, #2195).
+     */
     private class HtmlImage(val index: Int, val src: String, val dashed: Boolean, val undecided: Boolean = false)
 
     /** `SPACE_CHARS = ' \t\n\r\f'` */

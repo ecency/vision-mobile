@@ -235,5 +235,6 @@ proxy URL with `&amp;copy;` in its query became `?x=©` on the card while the bo
 from the rest of it (`TAG_START`, `IN_TAG`), and an `<img` marked inside a tag defers to the render as a dashed `src`
 does (`HtmlImage.undecided`). The render tier and the fast poster hand the src to `proxifySource`; `proxifyFound` is
 gone. Goldens: the 19 bodies of upstream's `card-image-2195.spec.ts` and two of its trade-off shapes (`c2559*` in
-`TransformGoldenTest`). The `undecided` defer is kept for parity although `hasUndecidedImage` already defers on every
-such body here (removing it alone changes no golden).
+`TransformGoldenTest`). The `undecided` defer is kept for parity although `unreadBefore` already defers on any candidate after
+such an `<img` (dropping `undecided` from the `dashSrc` check alone changes no golden; dropping the guard in
+`matchHtmlImage` fails 85).
