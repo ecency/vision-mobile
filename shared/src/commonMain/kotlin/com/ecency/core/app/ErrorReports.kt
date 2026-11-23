@@ -72,9 +72,12 @@ object ErrorReports {
     }
 
     /** [report] as it is, unless nothing is installed yet ([RcShortfall]'s counts). */
-    internal fun emit(report: CrashReport) {
-        val reporter = sink.load()?.reporter?.invoke() ?: return
-        if (reporter !== CrashReporter.None) reporter.capture(report)
+    /** Captures [report]; false when no reporter took it (none installed yet, or [CrashReporter.None]). */
+    internal fun emit(report: CrashReport): Boolean {
+        val reporter = sink.load()?.reporter?.invoke() ?: return false
+        if (reporter === CrashReporter.None) return false
+        reporter.capture(report)
+        return true
     }
 
     /**

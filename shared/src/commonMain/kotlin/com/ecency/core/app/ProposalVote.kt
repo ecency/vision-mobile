@@ -114,7 +114,8 @@ enum class ProposalDismiss { FOREVER, LATER }
  * - An account change resets the card for the new account.
  * - Not for a new account the Getting started card still asks things of (#3728): the card waits for a later run of
  *   the app, after the checklist was finished or dismissed; never in the same run as the checklist. Known from the
- *   account read, or from Getting started showing in this run (a failed read decides nothing).
+ *   account read, or from Getting started showing in this run. A failed account read keeps the card out until the
+ *   next read (a refresh, an account change, the next run), as any failed query does.
  */
 class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
     StateModel<ProposalCardState>(ProposalCardState(), env.dispatchers) {
@@ -157,22 +158,11 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 val user = env.session.current.username
                 setState { if (it.username == user) it else ProposalCardState(username = user) }
                 if (user == null) return@launch
-                // first, so a later read failing or finding no proposal cannot let the card into this run. A failed
-                // account read decides nothing: the card is still read, and Getting started's own state keeps it out
+                // first, so a later read failing or finding no proposal cannot let the card into this run. Unknown is
+                // not established: a failed or empty account read keeps the card out (the catch below reports it)
                 if (user !in onboarding && user !in established) {
-                    val account = try {
-                        env.api.accounts.getAccount(user)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        ErrorReports.quiet(e, "proposal.account")
-                        null
-                    }
-                    when {
-                        account == null -> Unit
-                        env.wavesOnboarding.pendingFor(user, account.created, account.postCount) -> onboarding += user
-                        else -> established += user
-                    }
+                    val account = env.api.accounts.getAccount(user) ?: return@launch
+                    if (env.wavesOnboarding.pendingFor(user, account.created, account.postCount)) onboarding += user else established += user
                 }
                 if (user in onboarding) return@launch
                 val proposal = env.proposalApi.proposals().filter { it.creator == ECENCY && it.status != "expired" }.maxByOrNull { it.id }
@@ -239,7 +229,8 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
             when (val phase = result.phase) {
                 is SendPhase.Done -> {
                     env.prefs.putString(key(id, user), PROCESSED)
-                    setState { it.copy(voting = false, voted = true, visible = true) }
+                    // the thanks show for the rest of the run, unless Getting started showed meanwhile (#3728)
+                    setState { it.copy(voting = false, voted = true, visible = user !in onboarding) }
                     env.ui.toast(ProposalCopy.THANK_YOU)
                 }
                 is SendPhase.Cancelled -> setState { it.copy(voting = false) }

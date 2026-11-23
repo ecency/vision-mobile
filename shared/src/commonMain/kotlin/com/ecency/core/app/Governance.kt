@@ -337,11 +337,16 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                 }
                 else -> {
                     // nothing was signed: the sheet stays to confirm again, unless the chain now says there is nothing to sign
-                    // (a read during the send kept the card only because it was sending). The card's own state says so
-                    // at once, so a failing read after this never leaves a Confirm that does nothing.
+                    // (a read during the send kept them only because it was sending). The card's own state says so at
+                    // once, so a failing read after this never leaves a Confirm that does nothing. The card follows the
+                    // rule of a read: an active account's goes, an expiring one's stays ("Vote yourself").
                     setState {
                         val nothingToSign = it.action == null && !it.done
-                        it.copy(sending = false, confirming = it.confirming && !nothingToSign, visible = it.visible && !nothingToSign)
+                        it.copy(
+                            sending = false,
+                            confirming = it.confirming && !nothingToSign,
+                            visible = it.visible && (it.done || it.status != GovernanceStatus.ACTIVE),
+                        )
                     }
                     reload()
                 }

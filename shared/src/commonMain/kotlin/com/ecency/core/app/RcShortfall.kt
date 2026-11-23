@@ -75,14 +75,15 @@ object RcShortfall {
             val key = "rcShortfall.precheck.$account.$op"
             val day = (nowMillis / DAY_MILLIS).toString()
             if (prefs.getString(key) == day) return
-            // the day is marked only once its event went out: one the run's cap held back is counted next run
+            // the day is marked only once a reporter took its event: one the run's cap held back, or sent before
+            // reporting was set up, is counted again
             if (record(STAGE_PRECHECK, op) { s -> State(s.sent + 1, s.recent) }) prefs.putString(key, day)
         } catch (t: Throwable) {
             // not reported: counting must never fail the caller
         }
     }
 
-    /** Sends the event unless the run's cap or [next] holds it back; true when it went out. */
+    /** Sends the event unless the run's cap or [next] holds it back; true when a reporter took it. */
     private fun record(stage: String, op: String, next: (State) -> State?): Boolean {
         try {
             while (true) {
@@ -91,7 +92,7 @@ object RcShortfall {
                 val after = next(before) ?: return false
                 if (state.compareAndSet(before, after)) break
             }
-            ErrorReports.emit(
+            return ErrorReports.emit(
                 CrashReport(
                     type = MESSAGE,
                     message = "$MESSAGE: $stage/$op",
@@ -101,7 +102,6 @@ object RcShortfall {
                     level = "info",
                 ),
             )
-            return true
         } catch (t: Throwable) {
             // not reported: counting must never fail the caller
             return false

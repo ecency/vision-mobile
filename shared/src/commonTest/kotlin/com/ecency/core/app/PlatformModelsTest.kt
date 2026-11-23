@@ -196,13 +196,13 @@ class PlatformModelsTest {
         {"id":3,"proposal_id":350,"creator":"ecency","status":"inactive"},
         {"id":4,"proposal_id":400,"creator":"someone","status":"active"}]}"""
 
-    /** [newAccount]: one post, so the Getting started card still asks things of it (`WavesOnboarding.isNewAccount`). */
     /** list_proposals fails while this is set (a node down at launch). */
     private var proposalsDown = false
 
     /** get_accounts fails while this is set. */
     private var accountsDown = false
 
+    /** [newAccount]: one post, so the Getting started card still asks things of it (`WavesOnboarding.isNewAccount`). */
     private suspend fun proposalApp(scope: TestScope, voted: List<Long> = emptyList(), signedIn: Boolean = true, newAccount: Boolean = false) = app(scope, signedIn) { req ->
         when (req.method) {
             "database_api.list_proposals" -> if (proposalsDown) HttpResult(500, "") else FakeTransport.result(req, proposals)
@@ -210,7 +210,6 @@ class PlatformModelsTest {
                 req,
                 "[" + AppTestKeys.accountJson(alice).replace("\"post_count\":1", "\"post_count\":${if (newAccount) 1 else 50}") + "]",
             )
-            "database_api.list_proposals" -> FakeTransport.result(req, proposals)
             "database_api.list_proposal_votes" -> FakeTransport.result(
                 req,
                 """{"proposal_votes":[${voted.joinToString(",") { """{"voter":"$alice","proposal":{"proposal_id":$it}}""" }},{"voter":"zz-other","proposal":{"proposal_id":350}}]}""".replace("[,", "["),
@@ -266,13 +265,59 @@ class PlatformModelsTest {
     }
 
     @Test
-    fun anEstablishedAccountWhoseAccountReadFailsStillGetsTheCard() = runTest {
-        // PR #3730 review: the account read only tells whether Getting started applies; it never decides alone
+    fun aNewAccountWhoseAccountReadFailsGetsNoCardBeforeGettingStartedLoads() = runTest {
+        // PR #3730 review: unknown is not established; the proposal reads working must not let the card in on day one
+        accountsDown = true
+        val app = proposalApp(this, newAccount = true)
+        app.env.proposalVote.start()
+        testScheduler.advanceUntilIdle()
+        assertFalse(app.env.proposalVote.current.visible, "the account read failed: nothing says the account is established")
+    }
+
+    @Test
+    fun anEstablishedAccountWhoseAccountReadFailedGetsTheCardOnTheNextRead() = runTest {
         accountsDown = true
         val app = proposalApp(this)
         app.env.proposalVote.start()
         testScheduler.advanceUntilIdle()
-        assertTrue(app.env.proposalVote.current.visible)
+        assertFalse(app.env.proposalVote.current.visible, "as for any failed query, the card waits")
+        accountsDown = false
+        app.env.proposalVote.refresh()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.proposalVote.current.visible, "the account read again: established")
+    }
+
+    @Test
+    fun aVoteThatLandsAfterGettingStartedShowedLeavesTheCardHidden() = runTest {
+        // PR #3730 review: the vote's thanks must not bring the card back beside Getting started
+        val app = proposalApp(this)
+        var posts = 50
+        val changing = TestApp(this) { req ->
+            when (req.method) {
+                // established when the card read it, new by the time Getting started reads it (posts deleted meanwhile)
+                "condenser_api.get_accounts" -> FakeTransport.result(
+                    req,
+                    "[" + AppTestKeys.accountJson(alice).replace("\"post_count\":1", "\"post_count\":$posts") + "]",
+                )
+                else -> app.handler(this, req)
+            }
+        }
+        changing.authBackend.rest = { r -> if (r.url.endsWith("/private-api/quests")) HttpResult(200, """{"daily":[],"streak":{"current":0}}""") else null }
+        KeyVault(changing.store).run { save(stored(alice)); setCurrentUsername(alice) }
+        changing.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val model = changing.env.proposalVote
+        model.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.visible)
+        posts = 1
+        changing.env.api.accounts.getAccount(alice, refresh = true)
+        changing.env.wavesOnboarding.start()
+        model.vote()
+        testScheduler.advanceUntilIdle()
+        assertTrue(changing.env.wavesOnboarding.current.visible, "Getting started shows")
+        assertTrue(model.current.voted, "the vote went through")
+        assertFalse(model.current.visible, "not beside Getting started")
     }
 
     @Test

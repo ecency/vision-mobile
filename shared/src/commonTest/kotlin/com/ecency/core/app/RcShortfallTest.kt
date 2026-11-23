@@ -116,4 +116,15 @@ class RcShortfallTest {
         assertEquals(ErrorKind.RESOURCE_CREDITS, error.kind)
         RcShortfall.precheck(InMemoryPrefs(), now, "alice", RcShortfall.OP_POST)
     }
+
+    @Test
+    fun aPrecheckWithNoReporterYetIsStillCountedOnceOneIsThere() {
+        // PR #3730 review: the day's marker is kept only for a precheck some reporter took
+        val prefs = InMemoryPrefs()
+        ErrorReports.install({ CrashReporter.None }, { now })
+        RcShortfall.precheck(prefs, now, "alice", RcShortfall.OP_POST)
+        ErrorReports.install({ reporter }, { now })
+        RcShortfall.precheck(prefs, now, "alice", RcShortfall.OP_POST)
+        assertEquals(1, shortfalls().count { it.tags["rc.stage"] == "precheck" })
+    }
 }
