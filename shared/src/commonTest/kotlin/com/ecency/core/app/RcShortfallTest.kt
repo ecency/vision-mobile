@@ -95,6 +95,18 @@ class RcShortfallTest {
     }
 
     @Test
+    fun aPrecheckHeldBackByTheRunsCapIsStillCountedInTheNextRun() {
+        // PR #3730 review: the day's marker is kept only for a precheck that was sent
+        val prefs = InMemoryPrefs()
+        repeat(RcShortfall.MAX_EVENTS) { AppError.fromBroadcast(outOfRc(), "post.vote") }
+        RcShortfall.precheck(prefs, now, "alice", RcShortfall.OP_POST)
+        assertTrue(shortfalls().none { it.tags["rc.stage"] == "precheck" }, "over the cap nothing is sent")
+        ErrorReports.install({ reporter }, { now })
+        RcShortfall.precheck(prefs, now, "alice", RcShortfall.OP_POST)
+        assertEquals(1, shortfalls().count { it.tags["rc.stage"] == "precheck" })
+    }
+
+    @Test
     fun aFailingReporterNeverReachesTheBroadcastFlow() {
         ErrorReports.install({ object : CrashReporter {
             override fun capture(report: CrashReport) = throw IllegalStateException("sentry down")
