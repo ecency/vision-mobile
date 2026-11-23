@@ -93,6 +93,27 @@ class RcPrecheckEditorTest {
     }
 
     @Test
+    fun aWarningIsCountedOncePerAccountWhileTheAuthorTypes() = runTest {
+        // #3727: one rc-shortfall event at the precheck stage, however often the estimate warns again
+        val w = World(this, mana = "1000")
+        val reporter = RecordingReporter()
+        w.app.env.crashReporter = reporter
+        val m = w.editor()
+        m.setTitle("A title")
+        m.setBody("Some text", TextSelection(9))
+        w.idle()
+        assertTrue(m.current.rcWarning)
+        m.setBody("Some more text", TextSelection(14))
+        w.idle()
+        m.setBody("Some more text again", TextSelection(20))
+        w.idle()
+        val sent = reporter.reports.filter { it.fingerprint == listOf(RcShortfall.MESSAGE) }
+        assertEquals(1, sent.size)
+        assertEquals("precheck", sent.single().tags["rc.stage"])
+        assertEquals("post", sent.single().tags["rc.op"])
+    }
+
+    @Test
     fun anAccountWithEnoughCreditsSeesNoBanner() = runTest {
         val w = World(this, mana = "900000000000000")
         val m = w.editor()

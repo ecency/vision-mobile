@@ -68,6 +68,16 @@ object ErrorReports {
     internal fun install(reporter: () -> CrashReporter, nowMillis: () -> Long) {
         sink.store(Sink(reporter, nowMillis))
         seen.store(NONE)
+        RcShortfall.reset()
+    }
+
+    /** [report] as it is, unless nothing is installed yet ([RcShortfall]'s counts). */
+    /** Captures [report]; false when no reporter took it (none installed yet, or [CrashReporter.None]). */
+    internal fun emit(report: CrashReport): Boolean {
+        val reporter = sink.load()?.reporter?.invoke() ?: return false
+        if (reporter === CrashReporter.None) return false
+        reporter.capture(report)
+        return true
     }
 
     /**
@@ -85,6 +95,8 @@ object ErrorReports {
      */
     fun handled(e: Throwable, where: String, mapped: AppError): String? = try {
         val root = rootOf(e)
+        // counted apart from this report's throttle (#3727)
+        if (mapped.kind == ErrorKind.RESOURCE_CREDITS) RcShortfall.rejected(root, where)
         if (skips(e, root, mapped.kind)) {
             null
         } else {

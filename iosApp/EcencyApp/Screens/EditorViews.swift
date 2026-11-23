@@ -1085,7 +1085,8 @@ private struct LinkSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        // a Form cannot be measured (#3728)
+        .presentationDetents([.large])
     }
 }
 

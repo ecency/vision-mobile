@@ -37,8 +37,12 @@ profile sheet models (`app/ChatSheets.kt`, `app/ProfileSheetModels.kt`).
   sit on the screen with their own `@State`.
 - The root passes `.environmentObject(app)`, `app.session` and `app.votes` into the sheet content; a sheet that
   needs others gets them passed the same way.
-- Sizing: `.presentationDetents([.medium, .large])` when the content grows with text size; rows that do not fit
-  fall back through `ViewThatFits`. Use `.interactiveDismissDisabled(state.isSending)` while a send runs
+- Sizing (#3728): put the scrolling content in `FittedSheetScroll { ... }` and `.fittedDetents()` on the sheet's
+  root (`Screens/Components.swift`): the sheet opens at its content's height plus what sits around the scroller (a
+  navigation bar, a pinned footer), taller content scrolls up to the full sheet. Content that fills whatever it is
+  given (a List, a Form, a text editor, a web view) takes `[.large]`. Never `.medium` (`SheetDetentLintTests`): it
+  opens at half the screen with an empty band under short content. Rows that do not fit fall back through
+  `ViewThatFits`. Use `.interactiveDismissDisabled(state.isSending)` while a send runs
   (`WavesViews.swift`, `EditorExtrasViews.swift`).
 - Signing prompts and the PIN lock sit in windows above every sheet (`AuthOverlay`, `LockOverlay`): do not try
   to present them from a sheet.

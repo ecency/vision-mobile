@@ -250,6 +250,15 @@ class WavesOnboardingModel internal constructor(private val env: AppEnvironment)
 
     private fun owns(user: String): Boolean = env.session.current.username == user && current.account == user
 
+    /**
+     * The Getting started card still has something to ask of [user]: a new account that neither dismissed nor finished
+     * it. The proposal card waits for a later run then (#3728).
+     */
+    internal fun pendingFor(user: String, created: String, postCount: Int): Boolean {
+        val persisted = read(user)
+        return WavesOnboarding.isNewAccount(created, postCount, env.nowMillis()) && !persisted.dismissed && !persisted.celebrated
+    }
+
     private fun read(user: String): Persisted {
         val o = env.prefs.getString(key(user))?.let { SafeJson.parseOrNull(it, 4) } as? JsonObject ?: return Persisted()
         return Persisted(

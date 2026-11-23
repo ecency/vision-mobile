@@ -17,7 +17,7 @@ struct QuickProfileSheet: View {
 
     var body: some View {
         let s = model.state
-        ScrollView {
+        FittedSheetScroll {
             VStack(spacing: 12) {
                 ZStack {
                     Circle().stroke(theme.lightBackground, lineWidth: 8)
@@ -88,7 +88,7 @@ struct QuickProfileSheet: View {
             }
             .padding(20)
         }
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .presentationDragIndicator(.visible)
         .onAppear { profile.start() }
         .accessibilityIdentifier("quick-profile")

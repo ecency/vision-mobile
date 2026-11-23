@@ -517,7 +517,7 @@ struct RenameGroupSheet: View {
 
     var body: some View {
         let s = model.state
-        ScrollView { VStack(alignment: .leading, spacing: 12) {
+        FittedSheetScroll { VStack(alignment: .leading, spacing: 12) {
             Text(ChatRenameState.companion.TITLE).scaledFont(18, weight: .bold).foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
             Text(ChatRenameState.companion.HINT).scaledFont(13).foregroundStyle(theme.secondary)
             TextField(ChatRenameState.companion.PLACEHOLDER, text: Binding(get: { s.value }, set: { rename.setValue(text: $0) }))
@@ -532,8 +532,7 @@ struct RenameGroupSheet: View {
             Button(UiCopy.shared.CANCEL) { dismiss() }.frame(maxWidth: .infinity).tapTarget()
         }
         .padding(20) }
-        .scrollBounceBehavior(.basedOnSize)
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .onChange(of: s.saved) { _, saved in if saved != nil { dismiss() } }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("rename-sheet")
@@ -1394,12 +1393,9 @@ struct MessageOptionsSheet: View {
     let actions: [ChatMessageAction]
     let onPick: (MessageOptionChoice) -> Void
     @Environment(\.appTheme) private var theme
-    /// The options' own height: the sheet opens at it instead of half the screen with a gap under the last row.
-    @State private var contentHeight: CGFloat = 0
-    @State private var detent: PresentationDetent = .medium
 
     var body: some View {
-        ScrollView { VStack(spacing: 0) {
+        FittedSheetScroll { VStack(spacing: 0) {
             // the quick reactions wrap at large text; More stays at the row's end and opens every emoji
             HStack(alignment: .center, spacing: 8) {
                 ChipFlow(spacing: 8) {
@@ -1428,14 +1424,9 @@ struct MessageOptionsSheet: View {
                 .accessibilityIdentifier("chat-option-\(action.name)")
             }
         }
-        .padding(.top, 8).padding(.bottom, 16)
-        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { h in
-            contentHeight = h
-            detent = .height(h)
-        } }
-        .scrollBounceBehavior(.basedOnSize)
+        .padding(.top, 8).padding(.bottom, 16) }
         // its content's height (more rows or larger text scroll inside, up to the full sheet)
-        .presentationDetents(contentHeight > 0 ? [.height(contentHeight), .large] : [.medium, .large], selection: $detent)
+        .fittedDetents()
         .presentationDragIndicator(.visible)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chat-options-sheet")
@@ -1509,7 +1500,7 @@ struct ReactorsSheet: View {
                     }
                 }
             }
-            ScrollView {
+            FittedSheetScroll {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(s.rows, id: \.userId) { r in
                         Button { if let a = r.account { onProfile(a) } } label: {
@@ -1527,7 +1518,7 @@ struct ReactorsSheet: View {
             }
         }
         .padding(16)
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .onAppear { reactors.start() }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("reactors-sheet")
@@ -1553,43 +1544,47 @@ struct PinnedSheet: View {
         let s = model.state
         VStack(alignment: .leading, spacing: 8) {
             Label(ChatPinnedModel.companion.TITLE, appIcon: .pin).scaledFont(18, weight: .bold).foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
-            if s.isLoading {
-                ProgressView().frame(maxWidth: .infinity).padding(32)
-            } else if let error = s.error {
-                Text(error).foregroundStyle(theme.dangerText).padding(32).announces(error)
-            } else if s.items.isEmpty {
-                Text(ChatPinnedModel.companion.EMPTY).foregroundStyle(theme.secondary).padding(32)
-            } else {
-                ScrollView {
-                    VStack(spacing: 8) {
-                        ForEach(s.items, id: \.post.id) { row in
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text(row.author).scaledFont(14, weight: .semibold).foregroundStyle(theme.accentText)
-                                    Spacer()
-                                    Text(row.time).scaledFont(12).foregroundStyle(theme.secondary)
-                                    if canUnpin {
-                                        Button { pinned.unpin(row: row) } label: { Image(appIcon: .close).foregroundStyle(theme.icon).tapTarget() }
-                                            .accessibilityLabel(ChatUiCopy.shared.UNPIN).accessibilityIdentifier("unpin-\(row.post.id)")
+            // every state inside the measured scroller, so the sheet fits the spinner, the notice or the rows (#3728)
+            FittedSheetScroll {
+                VStack(alignment: .leading, spacing: 0) {
+                    if s.isLoading {
+                        ProgressView().frame(maxWidth: .infinity).padding(32)
+                    } else if let error = s.error {
+                        Text(error).foregroundStyle(theme.dangerText).padding(32).announces(error)
+                    } else if s.items.isEmpty {
+                        Text(ChatPinnedModel.companion.EMPTY).foregroundStyle(theme.secondary).padding(32)
+                    } else {
+                        VStack(spacing: 8) {
+                            ForEach(s.items, id: \.post.id) { row in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack {
+                                        Text(row.author).scaledFont(14, weight: .semibold).foregroundStyle(theme.accentText)
+                                        Spacer()
+                                        Text(row.time).scaledFont(12).foregroundStyle(theme.secondary)
+                                        if canUnpin {
+                                            Button { pinned.unpin(row: row) } label: { Image(appIcon: .close).foregroundStyle(theme.icon).tapTarget() }
+                                                .accessibilityLabel(ChatUiCopy.shared.UNPIN).accessibilityIdentifier("unpin-\(row.post.id)")
+                                        }
                                     }
+                                    Text(row.text).scaledFont(14).foregroundStyle(theme.text).lineLimit(3)
                                 }
-                                Text(row.text).scaledFont(14).foregroundStyle(theme.text).lineLimit(3)
+                                .padding(12)
+                                .background(RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground))
+                                .onTapGesture { onOpen(row.post.id) }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityAddTraits(.isButton)
+                                .accessibilityAction { onOpen(row.post.id) }
+                                .accessibilityIdentifier("pinned-\(row.post.id)")
                             }
-                            .padding(12)
-                            .background(RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground))
-                            .onTapGesture { onOpen(row.post.id) }
-                            .accessibilityElement(children: .combine)
-                            .accessibilityAddTraits(.isButton)
-                            .accessibilityAction { onOpen(row.post.id) }
-                            .accessibilityIdentifier("pinned-\(row.post.id)")
                         }
                     }
                 }
+                // a notice keeps to the leading edge, as before the rows were measured
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            Spacer(minLength: 0)
         }
         .padding(16)
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .onAppear { pinned.start() }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("pinned-sheet")
@@ -1613,9 +1608,9 @@ struct MembersSheet: View {
                     Text(thread.membersSubtitle(rows: rows)).scaledFont(13).foregroundStyle(theme.secondary).accessibilityIdentifier("members-count")
                 }
             }
-            if rows.isEmpty { Text(ChatUiCopy.shared.NO_MEMBERS_FOUND).foregroundStyle(theme.secondary).padding(32) }
-            ScrollView {
+            FittedSheetScroll {
                 VStack(alignment: .leading, spacing: 0) {
+                    if rows.isEmpty { Text(ChatUiCopy.shared.NO_MEMBERS_FOUND).foregroundStyle(theme.secondary).padding(32) }
                     ForEach(rows, id: \.userId) { m in
                         Button { if let a = m.account { onProfile(a) } } label: {
                             HStack(spacing: 12) {
@@ -1635,10 +1630,11 @@ struct MembersSheet: View {
                         .accessibilityIdentifier("member-\(m.userId)")
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .padding(16)
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("members-sheet")
     }

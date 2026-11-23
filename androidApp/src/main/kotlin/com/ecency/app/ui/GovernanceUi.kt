@@ -68,7 +68,7 @@ fun GovernanceCard(env: AppEnvironment, openExternal: (String) -> Unit) {
         // never closed while it signs and sends (a swipe or back would leave the card waiting on a sheet nobody sees)
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { it != SheetValue.Hidden || !model.current.sending })
         ModalBottomSheet(onDismissRequest = model::cancelConfirm, sheetState = sheetState, containerColor = colors.background) {
-            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp).navigationBarsPadding().testTag("governanceSheet")) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 16.dp).navigationBarsPadding().testTag("governanceSheet")) {
                 Text(state.sheetTitle, color = colors.text, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() }.padding(bottom = 12.dp))
                 state.sheetPoints.forEach { point -> Text("•  $point", color = colors.text, modifier = Modifier.padding(bottom = 8.dp)) }
                 Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -84,7 +84,7 @@ fun GovernanceCard(env: AppEnvironment, openExternal: (String) -> Unit) {
     }
     if (state.askingDismiss) {
         ModalBottomSheet(onDismissRequest = { model.dismiss(null) }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp).navigationBarsPadding().testTag("governanceDismissSheet")) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 16.dp).navigationBarsPadding().testTag("governanceDismissSheet")) {
                 Text(GovernanceCopy.DISMISS_TITLE, color = colors.text, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() }.padding(bottom = 16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = { model.dismiss(GovernanceDismiss.FOREVER) }, modifier = Modifier.weight(1f).testTag("governanceForever")) {

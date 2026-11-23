@@ -69,7 +69,7 @@ private struct GovernanceConfirmSheet: View {
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        ScrollView {
+        FittedSheetScroll {
             VStack(alignment: .leading, spacing: 10) {
                 Text(state.sheetTitle).scaledFont(18, weight: .bold).foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
                 ForEach(Array(state.sheetPoints.enumerated()), id: \.offset) { index, point in
@@ -99,7 +99,7 @@ private struct GovernanceConfirmSheet: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("governance-sheet")
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         // never closed while it signs and sends
         .interactiveDismissDisabled(state.sending)
     }

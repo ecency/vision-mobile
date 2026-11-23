@@ -192,7 +192,11 @@ object SentryReporting {
         }
 
         fun event(report: CrashReport): SentryEvent = SentryEvent().apply {
-            level = if (report.level == "warning") SentryLevel.WARNING else SentryLevel.ERROR
+            level = when (report.level) {
+                "warning" -> SentryLevel.WARNING
+                "info" -> SentryLevel.INFO // counts such as rc-shortfall (#3727): never an error alert
+                else -> SentryLevel.ERROR
+            }
             if (report.isMessage) {
                 message = Message().apply { message = report.message }
             } else {

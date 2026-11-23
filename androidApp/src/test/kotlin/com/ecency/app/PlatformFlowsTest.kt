@@ -478,6 +478,7 @@ class PlatformFlowsTest {
 
     @Test
     fun theProposalCardVotesThroughTheActiveKeyPath() {
+        node.postCount = 50 // an established account: a new one waits for Getting started (#3728)
         node.extra = { method, _ ->
             when (method) {
                 "database_api.list_proposals" -> """{"proposals":[{"id":1,"proposal_id":342,"creator":"ecency","status":"active"}]}"""
@@ -496,6 +497,7 @@ class PlatformFlowsTest {
 
     @Test
     fun dismissingTheProposalCardForever() {
+        node.postCount = 50 // an established account: a new one waits for Getting started (#3728)
         node.extra = { method, _ ->
             when (method) {
                 "database_api.list_proposals" -> """{"proposals":[{"id":1,"proposal_id":342,"creator":"ecency","status":"active"}]}"""
@@ -550,6 +552,7 @@ class PlatformFlowsTest {
     @Test
     @Config(qualifiers = "w360dp-h400dp")
     fun onAShortWindowTheProposalDismissSheetScrollsToLater() {
+        node.postCount = 50 // an established account: a new one waits for Getting started (#3728)
         node.extra = { method, _ ->
             when (method) {
                 "database_api.list_proposals" -> """{"proposals":[{"id":1,"proposal_id":342,"creator":"ecency","status":"active"}]}"""

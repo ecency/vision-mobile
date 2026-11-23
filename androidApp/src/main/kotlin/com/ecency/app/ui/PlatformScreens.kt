@@ -667,7 +667,7 @@ fun QrScanner(model: QrScanModel, modifier: Modifier = Modifier, onDenied: () ->
 fun ShareChooserSheet(onChoose: (ShareTarget?) -> Unit) {
     val colors = LocalEcencyColors.current
     ModalBottomSheet(onDismissRequest = { onChoose(null) }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(top = 16.dp, bottom = 32.dp).navigationBarsPadding().testTag("shareChooser")) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 16.dp).navigationBarsPadding().testTag("shareChooser")) {
             Text(ShareCopy.TITLE, color = colors.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.semantics { heading() }.padding(bottom = 20.dp))
             ShareOption(AppIcon.EDIT, ShareCopy.BLOG, ShareCopy.BLOG_DESC, "shareBlog") { onChoose(ShareTarget.BLOG) }
             ShareOption(AppIcon.WAVES, ShareCopy.WAVE, ShareCopy.WAVE_DESC, "shareWave") { onChoose(ShareTarget.WAVE) }
@@ -728,7 +728,7 @@ fun ProposalCard(env: AppEnvironment) {
     }
     if (state.askingDismiss) {
         ModalBottomSheet(onDismissRequest = { model.dismiss(null) }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp).navigationBarsPadding().testTag("proposalDismissSheet")) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 16.dp).navigationBarsPadding().testTag("proposalDismissSheet")) {
                 Text(ProposalCopy.DISMISS_TITLE, color = colors.text, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() }.padding(bottom = 16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     androidx.compose.material3.OutlinedButton(onClick = { model.dismiss(ProposalDismiss.FOREVER) }, modifier = Modifier.weight(1f).testTag("proposalForever")) {

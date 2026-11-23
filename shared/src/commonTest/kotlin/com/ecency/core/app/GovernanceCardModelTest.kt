@@ -2,6 +2,7 @@ package com.ecency.core.app
 
 import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.Sent
+import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.hive.KeyRole
 import com.ecency.core.secure.AuthType
 import com.ecency.core.secure.KeyVault
@@ -15,6 +16,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -35,16 +37,19 @@ class GovernanceCardModelTest {
     private class Chain(val fields: MutableMap<String, String>, var failBroadcast: Boolean = false, var hangBroadcast: Boolean = false) {
         /** find_transaction's answer while a send is checked. */
         var txStatus = "unknown"
+
+        /** get_accounts fails (a node down). */
+        var readsDown = false
     }
 
     private fun governance(expiration: String, proxy: String = "", votes: List<String> = emptyList()) =
         """"proxy":"$proxy","witness_votes":[${votes.joinToString(",") { "\"$it\"" }}],"governance_vote_expiration_ts":"$expiration""""
 
-    private suspend fun app(scope: TestScope, chain: Chain): TestApp {
+    private suspend fun app(scope: TestScope, chain: Chain, postingOnly: Boolean = false): TestApp {
         val base = appWithAccounts(scope, known = setOf(alice, bob, GovernanceCardModel.PROXY))
         val app = TestApp(scope) { req ->
             when (req.method) {
-                "condenser_api.get_accounts" -> {
+                "condenser_api.get_accounts" -> if (chain.readsDown) HttpResult(500, "") else {
                     val names = req.params.jsonArray[0].jsonArray.map { it.jsonPrimitive.content }
                     FakeTransport.result(
                         req,
@@ -60,7 +65,11 @@ class GovernanceCardModelTest {
                 else -> base.handler(this, req)
             }
         }
-        KeyVault(app.store).run { save(stored(alice)); save(stored(bob)); setCurrentUsername(alice) }
+        KeyVault(app.store).run {
+            // postingOnly: the proxy needs the active key, so signing asks for the active key upgrade first
+            save(if (postingOnly) VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING)) else stored(alice))
+            save(stored(bob)); setCurrentUsername(alice)
+        }
         app.env.session.start()
         scope.testScheduler.advanceUntilIdle()
         return app
@@ -506,5 +515,101 @@ class GovernanceCardModelTest {
         } finally {
             chain.txStatus = "within_irreversible_block"
         }
+    }
+
+    @Test
+    fun aCancelledSigningAfterTheVotesCameToCountClosesTheSheet() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain, postingOnly = true)
+        val model = start(this, app)
+        model.askConfirm()
+        model.confirm()
+        testScheduler.advanceUntilIdle()
+        assertIs<SigningPrompt.AuthUpgrade>(app.env.signing.current.prompt)
+        // set on another device meanwhile: the read lands while the send waits for the key
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 200 * day), proxy = "ecency")
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.confirming)
+        app.env.signing.cancel()
+        testScheduler.advanceUntilIdle()
+        assertFalse(model.current.sending)
+        assertFalse(model.current.confirming, "no sheet whose Confirm does nothing")
+        assertFalse(model.current.visible, "the votes count: no card")
+    }
+
+    @Test
+    fun aCancelledSigningClosesASheetWithNothingToSignEvenWhenTheNextReadFails() = runTest {
+        // PR #3730 review: the card's own state says nothing is left to sign; no read is needed to close the sheet
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain, postingOnly = true)
+        val model = start(this, app)
+        model.askConfirm()
+        model.confirm()
+        testScheduler.advanceUntilIdle()
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 200 * day), proxy = "ecency")
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(GovernanceStatus.ACTIVE, model.current.status)
+        chain.readsDown = true
+        app.env.signing.cancel()
+        testScheduler.advanceUntilIdle()
+        assertFalse(model.current.confirming, "no sheet whose Confirm does nothing")
+        assertFalse(model.current.visible, "the votes count: no card")
+    }
+
+    @Test
+    fun aCancelledSigningWhileStillInactiveKeepsTheSheetReady() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain, postingOnly = true)
+        val model = start(this, app)
+        model.askConfirm()
+        model.confirm()
+        testScheduler.advanceUntilIdle()
+        app.env.signing.cancel()
+        testScheduler.advanceUntilIdle()
+        assertFalse(model.current.sending)
+        assertTrue(model.current.confirming, "nothing was signed: the sheet stays to confirm again or cancel")
+        assertEquals(GovernanceAction.SET_PROXY, model.current.action)
+    }
+
+    @Test
+    fun aCancelledSigningKeepsAnExpiringCardWithNothingToSign() = runTest {
+        // PR #3730 review: nothing to sign closes the sheet, but an expiring card still says "Vote yourself"
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain, postingOnly = true)
+        val model = start(this, app)
+        model.askConfirm()
+        model.confirm()
+        testScheduler.advanceUntilIdle()
+        // another proxy set meanwhile, expiring soon: the card stays, with no proxy offer
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 10 * day), proxy = "someone")
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(GovernanceStatus.EXPIRING, model.current.status)
+        assertNull(model.current.action)
+        chain.readsDown = true
+        app.env.signing.cancel()
+        testScheduler.advanceUntilIdle()
+        assertFalse(model.current.confirming, "nothing to sign: the sheet closes")
+        assertTrue(model.current.visible, "the expiring card stays")
+    }
+
+    @Test
+    fun aCancelledSigningWhoseNextReadFindsNothingToSignClosesTheSheet() = runTest {
+        // PR #3730 review: another device set another proxy while the key prompt waited; no read landed before the cancel
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain, postingOnly = true)
+        val model = start(this, app)
+        model.askConfirm()
+        model.confirm()
+        testScheduler.advanceUntilIdle()
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 10 * day), proxy = "someone")
+        app.env.signing.cancel()
+        testScheduler.advanceUntilIdle()
+        assertEquals(GovernanceStatus.EXPIRING, model.current.status)
+        assertNull(model.current.action)
+        assertFalse(model.current.confirming, "no sheet whose Confirm does nothing")
+        assertTrue(model.current.visible, "the expiring card stays")
     }
 }

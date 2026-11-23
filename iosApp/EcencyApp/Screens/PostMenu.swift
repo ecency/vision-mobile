@@ -211,7 +211,7 @@ struct PostMenuSheet: View {
     var body: some View {
         Group {
             if let items {
-                ScrollView {
+                FittedSheetScroll {
                     VStack(spacing: 0) {
                         ForEach(items, id: \.self) { item in
                             Button {
@@ -236,7 +236,7 @@ struct PostMenuSheet: View {
             }
         }
         .background(theme.background)
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .presentationDragIndicator(.visible)
         .accessibilityIdentifier("post-menu")
         .task {

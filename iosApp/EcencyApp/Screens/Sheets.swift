@@ -190,7 +190,8 @@ struct VideoPlayerSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button(UiCopy.shared.DONE) { dismiss() } } }
         }
-        .presentationDetents([.medium, .large])
+        // a web view that fills the sheet cannot be measured (#3728)
+        .presentationDetents([.large])
     }
 }
 

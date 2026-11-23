@@ -149,7 +149,8 @@ struct BalanceAnalyticsSheet: View {
         }
         .frame(minHeight: 350)
         .background(theme.background)
-        .presentationDetents([.medium, .large])
+        // a chart that fills its frame cannot be measured (#3728)
+        .presentationDetents([.large])
         .onAppear { model.start() }
         .accessibilityIdentifier("balance-analytics")
     }
@@ -608,7 +609,6 @@ struct PostViewCountView: View {
     @ObservedObject var model: Observed<PostStatsState>
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
-    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var open = false
 
     private var stats: PostStatsModel { model.model as! PostStatsModel }
@@ -636,7 +636,7 @@ struct PostViewCountView: View {
                 open = false
                 app.push(stats.promoteScreen)
             }
-            .presentationDetents(typeSize >= .stacksRows ? [.large] : [.medium, .large])
+            .fittedDetents()
         }
     }
 }
@@ -649,7 +649,7 @@ struct PostStatsSheet: View {
 
     var body: some View {
         let s = model.state
-        ScrollView {
+        FittedSheetScroll {
         VStack(alignment: .leading, spacing: 12) {
             AdaptiveStack {
                 stat(StatsCopy.shared.VISITORS, s.stats.visitors)
@@ -669,7 +669,6 @@ struct PostStatsSheet: View {
         }
         .padding(16)
         }
-        .scrollBounceBehavior(.basedOnSize)
         .background(theme.background)
         .accessibilityIdentifier("post-stats")
     }

@@ -489,7 +489,7 @@ struct WavesPickerSheet: View {
     var body: some View {
         let state = tabs.state
         NavigationStack {
-            ScrollView {
+            FittedSheetScroll {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(ReadingUiCopy.shared.CUSTOM_FEEDS_SUBTITLE).scaledFont(14, relativeTo: .subheadline).foregroundStyle(theme.secondary)
                     HStack(spacing: 8) {
@@ -540,7 +540,7 @@ struct WavesPickerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(UiCopy.shared.DONE) { dismiss() }.accessibilityIdentifier("waves-picker-done") } }
         }
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
     }
 
     private func submit() {
@@ -791,7 +791,8 @@ struct WaveComposerSheet: View {
         .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 8)
         // the sheet's own background, keyboard area included: no see-through stripe above the keyboard
         .background(theme.background.ignoresSafeArea())
-        .presentationDetents([.medium, .large])
+        // a text editor that fills the sheet cannot be measured (#3728)
+        .presentationDetents([.large])
         .interactiveDismissDisabled(state.isSending)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("wave-composer")

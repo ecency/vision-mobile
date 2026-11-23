@@ -331,7 +331,7 @@ struct CommunityScreen: View {
                 managePick = action
                 manage = false
             }
-            .presentationDetents([.medium, .large])
+            .fittedDetents()
         }
         .onAppear {
             community.start()
@@ -476,7 +476,7 @@ struct CommunityMembersScreen: View {
                 pick = nil
                 if role != p.current { members.setRole(account: account, role: role) }
             }
-            .presentationDetents([.medium, .large])
+            .fittedDetents()
         }
         .alert(CommunityCopy.shared.FAIL, isPresented: Binding(get: { state.alert != nil }, set: { if !$0 { members.dismissAlert() } })) {
             Button(UiCopy.shared.OK, role: .cancel) { members.dismissAlert() }
@@ -565,7 +565,7 @@ struct ModerationSheet<Content: View>: View {
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        ScrollView {
+        FittedSheetScroll {
             VStack(alignment: .leading, spacing: 0) {
                 Text(title).scaledFont(20, weight: .bold).foregroundStyle(theme.text).multilineTextAlignment(.center).frame(maxWidth: .infinity)
                     .accessibilityAddTraits(.isHeader)
@@ -581,7 +581,6 @@ struct ModerationSheet<Content: View>: View {
             }
             .padding(20)
         }
-        .scrollBounceBehavior(.basedOnSize)
         .background(theme.background)
     }
 }
@@ -787,7 +786,7 @@ struct ModNotesSheet: View {
 
     var body: some View {
         let notes = ModNotes.shared.notes(input: value)
-        // scrolls when the text is large (the sheet opens at half height)
+        // scrolls when the text is large
         ModerationSheet(title: title, subtitle: subtitle, cancelId: "mod-notes-cancel") {
             TextField(placeholder, text: Binding(get: { value }, set: { value = ModNotes.shared.limit(input: $0) }))
                 .padding(12).background(RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground))

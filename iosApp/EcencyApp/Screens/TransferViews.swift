@@ -800,7 +800,8 @@ struct FavoritesSheet: View {
                 }
         }
         .onAppear { model.start() }
-        .presentationDetents([.medium, .large])
+        // a searchable List cannot be measured (#3728)
+        .presentationDetents([.large])
     }
 }
 

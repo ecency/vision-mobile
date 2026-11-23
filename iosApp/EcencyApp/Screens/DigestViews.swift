@@ -42,7 +42,7 @@ struct DigestSheet: View {
 
     var body: some View {
         // scrolls when large text makes it taller than the sheet
-        ScrollView {
+        FittedSheetScroll {
         VStack(spacing: 12) {
             if let sentTo = state.checkInboxEmail {
                 title(DigestCopy.shared.CHECK_INBOX_TITLE)
@@ -82,10 +82,8 @@ struct DigestSheet: View {
         }
         .padding(.horizontal, 20).padding(.top, 24)
         }
-        .scrollBounceBehavior(.basedOnSize)
         .background(theme.background)
-        // never medium only: a short window (iPhone Duo's inner display held sideways) gets about 330 pt there
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .alert(state.alert ?? "", isPresented: Binding(get: { state.alert != nil }, set: { if !$0 { model.clearAlert() } })) {
             Button(DigestCopy.shared.OK, role: .cancel) { model.clearAlert() }
         }
