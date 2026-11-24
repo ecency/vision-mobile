@@ -7,8 +7,12 @@ struct FeedListView: View {
     @ObservedObject var feed: Observed<FeedState>
     /// Above the cards (the main feed's proposal card and spotlight).
     var header: AnyView? = nil
-    /// A header above the list that closes as it scrolls (community Details).
-    var collapse: SummaryCollapseDriver? = nil
+    /// After [header], pinned to the top once it reaches it (the community's tabs, #3734).
+    var pinned: AnyView? = nil
+    /// Start with [header] scrolled away and [pinned] at the top (another tab picked while the header was gone).
+    var startPinned = false
+    /// Whether [header] has scrolled away, as the reader scrolls.
+    var onHeaderGone: ((Bool) -> Void)? = nil
     /// Bumped by a tap on the selected tab or filter above (RN TabbedPosts onTabPress): back to the top.
     var scrollToTop = 0
     @Environment(\.appTheme) private var theme
@@ -16,6 +20,8 @@ struct FeedListView: View {
     /// Where the drawn cards are (README "Foreground refresh"): the card at the top of the screen stays there when a
     /// quiet refresh puts new cards above it, so nothing moves under a reader who scrolled down.
     @State private var frames = CardFrames()
+    @State private var headerHeight: CGFloat = 0
+    @State private var filler = PinFiller()
 
     private var model: FeedModel { feed.model as! FeedModel }
 
@@ -24,9 +30,17 @@ struct FeedListView: View {
         GeometryReader { geo in
             ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 0) {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     Color.clear.frame(height: 0).id("feed-top")
-                    if let header { header }
+                    if let header {
+                        VStack(spacing: 0) {
+                            header
+                            // another tab picked with the header gone scrolls here: the pinned row right at the top
+                            Color.clear.frame(height: 0).id("feed-header-end")
+                        }
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
+                    }
+                    Section {
                     if state.items.isEmpty {
                         if let error = state.error {
                             ErrorStateView(error: error) { model.retry() }.padding(.top, 80)
@@ -67,6 +81,13 @@ struct FeedListView: View {
                             ProgressView().padding(24)
                         }
                     }
+                    if pinned != nil {
+                        // at least a screen under the header: a short or loading feed keeps the row pinned, as X
+                        Color.clear.frame(height: filler.height).accessibilityHidden(true)
+                    }
+                    } header: {
+                        if let pinned { pinned }
+                    }
                 }
                 .reportsScrollOffset("feed-scroll")
                 .tracksScrollMomentum(momentum)
@@ -75,10 +96,21 @@ struct FeedListView: View {
             .onChange(of: state.items.first?.key) { _, _ in if momentum.isAtTop { proxy.scrollTo("feed-top", anchor: .top) } }
             .accessibilityIdentifier("feed-list")
             .refreshable { await refresh() }
-            .collapsesSummary(collapse, space: "feed-scroll")
-            // RN postsTabContent's ScrollTopPopup (feed, tag and community lists); the top opens a header above
+            // RN postsTabContent's ScrollTopPopup (feed, tag and community lists)
             .scrollTopPopup(space: "feed-scroll", id: "feed-scroll-top") { toTop(proxy) }
+            .reportsHeaderGone(headerHeight: onHeaderGone == nil ? 0 : headerHeight) { onHeaderGone?($0) }
             .onChange(of: scrollToTop) { _, _ in toTop(proxy) }
+            .onAppear {
+                guard startPinned, pinned != nil, header != nil else { return }
+                filler.reserve(viewport: geo.size.height)
+                DispatchQueue.main.async {
+                    proxy.scrollTo("feed-header-end", anchor: .top)
+                    filler.release()
+                }
+            }
+            .onPreferenceChange(ScrollContentHeightKey.self) { h in
+                MainActor.assumeIsolated { if let h, pinned != nil { filler.update(content: h, header: headerHeight, viewport: geo.size.height) } }
+            }
             }
         }
         .background(theme.background)
@@ -86,10 +118,9 @@ struct FeedListView: View {
         .onReturnToForeground { model.start() }
     }
 
-    /// The scroll to top (popup or tab reselect): mid-fling too; the top opens a header above.
+    /// The scroll to top (popup or tab reselect): mid-fling too; a header above the cards shows again.
     private func toTop(_ proxy: ScrollViewProxy) {
         momentum.stop()
-        collapse?.expand()
         proxy.scrollTo("feed-top", anchor: .top)
     }
 
@@ -503,4 +534,32 @@ final class TagFeeds: ObservableObject {
         feeds[index] = f
         return f
     }
+}
+
+
+/// The blank row at the end of a list with a header and a pinned row (#3734): tall enough that the list can scroll the
+/// header away even while the content below is short or loading, so a pinned row stays pinned, as X. Computed from
+/// the stack's height without itself, so it settles.
+struct PinFiller: Equatable {
+    private(set) var height: CGFloat = 0
+    /// Reserved for a switch: only grows until `release`, so a late height of the old content cannot trim it.
+    private var held = false
+
+    mutating func update(content: CGFloat, header: CGFloat, viewport: CGFloat) {
+        guard header > 0, viewport > 0 else { return }
+        let rest = content - height
+        let next = max(0, (header + viewport - rest).rounded(.up))
+        if held && next < height { return }
+        if abs(next - height) > 0.5 { height = next }
+    }
+
+    /// Before the content under the pinned row is replaced (another tab): a screen of room at once, so the list is
+    /// not clamped back over the header before the new content's height is known.
+    mutating func reserve(viewport: CGFloat) {
+        height = max(height, viewport)
+        held = true
+    }
+
+    /// The new content is in: `update` may trim again.
+    mutating func release() { held = false }
 }

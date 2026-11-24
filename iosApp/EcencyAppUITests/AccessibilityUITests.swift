@@ -191,8 +191,7 @@ final class AccessibilityUITests: XCTestCase {
             ("wallet", ["-seedAccounts", "YES", "-startTab", "WALLET"], "wallet-total"),
             ("notifications", ["-seedAccounts", "YES", "-startTab", "NOTIFICATION"], "tab-notification"),
             ("chats", ["-seedAccounts", "YES", "-startTab", "CHATS"], "tab-chats"),
-            // at AX5 the summary starts closed (SummarySizeRule); auditAll opens it and audits it as well
-            ("profile", ["-openScreen", "route:PROFILE:spike-alice"], size.isEmpty ? "profile-summary" : "profile-compact-header"),
+            ("profile", ["-openScreen", "route:PROFILE:spike-alice"], "profile-summary"),
             ("communities", ["-openScreen", "route:COMMUNITIES"], "tab-Discover"),
             ("search", ["-openScreen", "route:SEARCH_RESULT"], "search-input"),
             ("settings", ["-openScreen", "settings"], "settings"),
@@ -206,13 +205,7 @@ final class AccessibilityUITests: XCTestCase {
         let suffix = (ax5 ? " (AX5)" : "") + (bold ? " (bold)" : "")
         for (name, args, ready) in screens(size) {
             let app = launch(args + (bold ? Self.boldText : []))
-            if name == "profile", ax5 {
-                audit(app, "profile closed" + suffix, ready: ready)
-                element(app, ready).tap()
-                audit(app, "profile" + suffix, ready: "profile-summary")
-            } else {
-                audit(app, name + suffix, ready: ready)
-            }
+            audit(app, name + suffix, ready: ready)
             app.terminate()
         }
     }
@@ -422,9 +415,8 @@ enum AuditExclusions {
 
     /// The share of the element drawn where it can be read; nil when nothing cuts it. Two things cut it. A scroll view
     /// that holds it and clips it, or the window's edge: VoiceOver scrolls to such text, but the audit reads the pixels
-    /// drawn where it would be (at AX5 the profile summary is capped to 70 % of the screen and scrolls inside, so its
-    /// location and follower counts sit under the tabs and the first post; the reading then depended on which card had
-    /// loaded there). Then the system tab bar: list rows scroll on under its glass, as in Apple's own apps, and the
+    /// drawn where it would be (at AX5 the profile summary is taller than the screen, so its location and follower
+    /// counts sit below the window's edge). Then the system tab bar: list rows scroll on under its glass, as in Apple's own apps, and the
     /// audit reads them through it. The visible share is the smaller of the visible height and width shares, less the
     /// part under the bar. Both count together: a wallet card title half below the screen's edge has the rest of it
     /// under the bar (#3658), and neither share alone reached half.

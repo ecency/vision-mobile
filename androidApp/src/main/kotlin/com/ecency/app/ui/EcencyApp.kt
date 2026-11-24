@@ -545,7 +545,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
                         }
                         // ---- profile, social graph and bookmarks (ProfileScreens.kt) ----
                         is AppScreen.Profile -> Guarded({ entry.get("profile") { env.profileModel(screen.author, screen.section) } }) { model ->
-                            ProfileScreen(env, model, entry.get("list") { LazyListState() }, env.votes.state, now, feedActions, routes.profileActions, wavesUi, entry.get("summary") { SummaryCollapseState() })
+                            ProfileScreen(env, model, entry.get("list") { LazyListState() }, env.votes.state, now, feedActions, routes.profileActions, wavesUi)
                         }
                         is AppScreen.Follows -> Guarded({ entry.get("follows") { env.followsModel(screen.username, screen.following, screen.count) } }) { model ->
                             FollowsScreen(env, model, entry.get("list") { LazyListState() }, onBack = { navigator.pop() }, onUser = { navigator.push(AppScreen.Profile(it)) })

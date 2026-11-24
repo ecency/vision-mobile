@@ -120,13 +120,18 @@ final class ProfileFeeds: ObservableObject {
 }
 
 /// RN profile: summary (cover, avatar, Follow / Message / email digest / menu or Edit, name, bio, date, website,
-/// location, follower counts, voting power and RC), then the tabs over the list. The summary sits above the list and
-/// closes as it scrolls down, opening back at the top or on a tap on the user in the bar (RN profileView,
-/// `SummaryCollapseDriver`); the tabs stay.
+/// location, follower counts, voting power and RC), then the tabs over the list. The summary is the list's first row
+/// and scrolls away with it, the tabs pin under the bar and the user fades into the bar, as Instagram and X (#3734;
+/// RN profileView toggled the summary instead). A tap on the user in the bar scrolls back to the summary.
 struct ProfileScreen: View {
     @StateObject private var profile: Observed<ProfileState>
     @StateObject private var feeds = ProfileFeeds()
-    @StateObject private var collapse = SummaryCollapseDriver()
+    /// The summary has scrolled away under the bar (the tabs pinned): the bar shows the user.
+    @State private var summaryGone = false
+    @State private var summaryHeight: CGFloat = 0
+    @State private var filler = PinFiller()
+    /// A tab picked with the summary gone: the tab's rows, once swapped, start with the tabs pinned.
+    @State private var pinAfterSwitch = false
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
     @Environment(\.motion) private var motion
@@ -134,8 +139,6 @@ struct ProfileScreen: View {
     /// Bumped by a tap on the selected tab (RN TabbedPosts onTabPress): the list goes to the top.
     @State private var scrollTop = 0
     @State private var momentum = ScrollMomentum()
-    @Environment(\.dynamicTypeSize) private var typeSize
-    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     init(author: String, section: String, env: AppEnvironment) {
         _profile = StateObject(wrappedValue: Observed(env.profileModel(username: author, section: section), ownsModel: true))
@@ -146,45 +149,28 @@ struct ProfileScreen: View {
     var body: some View {
         let state = profile.state
         GeometryReader { geo in
-            VStack(spacing: 0) {
-                if let header = state.header {
-                    if collapse.open {
-                        CappedHeader(maxHeight: geo.size.height * 0.7) {
-                            VStack(spacing: 0) {
-                                ProfileSummaryView(state: state, header: header, model: model, onReport: { confirmReport = true })
-                                // RN NewsletterSenderInfo: the own creator list's subscribers, link and "Manage"
-                                if state.isOwn { DigestSenderRow(username: state.username, env: app.env) }
-                            }
-                        }
-                        .clipped()
-                        .transition(motion.revealTransition)
-                    }
-                    if !state.isMuted {
-                        // another tab's list: the summary opens over it (the three ways in agree)
-                        ProfileTabsView(state: state, onSelect: { i in
-                            collapse.resetForSize(SummarySizeRule.holds(typeSize, verticalSizeClass))
-                            model.selectTab(index: Int32(i))
-                        }, onReselect: { scrollTop += 1 })
-                    }
-                    list(state, width: geo.size.width)
-                } else if let error = state.error {
+            if state.header != nil {
+                list(state, width: geo.size.width, height: geo.size.height)
+            } else if let error = state.error {
+                VStack(spacing: 0) {
                     ErrorStateView(error: error) { model.retry() }.padding(.top, 80)
                     Spacer(minLength: 0)
-                } else {
+                }
+            } else {
+                VStack(spacing: 0) {
                     ProfileHeaderSkeleton().accessibilityIdentifier("profile-loading")
                     Spacer(minLength: 0)
                 }
             }
-            .animation(motion.reveal, value: collapse.open)
         }
         .background(theme.background)
         .screenTitle(state.header?.displayName ?? "@\(state.username)")
         .navigationBarTitleDisplayMode(.inline)
-        .screenBarItem(.principal, shown: !collapse.open && state.header != nil) {
-            // RN Header with the selected user while the summary is closed; a tap opens it again
-            if !collapse.open, let header = state.header {
+        .screenBarItem(.principal, shown: summaryGone && state.header != nil) {
+            // RN Header with the selected user once the summary has scrolled away; a tap scrolls back to it
+            if summaryGone, let header = state.header {
                 Group {
-                    Button { collapse.expand() } label: {
+                    Button { scrollTop += 1 } label: {
                         HStack(spacing: 8) {
                             AvatarView(url: header.avatarUrl, size: 28)
                             Text(header.displayName).scaledFont(16, weight: .bold).foregroundStyle(theme.text).lineLimit(1)
@@ -198,8 +184,7 @@ struct ProfileScreen: View {
         }
         .onAppear { model.start() }
         .onReturnToForeground { model.start() }
-        // at accessibility text sizes the open summary and the tabs would leave the list no room (SummarySizeRule)
-        .closesSummaryForSize(collapse)
+        .animation(motion.reveal, value: summaryGone)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("profile")
         .alert(ProfileUiCopy.shared.CONFIRM_REPORT, isPresented: $confirmReport) {
@@ -211,18 +196,40 @@ struct ProfileScreen: View {
         } message: { Text(profile.state.alert?.message ?? ProfileUiCopy.shared.AN_ERROR_OCCURRED) }
     }
 
-    /// The selected tab's list (or the muted view), lazy, under the tabs.
-    private func list(_ state: ProfileState, width: CGFloat) -> some View {
+    /// The summary, then the tabs pinned once they reach the top, over the selected tab's list (or the muted view).
+    @ViewBuilder private func list(_ state: ProfileState, width: CGFloat, height: CGFloat) -> some View {
+        if let header = state.header {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 0) {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     Color.clear.frame(height: 0).id("profile-top")
+                    VStack(spacing: 0) {
+                        ProfileSummaryView(state: state, header: header, model: model, onReport: { confirmReport = true })
+                        // RN NewsletterSenderInfo: the own creator list's subscribers, link and "Manage"
+                        if state.isOwn { DigestSenderRow(username: state.username, env: app.env) }
+                        // a tab switch with the summary gone scrolls here: the tabs right under the bar
+                        Color.clear.frame(height: 0).id("profile-summary-end")
+                    }
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { summaryHeight = $0 }
                     if state.isMuted {
                         Image(appIcon: .muted).scaledFont(96, relativeTo: .largeTitle).foregroundStyle(theme.icon)
                             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                             .padding(.top, 48).accessibilityLabel(UiCopy.shared.MUTED).accessibilityIdentifier("muted-view")
                     } else {
-                        tabContent(state, width: width)
+                        Section {
+                            tabContent(state, width: width)
+                            // at least a screen under the summary: a short or loading tab keeps the tabs pinned, as X
+                            Color.clear.frame(height: filler.height).accessibilityHidden(true)
+                        } header: {
+                            ProfileTabsView(state: state, onSelect: { i in
+                                // the summary gone: the new tab starts at its top with the tabs still pinned, scrolled in
+                                // the same update that swaps the tab's rows (onChange below)
+                                pinAfterSwitch = summaryGone
+                                if summaryGone { filler.reserve(viewport: height) }
+                                model.selectTab(index: Int32(i))
+                            }, onReselect: { scrollTop += 1 })
+                            .background(theme.background)
+                        }
                     }
                 }
                 .reportsScrollOffset("profile-scroll")
@@ -230,19 +237,29 @@ struct ProfileScreen: View {
             }
             // the spinner stays until the profile and its tab were read again (#3704)
             .refreshable { try? await model.refreshAndWait() }
-            .collapsesSummary(collapse, space: "profile-scroll")
-            // RN postsTabContent's ScrollTopPopup (the profile's post tabs); the top opens the summary
+            // RN postsTabContent's ScrollTopPopup (the profile's post tabs)
             .scrollTopPopup(space: "profile-scroll", id: "profile-scroll-top") { toTop(proxy) }
+            .reportsHeaderGone(headerHeight: summaryHeight) { gone in if gone != summaryGone { summaryGone = gone } }
+            .onPreferenceChange(ScrollContentHeightKey.self) { h in
+                MainActor.assumeIsolated { if let h { filler.update(content: h, header: summaryHeight, viewport: height) } }
+            }
             .onChange(of: scrollTop) { _, _ in toTop(proxy) }
-            .accessibilityIdentifier("profile-list")
+            .onChange(of: state.selectedTab) { _, _ in
+                if pinAfterSwitch {
+                    pinAfterSwitch = false
+                    proxy.scrollTo("profile-summary-end", anchor: .top)
+                }
+                filler.release()
+            }
+            // the screen's one child: it carries the screen's identifier ("profile")
+        }
         }
     }
 
-    /// The scroll to top (popup or tab reselect), mid-fling too; the top opens the summary.
+    /// The scroll to top (popup, tab reselect, the user in the bar), mid-fling too: back to the summary.
     private func toTop(_ proxy: ScrollViewProxy) {
         momentum.stop()
-        collapse.expand()
-        proxy.scrollTo("profile-top", anchor: .top)
+        withAnimation { proxy.scrollTo("profile-top", anchor: .top) }
     }
 
     @ViewBuilder private func tabContent(_ state: ProfileState, width: CGFloat) -> some View {

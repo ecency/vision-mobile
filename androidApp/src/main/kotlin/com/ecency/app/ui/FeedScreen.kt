@@ -1,5 +1,6 @@
 package com.ecency.app.ui
 
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.ui.semantics.role
 
 import androidx.compose.ui.semantics.customActions
@@ -187,7 +188,7 @@ fun rememberCardActions(actions: FeedActions, model: FeedModel?): FeedActions {
  * A feed: pull to refresh, infinite scroll (the next page starts 3 cards before the end), a
  * full-screen state for the first page and a footer for later pages.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun FeedList(
     model: FeedModel,
@@ -197,8 +198,8 @@ fun FeedList(
     actions: FeedActions,
     modifier: Modifier = Modifier,
     header: (@Composable () -> Unit)? = null,
-    /** A header above the list that closes as it scrolls (community Details). */
-    collapse: SummaryCollapseState? = null,
+    /** A row after [header] that pins to the top once it reaches it (the community's tabs, #3734). */
+    pinned: (@Composable () -> Unit)? = null,
     /** Pushed feeds (no tab bar below) pass `Modifier.navigationBarsPadding()` for the scroll to top. */
     scrollTopModifier: Modifier = Modifier,
 ) {
@@ -222,26 +223,31 @@ fun FeedList(
     val haptics = rememberHaptics()
     val motion = LocalMotion.current
     FirstPageAnchor(listState, hasItems = state.items.isNotEmpty(), key = model)
-    NewCardsOnTop(listState, state.items.firstOrNull()?.key, firstCardIndex = if (header != null) 1 else 0)
+    NewCardsOnTop(listState, state.items.firstOrNull()?.key, firstCardIndex = (if (header != null) 1 else 0) + (if (pinned != null) 1 else 0))
     PullToRefreshBox(
         isRefreshing = state.isRefreshing,
         onRefresh = { haptics(com.ecency.core.app.HapticEvent.REFRESH); model.refresh() },
         modifier = modifier.fillMaxSize().background(colors.background).testTag("feed"),
     ) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize().then(if (collapse != null) Modifier.collapsesSummary(collapse) else Modifier)) {
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
             if (header != null) item(key = "header") { header() }
+            if (pinned != null) stickyHeader(key = "pinned") { pinned() }
+            // with a pinned row, a short state is a screen tall: the header can still scroll away and the row stay pinned
+            val short: LazyItemScope.() -> Modifier = { if (pinned != null) Modifier.fillParentMaxHeight() else Modifier }
             when {
-                state.items.isEmpty() && state.isLoading -> item(key = "loading") { FeedSkeleton() }
+                state.items.isEmpty() && state.isLoading -> item(key = "loading") { Box(short()) { FeedSkeleton() } }
                 state.items.isEmpty() && state.error != null -> item(key = "error") {
-                    ErrorBlock(state.error!!, Modifier.padding(top = 48.dp), com.ecency.core.esie.EsiePlacement.ERROR, model::retry)
+                    Box(short()) { ErrorBlock(state.error!!, Modifier.padding(top = 48.dp), com.ecency.core.esie.EsiePlacement.ERROR, model::retry) }
                 }
-                state.items.isEmpty() && state.isLoadingMore -> item(key = "loading") { FeedSkeleton() }
+                state.items.isEmpty() && state.isLoadingMore -> item(key = "loading") { Box(short()) { FeedSkeleton() } }
                 // the pages read so far were all filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
                 state.items.isEmpty() && state.loaded -> item(key = "empty") {
-                    EsieMessageBlock(
-                        com.ecency.core.esie.EsiePlacement.EMPTY, state.emptyText, Modifier.padding(top = 48.dp),
-                        actionLabel = if (state.endReached) null else com.ecency.core.app.UiCopy.LOAD_MORE, onAction = model::loadMore,
-                    )
+                    Box(short()) {
+                        EsieMessageBlock(
+                            com.ecency.core.esie.EsiePlacement.EMPTY, state.emptyText, Modifier.padding(top = 48.dp),
+                            actionLabel = if (state.endReached) null else com.ecency.core.app.UiCopy.LOAD_MORE, onAction = model::loadMore,
+                        )
+                    }
                 }
             }
             items(state.items, key = { it.key.toString() }, contentType = { "card" }) { card ->
@@ -271,7 +277,7 @@ fun FeedList(
             }
         }
         // RN postsTabContent's ScrollTopPopup (feed, tag, community lists)
-        ScrollTopPopup(listState, modifier = scrollTopModifier, onTap = { collapse?.expand() })
+        ScrollTopPopup(listState, modifier = scrollTopModifier)
     }
 }
 

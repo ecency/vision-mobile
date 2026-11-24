@@ -347,6 +347,13 @@ extension View {
         })
     }
 
+    /// On a ScrollView whose stack calls `reportsScrollOffset`: [gone] true once the list has scrolled past a header of
+    /// [headerHeight] at its top (#3734). Read from the stack's offset, which a lazy stack keeps reporting after the
+    /// header row itself was unloaded.
+    func reportsHeaderGone(headerHeight: CGFloat, gone: @escaping (Bool) -> Void) -> some View {
+        modifier(HeaderGoneModifier(headerHeight: headerHeight, gone: gone))
+    }
+
     /// RN ScrollTopPopup on a ScrollView whose stack calls `reportsScrollOffset(space)`: the arrow pill at the bottom
     /// left, by `ScrollTopRule` (5000 points scrolled up; post lists hide it on tap only, waves also on scroll down).
     func scrollTopPopup(space: String, hidesOnScrollDown: Bool = false, id: String = "scroll-top", onTap: @escaping () -> Void) -> some View {
@@ -900,5 +907,31 @@ struct ProfileWalletTab: View {
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(theme.lightBackground, in: RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+
+/// `reportsHeaderGone`: the stack's offset is the distance scrolled from the list's top (the scroll view's space starts
+/// under the bar).
+private struct HeaderGoneModifier: ViewModifier {
+    let headerHeight: CGFloat
+    let gone: (Bool) -> Void
+    @State private var offset: CGFloat?
+
+    func body(content: Content) -> some View {
+        content
+            .onPreferenceChange(ScrollOffsetKey.self) { value in
+                MainActor.assumeIsolated {
+                    guard let value else { return }
+                    offset = value
+                    report()
+                }
+            }
+            .onChange(of: headerHeight) { _, _ in report() }
+    }
+
+    private func report() {
+        guard headerHeight > 0, let offset else { return }
+        gone(offset >= headerHeight - 0.5)
     }
 }

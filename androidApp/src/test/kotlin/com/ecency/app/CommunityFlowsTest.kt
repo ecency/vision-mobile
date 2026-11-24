@@ -200,8 +200,13 @@ class CommunityFlowsTest {
     }
 
     @Test
-    fun theDetailsCardClosesOnScrollAndOpensAtTheTopOrOnItsTitle() {
+    fun theDetailsCardScrollsWithTheFeedAndTheTabsPin() {
         launchSignedIn()
+        node.extra = { method, req ->
+            if (method != "bridge.get_ranked_posts") null
+            else if (req["params"].toString().contains("start_author")) "[]"
+            else (1..40).joinToString(",", "[", "]") { node.entry("alice", "long-$it") }
+        }
         push(AppScreen.Community("hive-100001"))
         waitFor("communityDetailsBody")
         // the title closes and opens it (RN CollapsibleCard)
@@ -209,21 +214,17 @@ class CommunityFlowsTest {
         compose.await("!exists(\"communityDetailsBody\")") { idleMain(); !exists("communityDetailsBody") }
         tap("communityDetailsToggle")
         waitFor("communityDetailsBody")
-        // scrolling the feed down closes it, the title and the tabs stay; back at the top it opens again
-        compose.mainClock.advanceTimeBy(1_000)
-        waitFor("card:alice/trending-one")
-        compose.onNodeWithTag("feed").performTouchInput { swipeUp(durationMillis = 600) }
-        compose.await("!exists(\"communityDetailsBody\")") { idleMain(); !exists("communityDetailsBody") }
-        assertTrue(exists("communityDetailsToggle"))
-        compose.mainClock.advanceTimeBy(1_000)
-        compose.onNodeWithTag("feed").performTouchInput { swipeDown(durationMillis = 600) }
-        waitFor("communityDetailsBody")
-        // closed, then another tab: it opens over that tab's list
-        compose.mainClock.advanceTimeBy(1_000)
-        compose.onNodeWithTag("feed").performTouchInput { swipeUp(durationMillis = 600) }
-        compose.await("!exists(\"communityDetailsBody\")") { idleMain(); !exists("communityDetailsBody") }
+        waitFor("card:alice/long-1")
+        // #3734: the card is the feed's first row and scrolls away; the tabs pin at the feed's top
+        val feedTop = compose.onNodeWithTag("feed").fetchSemanticsNode().boundsInRoot.top
+        compose.onNode(androidx.compose.ui.test.hasScrollToIndexAction() and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("feed"))).performScrollToIndex(10)
+        compose.await("!exists(\"communityDetails\")") { idleMain(); !exists("communityDetails") }
+        assertEquals("the tabs pinned at the top", feedTop, compose.onNodeWithTag("tab:HOT").fetchSemanticsNode().boundsInRoot.top, 8f)
+        // another tab starts with the tabs still pinned
         tap("tab:HOT")
-        waitFor("communityDetailsBody")
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertFalse("the card stays away", exists("communityDetails"))
     }
 
     @Test

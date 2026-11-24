@@ -125,7 +125,7 @@ final class UiNotesUITests: XCTestCase {
         XCTAssertFalse(top.frame.intersects(fab.frame))
     }
 
-    /// The community's Details card shares the profile's capped header: the pills follow the card, no gap.
+    /// The community's Details card is the feed's first row: the pills follow the card, no gap.
     func testTheCommunityDetailsHugTheirContent() {
         let app = launch(["-openScreen", "route:COMMUNITY:hive-125125"])
         let body = element(app, "community-details-body")
@@ -137,48 +137,15 @@ final class UiNotesUITests: XCTestCase {
         XCTAssertEqual(pill.frame.minY - body.frame.maxY, 32, accuracy: 1.5, "\(body.frame) then \(pill.frame)")
     }
 
-    /// At AX3 the summary and the tabs would leave the list no room, so the summary starts closed.
-    func testTheProfileListKeepsRoomAtLargeText() {
+    /// At large text the summary is as tall as it needs and simply scrolls away with the list (#3734).
+    func testAtLargeTextTheSummaryScrollsAwayWithTheList() {
         let app = launch(["-openLink", "https://ecency.com/@spike-bob", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"])
-        let list = app.scrollViews["profile-list"]
+        let list = app.scrollViews["profile"]
         XCTAssertTrue(list.waitForExistence(timeout: 20), app.debugDescription)
-        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
-        XCTAssertGreaterThan(list.frame.height, 120, "the list keeps room: \(list.frame)")
-        XCTAssertTrue(element(app, "profile-compact-header").exists, "the summary starts closed")
-        // it still opens on demand
-        element(app, "profile-compact-header").tap()
-        XCTAssertTrue(element(app, "profile-summary").waitForExistence(timeout: 5))
-    }
-
-    // MARK: the size rule holds across tab switches
-
-    /// At accessibility text sizes the summary starts closed and a tab switch keeps it closed (a switch otherwise opens
-    /// it over the new list). The app is portrait only on iPhone (project.yml), so the compact height branch of the
-    /// rule cannot be reached here.
-    func testAtLargeTextATabSwitchKeepsTheSummaryClosed() {
-        let app = launch(["-openLink", "https://ecency.com/@spike-bob", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityM"])
-        XCTAssertTrue(element(app, "profile-compact-header").waitForExistence(timeout: 20), app.debugDescription)
-        let posts = app.buttons["tab-posts"]
-        XCTAssertTrue(posts.waitForExistence(timeout: 10))
-        posts.tap()
-        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
-        XCTAssertTrue(element(app, "profile-compact-header").exists, "a tab switch keeps it closed at large text")
-        XCTAssertFalse(element(app, "profile-summary").exists)
-        // it still opens on demand
-        element(app, "profile-compact-header").tap()
-        XCTAssertTrue(element(app, "profile-summary").waitForExistence(timeout: 5))
-    }
-
-    /// The community card keeps the same rule on a tab switch.
-    func testAtLargeTextACommunityTabSwitchKeepsTheCardClosed() {
-        let app = launch(["-openScreen", "route:COMMUNITY:hive-125125", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityM"])
-        XCTAssertTrue(element(app, "community-details-toggle").waitForExistence(timeout: 20), app.debugDescription)
-        XCTAssertFalse(element(app, "community-details-body").exists, "starts closed at large text")
-        let hot = app.buttons["tab-HOT"]
-        XCTAssertTrue(hot.waitForExistence(timeout: 10))
-        hot.tap()
-        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
-        XCTAssertFalse(element(app, "community-details-body").exists, "a tab switch keeps it closed at large text")
+        XCTAssertTrue(element(app, "profile-summary").exists, "the summary shows at first")
+        XCTAssertFalse(element(app, "profile-compact-header").exists)
+        for _ in 0..<4 where !element(app, "profile-compact-header").exists { list.swipeUp() }
+        XCTAssertTrue(element(app, "profile-compact-header").waitForExistence(timeout: 5), "scrolled away, the bar shows the user")
     }
 
     // MARK: 6. comment menu
