@@ -2195,6 +2195,7 @@
       "chat": {
         "cancel_edit": "Cancel edit",
         "cancel_reply": "Cancel reply",
+      "go_to_quoted_message": "Go to the quoted message",
         "copied_to_clipboard": "Copied to clipboard",
         "edited_at": "Edited {time}",
         "group_options": "Group options",
@@ -2543,6 +2544,7 @@
       "wide_mentions_title": "Channel-wide mentions",
       "wide_mentions_limited": "Channel-wide mentions (@here, @channel, @all, @everyone) are limited to moderators.",
       "unable_to_load_messages": "Unable to load messages.",
+      "quoted_message_not_found": "The quoted message could not be found.",
       "someone": "Someone",
       "renamed_the_group_to": "{actor} renamed the group to \"{name}\"",
       "removed_the_group_name": "{actor} removed the group name",

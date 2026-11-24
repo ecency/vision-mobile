@@ -26,6 +26,7 @@ import com.ecency.core.api.chat.ChatPostsPage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import com.ecency.core.l10n.L
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -1236,6 +1237,63 @@ class ChatThreadTest {
     }
 
     private fun texts(m: ChatThreadModel) = m.current.items.filterIsInstance<ChatMessageItem>().map { it.spans.joinToString("") { s -> s.text } }
+
+    /** A tapped quote scrolls to the quoted message and marks it a moment (an addition to RN, owner request). */
+    @Test
+    fun aTappedQuoteScrollsToTheQuotedMessageAndMarksIt() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            val reply = m.current.items.filterIsInstance<ChatMessageItem>().first { it.quote != null }
+            val quoted = reply.quote!!.postId
+            assertTrue(m.current.items.any { it.id == quoted }, "the quoted message is loaded")
+            m.openQuote(quoted)
+            f.run(1)
+            assertEquals(quoted, m.current.scrollTo)
+            assertEquals(quoted, m.current.highlightId)
+            m.consumeScroll()
+            f.run(ChatThreadModel.HIGHLIGHT_MILLIS + 1)
+            assertNull(m.current.highlightId, "the mark goes after a moment")
+        } finally {
+            m.close()
+        }
+    }
+
+    /** A quote of a message older than the loaded pages reads the pages before until it is there. */
+    @Test
+    fun aQuoteOfAnOlderMessagePagesBackToIt() = runTest {
+        val f = ChatFixture(this)
+        f.chat.seedHistory("ch-ecency", read = 40, unread = 40)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            val quoted = f.chat.idOf("ch-ecency", DemoChat.LONG_MESSAGE)!!
+            assertFalse(m.current.items.any { it.id == quoted }, "not loaded yet")
+            m.openQuote(quoted)
+            f.idle()
+            assertTrue(m.current.items.any { it.id == quoted }, "read back to it")
+            assertEquals(quoted, m.current.scrollTo)
+        } finally {
+            m.close()
+        }
+    }
+
+    /** A quoted message that is not in the chat any more says so, after reading back to the start. */
+    @Test
+    fun aQuoteOfAMessageThatIsGoneSaysSo() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.openQuote("gone-post")
+            f.idle()
+            assertNull(m.current.scrollTo)
+            assertEquals(L.native.chatThread.quotedMessageNotFound, f.env.ui.current.toast?.text)
+        } finally {
+            m.close()
+        }
+    }
 
     /** Review of #3706: a return while an older page is loading catches up once that load ends. */
     @Test

@@ -894,7 +894,9 @@ struct ChatThreadView: View {
                 onReact: { thread.react(item: m, emojiName: $0) },
                 onReactors: { sheet = .reactors(m, $0) },
                 actions: thread.actions(item: m),
-                onAction: { perform($0, m) }
+                onAction: { perform($0, m) },
+                highlighted: model.state.highlightId == m.rowId,
+                onQuote: { thread.openQuote(postId: $0) }
             )
         case let j as ChatJoinItem: joinPill(j)
         case let g as ChatJoinGroupItem: JoinGroupPill(item: g) { joinPill($0) }
@@ -1030,7 +1032,12 @@ struct ChatMessageBubble: View {
     let onReactors: (String) -> Void
     var actions: [ChatMessageAction] = []
     var onAction: (ChatMessageAction) -> Void = { _ in }
+    /// The message a tapped quote led to: its row is tinted a moment.
+    var highlighted = false
+    /// A tap on the quote: the quoted message's id.
+    var onQuote: (String) -> Void = { _ in }
     @State private var allLinks = false
+    @Environment(\.motion) private var motion
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -1056,6 +1063,8 @@ struct ChatMessageBubble: View {
             if !item.reactions.isEmpty { reactions(own) }
         }
         .padding(.vertical, 4)
+        .background(RoundedRectangle(cornerRadius: 8).fill(theme.accent.opacity(highlighted ? 0.18 : 0)).accessibilityHidden(true))
+        .animation(motion.reveal, value: highlighted)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chat-message-\(item.rowId)")
     }
@@ -1081,7 +1090,14 @@ struct ChatMessageBubble: View {
                     // VoiceOver reads the name in the message label and opens the profile through its action
                     .accessibilityHidden(true)
                 }
-                if let quote = item.quote { ChatQuoteView(quote: quote, own: own, onClose: nil) }
+                if let quote = item.quote {
+                    ChatQuoteView(quote: quote, own: own, onClose: nil)
+                        .contentShape(Rectangle())
+                        // a plain tap goes to the quoted message; a long press opens the message options as anywhere
+                        // on the bubble (the long press wins exclusively, so its release never also taps)
+                        .gesture(LongPressGesture(minimumDuration: 0.35).onEnded { _ in onLongPress() }
+                            .exclusively(before: TapGesture().onEnded { onQuote(quote.postId) }))
+                }
                 if !item.blocks.isEmpty {
                     ChatBlocksView(blocks: item.blocks, own: own, color: text, linkColor: own ? .white : theme.accentText)
                         .environment(\.openURL, OpenURLAction { url in
@@ -1107,6 +1123,9 @@ struct ChatMessageBubble: View {
                 }
                 if links.count > ChatBubbleText.linkActions {
                     Button(ChatUiCopy.shared.MORE_MENU) { allLinks = true }
+                }
+                if let quote = item.quote {
+                    Button(ChatUiCopy.shared.GO_TO_QUOTED_MESSAGE) { onQuote(quote.postId) }
                 }
                 if !item.own, let author = item.authorAccount {
                     Button(UiCopy.shared.profileOf(username: author)) { app.sheet = .quickProfile(author) }

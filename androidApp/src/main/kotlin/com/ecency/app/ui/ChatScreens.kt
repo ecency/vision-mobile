@@ -621,6 +621,8 @@ fun ChatThreadScreen(env: AppEnvironment, host: AppHost, entry: StackEntry, scre
                                         onImage = { url -> gallery = item.images to item.images.indexOf(url).coerceAtLeast(0) },
                                         onReaction = { model.react(item, it) },
                                         onReactors = { reactors = model.reactorsModel(item, it).also { r -> r.start() } },
+                                        highlighted = item.id == s.highlightId,
+                                        onQuote = { model.openQuote(it) },
                                     )
                                     is ChatJoinItem -> JoinPill(item, actions.onProfile)
                                     is ChatJoinGroupItem -> JoinGroupPill(item, actions.onProfile)
@@ -880,10 +882,16 @@ private fun MessageBubble(
     onImage: (String) -> Unit,
     onReaction: (String) -> Unit,
     onReactors: (String) -> Unit,
+    /** The message a tapped quote led to: its row is tinted a moment. */
+    highlighted: Boolean = false,
+    /** A tap on the quote: the quoted message's id. */
+    onQuote: (String) -> Unit = {},
 ) {
     val colors = LocalEcencyColors.current
     val own = item.own
     val text = if (own) Color.White else colors.text
+    val mark by androidx.compose.animation.core.animateFloatAsState(if (highlighted) 0.18f else 0f, LocalMotion.current.fade(), label = "quoteMark")
+    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(colors.blue.copy(alpha = mark)).then(if (highlighted) Modifier.testTag("highlight:${item.id}") else Modifier)) {
     Column(Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("message:${item.id}"), horizontalAlignment = if (own) Alignment.End else Alignment.Start) {
         Row(verticalAlignment = Alignment.Top) {
             if (!own) {
@@ -909,7 +917,7 @@ private fun MessageBubble(
                         if (item.authorOfficial) OfficialBadge(Modifier.padding(start = 4.dp))
                     }
                 }
-                item.quote?.let { QuoteBox(it, own, onClose = null) }
+                item.quote?.let { q -> QuoteBox(q, own, onClose = null, onOpen = { onQuote(q.postId) }, onLongPress = onLongPress) }
                 if (item.blocks.isNotEmpty()) MessageBlocks(item.blocks, item.id, own, text, onLink)
                 item.images.forEach { url ->
                     AsyncImage(
@@ -947,14 +955,19 @@ private fun MessageBubble(
             }
         }
     }
+    }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun QuoteBox(quote: ChatQuote, own: Boolean, onClose: (() -> Unit)?) {
+private fun QuoteBox(quote: ChatQuote, own: Boolean, onClose: (() -> Unit)?, onOpen: (() -> Unit)? = null, onLongPress: (() -> Unit)? = null) {
     val colors = LocalEcencyColors.current
     Row(
         Modifier.fillMaxWidth().padding(vertical = 4.dp).clip(RoundedCornerShape(8.dp))
-            .background(if (own) Color.White.copy(alpha = 0.15f) else colors.background.copy(alpha = 0.6f)).padding(8.dp).testTag("quote"),
+            .background(if (own) Color.White.copy(alpha = 0.15f) else colors.background.copy(alpha = 0.6f))
+            // in a message: a tap goes to the quoted message, a long press still opens the message's options
+            .then(if (onOpen != null) Modifier.combinedClickable(onClickLabel = ChatUiCopy.GO_TO_QUOTED_MESSAGE, role = Role.Button, onLongClickLabel = ChatUiCopy.MESSAGE_OPTIONS, onLongClick = onLongPress, onClick = onOpen) else Modifier)
+            .padding(8.dp).testTag("quote"),
     ) {
         Box(Modifier.width(3.dp).height(32.dp).background(if (own) Color.White else colors.blue))
         Column(Modifier.weight(1f).padding(start = 8.dp)) {

@@ -147,6 +147,8 @@ data class ChatThreadState(
     val unreadItemId: String? = null,
     /** An item to scroll to once (the first unread, a pinned message); the UI calls [ChatThreadModel.consumeScroll]. */
     val scrollTo: String? = null,
+    /** The message a tapped quote led to, marked for a moment ([ChatThreadModel.openQuote]). */
+    val highlightId: String? = null,
     val text: String = "",
     /** Bumped when the model replaced [text] (a mention, a sent message): UIs that keep their own field copy it. */
     val textVersion: Int = 0,
@@ -1374,6 +1376,36 @@ class ChatThreadModel internal constructor(
         }
     }
 
+    private var quoteJob: Job? = null
+
+    /**
+     * The quote above a reply was tapped (an addition to RN, whose quote did nothing; owner request): the quoted
+     * message is scrolled to and marked for [HIGHLIGHT_MILLIS]. One older than the loaded pages is looked for in the
+     * pages before, [QUOTE_PAGES] at most; one not found by then (removed, or very old) is said so.
+     */
+    fun openQuote(postId: String) {
+        if (quoteJob?.isActive == true) return
+        quoteJob = scope.launch {
+            var pages = 0
+            while (current.items.none { it.id == postId }) {
+                // a load in flight first (the older page an auto fill asked for); then the page before, if any
+                loadJob?.join()
+                if (current.items.any { it.id == postId }) break
+                if (!current.hasMore || current.error != null || pages >= QUOTE_PAGES || user == null) break
+                load(refresh = false)
+                loadJob?.join()
+                pages++
+            }
+            if (current.items.none { it.id == postId }) {
+                env.ui.toast(L.native.chatThread.quotedMessageNotFound)
+                return@launch
+            }
+            setState { it.copy(scrollTo = postId, highlightId = postId) }
+            delay(HIGHLIGHT_MILLIS)
+            setState { if (it.highlightId == postId) it.copy(highlightId = null) else it }
+        }
+    }
+
     /** A pinned message was tapped: scroll to it when it is loaded. */
     fun scrollToMessage(postId: String) {
         if (current.items.any { it.id == postId }) setState { it.copy(scrollTo = postId) }
@@ -1423,6 +1455,12 @@ class ChatThreadModel internal constructor(
     companion object {
         internal const val SPAN_CACHE_MAX = 5_000
         const val AUTO_FILL_ROWS = 15
+
+        /** How long a message a quote led to stays marked. */
+        const val HIGHLIGHT_MILLIS = 1_500L
+
+        /** At most this many pages before are read to find a quoted message. */
+        const val QUOTE_PAGES = 10
         const val ECHO_WINDOW_MILLIS = 30_000L
         const val SEND_BOUND_MILLIS = 30_000L
         const val TYPING_MILLIS = 5_000L

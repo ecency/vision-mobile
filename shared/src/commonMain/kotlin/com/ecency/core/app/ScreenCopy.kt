@@ -291,6 +291,7 @@ object ReadingUiCopy {
 object ChatUiCopy {
     val CANCEL_EDIT: String get() = L.native.ui.chat.cancelEdit
     val CANCEL_REPLY: String get() = L.native.ui.chat.cancelReply
+    val GO_TO_QUOTED_MESSAGE: String get() = L.native.ui.chat.goToQuotedMessage
     val CHANNELS: String get() = L.chats.channels
     val CHANNEL_MEMBERS: String get() = L.chats.channelMembers
     val CHANNEL_OPTIONS: String get() = L.chats.channelOptions
