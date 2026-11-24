@@ -20,6 +20,10 @@ updates:
     groups:
       gradle:
         patterns: ["*"]
+    ignore:
+      # ICU4J is the oracle the vendored CLDR data is checked against: a new version changes what users see in
+      # several languages, so it moves by hand with that data (#3733).
+      - dependency-name: com.ibm.icu:icu4j
 
   # Offline golden fixture generators only; never part of a build.
   - package-ecosystem: npm
