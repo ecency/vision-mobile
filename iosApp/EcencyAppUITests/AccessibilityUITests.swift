@@ -87,6 +87,12 @@ final class AccessibilityUITests: XCTestCase {
                     unresolved.append(issue.detailedDescription)
                     return true
                 }
+                // text drawn inside a picture no element names (a community logo in its hidden avatar): counted
+                // against the screen's number too (#3729)
+                if issue.element == nil, issue.auditType == .elementDetection {
+                    unresolved.append(AuditExclusions.textInImage)
+                    return true
+                }
                 // a clipping reading on a screen with an allowance counts against it whether or not the audit names
                 // the element: on iOS 27 it names some of the nodes it left unnamed before, and which ones varies
                 // from run to run (the vote sheet: its own lines one run, the feed card behind it the next). Before
@@ -378,9 +384,15 @@ enum AuditExclusions {
     /// sometimes reports the same 2 clipped and 3 fixed size nodes as the light one, sometimes none).
     static let clipped = "Text of this element may be clipped at larger Dynamic Type sizes."
     static let fixedSize = "User will not be able to change the font size of this element"
+    /// "Potentially inaccessible text" with no element: letters inside an image (#3729).
+    static let textInImage = "Potentially inaccessible text inside an image"
     static let unresolvedAllowance: [String: [String: Int]] = [
         "feed": [clipped: 2, fixedSize: 3], "feed (AX5)": [clipped: 1],
-        "profile (AX5)": [clipped: 3], "communities (AX5)": [clipped: 2], "settings (AX5)": [clipped: 3],
+        "profile (AX5)": [clipped: 3], "communities (AX5)": [clipped: 2, textInImage: 1], "settings (AX5)": [clipped: 3],
+        // 2026-11-24 (#3729): the sample Spike Community's logo is a picture with words in it ("TRAVEL FEED"); avatars
+        // are hidden from VoiceOver on purpose (the row's title names the community), so the audit finds those letters
+        // with no element (shown on a screenshot, and gone with the avatar removed)
+        "communities": [textInImage: 1],
         // 2026-10-29: the closed profile's compact header, one line in the navigation bar
         "profile closed (AX5)": [clipped: 1],
         // 2026-11-02: the vote sheet over the feed, whose header the sheet dims but does not hide (the feed's one), and
