@@ -8,8 +8,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -111,7 +115,9 @@ enum class ProposalDismiss { FOREVER, LATER }
  * - "Cast My Vote" signs update_proposal_votes {voter, [id], approve true} with the active authority (auth upgrade,
  *   HiveSigner, HiveAuth) as one action with its own id; never retried by itself. Success: "Thank You!", the card
  *   says thanks for the rest of the run, the vote is remembered as processed. Failure: "Fail!: <message>".
- * - An account change resets the card for the new account.
+ * - An account change resets the card for the new account. A vote still in flight stays the voting account's (#3725):
+ *   a fresh card for it waits on that vote and offers no second one, its outcome is toasted whichever account is shown,
+ *   and a logout (which cancels the send) ends the wait.
  * - Not for a new account the Getting started card still asks things of (#3728): the card waits for a later run of
  *   the app, after the checklist was finished or dismissed; never in the same run as the checklist. Known from the
  *   account read, or from Getting started showing in this run. A failed account read keeps the card out until the
@@ -128,6 +134,11 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
 
     /** Accounts found established in this run: their account is not read again for the card. */
     private val established = HashSet<String>()
+
+    /** The vote in flight per account (main thread), so a fresh card for it waits on that vote (#3725). */
+    private val inFlight = HashMap<String, String>()
+
+    private fun fresh(user: String?) = ProposalCardState(username = user, voting = user != null && user in inFlight)
 
     fun start() {
         if (started) return
@@ -150,13 +161,13 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
 
     private fun reload() {
         loadJob?.cancel()
-        setState { ProposalCardState(username = env.session.current.username) }
+        setState { fresh(env.session.current.username) }
         loadJob = scope.launch {
             try {
                 // at launch the accounts may still be read: the card belongs to whoever is signed in after that
                 env.session.awaitLoaded()
                 val user = env.session.current.username
-                setState { if (it.username == user) it else ProposalCardState(username = user) }
+                setState { if (it.username == user) it else fresh(user) }
                 if (user == null) return@launch
                 // first, so a later read failing or finding no proposal cannot let the card into this run. Unknown is
                 // not established: a failed or empty account read keeps the card out (the catch below reports it)
@@ -193,7 +204,7 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
         val s = current
         val user = s.username ?: return
         val id = s.proposalId ?: return
-        if (s.voting || s.voted || env.session.current.username != user) return
+        if (s.voting || s.voted || user in inFlight || env.session.current.username != user) return
         setState { it.copy(voting = true) }
         val ops = buildJsonArray {
             add(
@@ -211,6 +222,7 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
             )
         }
         val actionId = env.idempotencyKey()
+        inFlight[user] = actionId
         scope.launch {
             val final = CompletableDeferred<WalletSend>()
             env.walletSends.send(user, ops, KeyRole.ACTIVE, actionId) { final.complete(it) }
@@ -219,13 +231,38 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 env.walletSends.state.first { it.sends[actionId]?.phase is SendPhase.Checking }
                 env.ui.toast(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE)
             }
+            // a logout cancels the send without an outcome: its entry leaves the sends
+            val gone = async { env.walletSends.state.map { actionId in it.sends }.dropWhile { !it }.first { !it } }
             val result = try {
-                final.await()
+                select<WalletSend?> {
+                    final.onAwait { it }
+                    gone.onAwait { null }
+                }
             } finally {
                 checking.cancel()
-                withContext(NonCancellable + env.dispatchers.main) { env.walletSends.disown(actionId) }
+                gone.cancel()
+                withContext(NonCancellable + env.dispatchers.main) {
+                    if (inFlight[user] == actionId) inFlight.remove(user)
+                    env.walletSends.disown(actionId)
+                }
             }
-            if (current.username != user) return@launch
+            if (result == null) {
+                setState { if (it.username == user) it.copy(voting = false) else it }
+                return@launch
+            }
+            if (current.username != user) {
+                // another account is shown: the outcome is still this user's to hear
+                when (val phase = result.phase) {
+                    is SendPhase.Done -> {
+                        env.prefs.putString(key(id, user), PROCESSED)
+                        env.ui.toast(ProposalCopy.THANK_YOU)
+                    }
+                    is SendPhase.Unconfirmed -> env.ui.toast(phase.message)
+                    is SendPhase.Failed -> env.ui.toast(failText(phase), phase.error)
+                    else -> Unit
+                }
+                return@launch
+            }
             when (val phase = result.phase) {
                 is SendPhase.Done -> {
                     env.prefs.putString(key(id, user), PROCESSED)
@@ -240,12 +277,16 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 }
                 is SendPhase.Failed -> {
                     setState { it.copy(voting = false) }
-                    val message = phase.error.text
-                    env.ui.toast(if (message.isNotEmpty()) "${ProposalCopy.FAIL}: $message" else ProposalCopy.FAIL, phase.error)
+                    env.ui.toast(failText(phase), phase.error)
                 }
                 else -> setState { it.copy(voting = false) }
             }
         }
+    }
+
+    private fun failText(phase: SendPhase.Failed): String {
+        val message = phase.error.text
+        return if (message.isNotEmpty()) "${ProposalCopy.FAIL}: $message" else ProposalCopy.FAIL
     }
 
     /** RN Dismiss: the choice sheet. */
