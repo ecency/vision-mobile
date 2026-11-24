@@ -5,6 +5,8 @@ import com.ecency.core.hive.KeyRole
 import com.ecency.core.secure.AuthType
 import com.ecency.core.secure.KeyVault
 import com.ecency.core.secure.VaultAccount
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -73,8 +75,11 @@ class ProposalVoteModelTest {
             assertTrue(model.current.voting, "her vote is still in flight")
             model.vote()
             testScheduler.runCurrent()
-            // node failover sends the same signed transaction again; a second vote would be another transaction
-            assertEquals(1, app.broadcasts().map { it.params.toString() }.distinct().size, "no second vote")
+            // one send admitted: a second vote is another action. (The fixed test clock and chain head would sign a
+            // second vote byte for byte as the first, so the broadcasts alone cannot tell.)
+            assertEquals(1, app.env.walletSends.current.sends.size, "no second vote")
+            // node failover sends the same signed transaction again
+            assertEquals(1, app.broadcasts().map { it.params.toString() }.distinct().size, "the same transaction")
             chain.txStatus = "within_irreversible_block"
             testScheduler.advanceTimeBy(WalletSends.RECHECK_MILLIS + 1)
             testScheduler.advanceUntilIdle()
@@ -125,6 +130,27 @@ class ProposalVoteModelTest {
             testScheduler.advanceUntilIdle()
             assertEquals(alice, model.current.username)
             assertFalse(model.current.voting, "the cancelled vote no longer holds the card")
+        } finally {
+            chain.txStatus = "within_irreversible_block"
+        }
+    }
+
+    @Test
+    fun aLogoutBeforeTheSendIsSeenStillEndsTheWait() = runTest {
+        val chain = Chain()
+        val app = app(this, chain)
+        try {
+            val model = start(this, app)
+            model.vote()
+            // the logout lands in the same main thread step as the send's entry, before the card's watcher subscribes:
+            // that watcher only ever sees the entry gone
+            launch(kotlinx.coroutines.test.UnconfinedTestDispatcher(testScheduler)) {
+                app.env.walletSends.state.first { it.sends.isNotEmpty() }
+                app.env.walletSends.accountsLeft(listOf(alice))
+            }
+            testScheduler.advanceUntilIdle()
+            assertEquals(alice, model.current.username)
+            assertFalse(model.current.voting, "a send cancelled before it was seen no longer holds the card")
         } finally {
             chain.txStatus = "within_irreversible_block"
         }

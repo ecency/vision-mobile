@@ -9,7 +9,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -226,13 +226,16 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
         scope.launch {
             val final = CompletableDeferred<WalletSend>()
             env.walletSends.send(user, ops, KeyRole.ACTIVE, actionId) { final.complete(it) }
+            // taken at once: a logout may stop the send before any watcher of the sends could see it
+            val job = env.walletSends.jobOf(actionId)
             // the chain cannot tell yet: the send keeps asking in the app (WalletSends); the card says so once
             val checking = launch {
                 env.walletSends.state.first { it.sends[actionId]?.phase is SendPhase.Checking }
                 env.ui.toast(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE)
             }
-            // a logout cancels the send without an outcome: its entry leaves the sends
-            val gone = async { env.walletSends.state.map { actionId in it.sends }.dropWhile { !it }.first { !it } }
+            // a logout cancels the send without an outcome: its job ends and [final] never comes. A send that ends
+            // normally hears its outcome inside that job, so [final] is there first.
+            val gone = async { job?.join() ?: awaitCancellation() }
             val result = try {
                 select<WalletSend?> {
                     final.onAwait { it }
