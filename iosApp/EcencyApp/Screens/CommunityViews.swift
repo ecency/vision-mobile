@@ -166,15 +166,16 @@ struct CommunityListRow: View {
             VStack(alignment: .leading, spacing: 0) {
                 AdaptiveStack(horizontalAlignment: .leading) {
                     // VoiceOver: the title is the row's button (a double tap lands on it and opens the community)
-                    Text(row.title).scaledFont(17, weight: .bold).foregroundStyle(theme.accentText).accessibilityAddTraits(.isButton)
+                    Text(row.title).scaledFont(17, weight: .bold).foregroundStyle(theme.accentText).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isButton)
                     Spacer(minLength: 0)
                     if showJoin { JoinButton(subscribed: row.subscribed, pending: row.pending, action: onJoin) }
                 }
                 if !row.about.isEmpty {
-                    Text(row.about).scaledFont(14).foregroundStyle(theme.text).padding(.top, 10)
+                    // each line its whole height: a list row would otherwise cut the text to the height it first proposed (#3729)
+                    Text(row.about).scaledFont(14).foregroundStyle(theme.text).fixedSize(horizontal: false, vertical: true).padding(.top, 10)
                 }
                 Rectangle().fill(theme.secondary).frame(width: 100, height: 1).frame(maxWidth: .infinity).padding(.vertical, 10)
-                Text(row.stats).scaledFont(14).foregroundStyle(theme.secondary)
+                Text(row.stats).scaledFont(14).foregroundStyle(theme.secondary).fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(16)
@@ -280,11 +281,12 @@ struct CommunityScreen: View {
     @State private var scrollTop = 0
     @State private var manage = false
     @State private var managePick: CommunityManageAction?
-    @StateObject private var collapse = SummaryCollapseDriver()
-    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    /// RN CollapsibleCard "Details": open or closed by its title only; it scrolls away with the feed (#3734).
+    @State private var detailsOpen = true
+    /// The card has scrolled away (the tabs pinned): another tab starts with the tabs still pinned.
+    @State private var headerGone = false
     @Environment(\.appTheme) private var theme
     @Environment(\.motion) private var motion
-    @Environment(\.dynamicTypeSize) private var typeSize
     /// RN's 120 pt description box, taller with larger text
     @ScaledMetric(relativeTo: .body) private var descriptionHeight: CGFloat = 120
 
@@ -298,20 +300,17 @@ struct CommunityScreen: View {
     var body: some View {
         let state = model.state
         let tabs = CommunityTab.entries
-        GeometryReader { geo in
-            VStack(spacing: 0) {
-                details(state, maxHeight: geo.size.height * 0.7)
-                PillTabs(labels: tabs.map { $0.label }, selected: $tab) { scrollTop += 1 }
-                let selected = tabs[tab]
-                // RN CollapsibleCard "Details": closes as the feed scrolls down, opens back at the top or on a tap on
-                // its title, the profile summary's rule (RN closed it on any drag)
-                FeedListView(feed: feeds.feed(selected.name, source: community.feedSource(tab: selected), env: app.env), collapse: collapse, scrollToTop: scrollTop)
-                    .id(selected.name)
-            }
-            .animation(motion.reveal, value: collapse.open)
-        }
-        // another tab's list: the card opens over it (the three ways in agree)
-        .onChange(of: tab) { collapse.resetForSize(SummarySizeRule.holds(typeSize, verticalSizeClass)) }
+        let selected = tabs[tab]
+        // the Details card is the feed's first row and scrolls away with it; the tabs pin under the bar (#3734)
+        FeedListView(
+            feed: feeds.feed(selected.name, source: community.feedSource(tab: selected), env: app.env),
+            header: AnyView(details(state)),
+            pinned: AnyView(PillTabs(labels: tabs.map { $0.label }, selected: $tab) { scrollTop += 1 }.background(theme.background)),
+            startPinned: headerGone,
+            onHeaderGone: { gone in if gone != headerGone { headerGone = gone } },
+            scrollToTop: scrollTop
+        )
+        .id(selected.name)
         .background(theme.background)
         .screenTitle(state.headerTitle)
         .navigationBarTitleDisplayMode(.inline)
@@ -336,23 +335,20 @@ struct CommunityScreen: View {
         .onAppear {
             community.start()
         }
-        // at accessibility text sizes the open card would leave the feed no room (SummarySizeRule)
-        .closesSummaryForSize(collapse)
     }
 
     /// RN CollapsibleCard "Details": description, stats, Join / New Post / Newsletter; the title opens and closes it.
-    @ViewBuilder private func details(_ state: CommunityState, maxHeight: CGFloat) -> some View {
+    @ViewBuilder private func details(_ state: CommunityState) -> some View {
         VStack(spacing: 0) {
-            Button { collapse.toggle() } label: {
+            Button { withAnimation(motion.reveal) { detailsOpen.toggle() } } label: {
                 Text(CommunityCopy.shared.DETAILS).scaledFont(15, weight: .bold).foregroundStyle(theme.text).frame(maxWidth: .infinity).padding(12)
             }
             .buttonStyle(.plain)
             .accessibilityAddTraits(.isHeader)
-            .accessibilityValue(collapse.open ? L.Native.Ios.A11yShell.expanded : L.Native.Ios.A11yShell.collapsed)
+            .accessibilityValue(detailsOpen ? L.Native.Ios.A11yShell.expanded : L.Native.Ios.A11yShell.collapsed)
             .accessibilityIdentifier("community-details-toggle")
             if let c = state.community {
-                if collapse.open {
-                    CappedHeader(maxHeight: maxHeight) {
+                if detailsOpen {
                     VStack(alignment: .leading, spacing: 10) {
                         ScrollView { Text(c.description_).scaledFont(14).foregroundStyle(theme.text).frame(maxWidth: .infinity, alignment: .leading) }
                             .frame(maxHeight: descriptionHeight)
@@ -375,7 +371,6 @@ struct CommunityScreen: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.horizontal, 16).padding(.bottom, 16)
-                    }
                     .clipped()
                     .transition(motion.revealTransition)
                     .accessibilityElement(children: .contain)
@@ -389,8 +384,6 @@ struct CommunityScreen: View {
         }
         .background(RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground))
         .padding(12)
-        // the feed below gives way first: at large text the description and stats keep their room
-        .layoutPriority(1)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("community-details")
     }
