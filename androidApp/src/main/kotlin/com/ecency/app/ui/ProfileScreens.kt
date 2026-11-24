@@ -203,11 +203,13 @@ fun ProfileScreen(
     val tab = state.tab
     // RN wavesTabContent: the author's waves, loaded when the tab is first shown
     val waves = remember(tab, model) { if (tab == ProfileTab.WAVES) model.waves() else null }
-    val wavesState = waves?.state?.collectAsState()?.value
+    // keyed on the model: collectAsState keeps its last value across a new flow for a frame, which would show the
+    // previous tab's rows under the new tab (and measure the pinned tabs' filler on them, #3734)
+    val wavesState = waves?.let { w -> androidx.compose.runtime.key(w) { w.state.collectAsState().value } }
     OnShow(waves) { waves?.start() }
     val wavesWidth = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp - 32.dp
     val feed: FeedModel? = remember(tab) { model.feed(tab) }
-    val feedState = feed?.state?.collectAsState()?.value
+    val feedState = feed?.let { f -> androidx.compose.runtime.key(f) { f.state.collectAsState().value } }
     OnShow(feed) { feed?.start() }
     val nearEnd by remember(listState) {
         derivedStateOf {
@@ -228,6 +230,7 @@ fun ProfileScreen(
     // how far the summary has gone under the bar: the compact bar fades in, the pinned tabs stop under it
     val progress = rememberHeaderProgress(listState, barPx)
     val tabsShift = rememberTabsShift(listState, barPx)
+    val filler = rememberPinFiller(listState)
     val toTop: () -> Unit = { scope.launch { listState.animateScrollToItem(0) } }
     Box(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().testTag("profile")) {
         val header = state.header
@@ -248,9 +251,12 @@ fun ProfileScreen(
             val summary = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == ScrollingHeader.HEADER_INDEX }?.size
             model.selectTab(i)
             if (pinned) {
+                // a screen tall filler while the new tab is placed: its rows may be shorter than the pinned position
+                filler.reserve()
                 scope.launch {
                     val height = summary ?: profileSummaryHeight
                     if (height > 0) listState.scrollToItem(ScrollingHeader.HEADER_INDEX, (height - barPx.toInt()).coerceAtLeast(0)) else listState.scrollToItem(ScrollingHeader.TABS_INDEX)
+                    filler.release()
                 }
             }
         }
@@ -290,7 +296,7 @@ fun ProfileScreen(
                             wavesState.items.isEmpty() && wavesState.loaded -> item(key = "waves:empty") {
                                 Box(Modifier.fillParentMaxHeight()) { EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY, UiCopy.userHasNoPosts(state.username), Modifier.padding(top = 32.dp)) }
                             }
-                            wavesState.items.isEmpty() -> item(key = "waves:loading") { Box(Modifier.fillParentMaxHeight()) { LoadingBlock(Modifier.padding(top = 32.dp)) } }
+                            wavesState.items.isEmpty() -> item(key = "waves:loading", contentType = ScrollingHeader.LOADING) { LoadingBlock(Modifier.padding(top = 32.dp)) }
                         }
                         val ui = wavesUi ?: WavesUi(com.ecency.app.render.PostActions(), login = {}, requireLogin = { it() }, push = {})
                         items(wavesState.items, key = { "waves:${it.key}" }, contentType = { "wave" }) { item ->
@@ -304,23 +310,24 @@ fun ProfileScreen(
                             }
                         }
                     }
-                    // a screen tall, as the short states: the summary can stay away (#3734)
-                    ProfileTab.WALLET -> item(key = "wallet") { Box(Modifier.fillParentMaxHeight()) {
+                    // its own height, however tall; the filler below keeps the summary away when it is short (#3734)
+                    ProfileTab.WALLET -> item(key = "wallet") {
                         if (state.isOwn) {
                             PlaceholderTab(ProfileUiCopy.WALLET, ProfileUiCopy.YOUR_WALLET_IS_ON, ProfileUiCopy.OPEN_WALLET) { actions.onWallet(true) }
                         } else {
                             // RN profile wallet tab of another account: unclaimed rewards and Wallet Details, read only
                             ProfileWalletTab(env, state.username)
                         }
-                    } }
+                    }
                     else -> if (feedState != null) {
-                        // a short state is a screen tall: the summary can still scroll away and the tabs stay pinned (#3734)
+                        // an empty or error state is a screen tall: the summary can still scroll away and the tabs stay
+                        // pinned (#3734); loading rows keep their height, the filler stands in for them
                         when {
-                            feedState.items.isEmpty() && feedState.isLoading -> item(key = "loading") { Box(Modifier.fillParentMaxHeight()) { FeedSkeleton(2) } }
+                            feedState.items.isEmpty() && feedState.isLoading -> item(key = "loading", contentType = ScrollingHeader.LOADING) { FeedSkeleton(2) }
                             feedState.items.isEmpty() && feedState.error != null -> item(key = "error") {
                                 Box(Modifier.fillParentMaxHeight()) { ErrorBlock(feedState.error!!, Modifier.padding(top = 32.dp), com.ecency.core.esie.EsiePlacement.ERROR, feed!!::retry) }
                             }
-                            feedState.items.isEmpty() && feedState.isLoadingMore -> item(key = "loading") { Box(Modifier.fillParentMaxHeight()) { FeedSkeleton(2) } }
+                            feedState.items.isEmpty() && feedState.isLoadingMore -> item(key = "loading", contentType = ScrollingHeader.LOADING) { FeedSkeleton(2) }
                             feedState.items.isEmpty() && feedState.loaded -> item(key = "empty") {
                                 // RN profile.havent_posted / havent_commented; the pages read so far may all be filtered out
                                 Box(Modifier.fillParentMaxHeight()) {
@@ -350,6 +357,8 @@ fun ProfileScreen(
                         }
                     }
                 }
+                // a short tab can still scroll the summary away and keep the tabs pinned (#3734)
+                item(key = ScrollingHeader.FILLER_KEY) { PinFillerRow(filler) }
             }
             // RN postsTabContent's ScrollTopPopup (the profile's post tabs)
             ScrollTopPopup(listState, "profileScrollTop", modifier = Modifier.navigationBarsPadding())

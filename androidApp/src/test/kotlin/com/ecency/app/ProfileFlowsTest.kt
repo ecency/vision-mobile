@@ -417,6 +417,67 @@ class ProfileFlowsTest {
         assertEquals("the tabs still right under the bar", bounds("profileCompactHeader").bottom, bounds("profileTabs").top, 1f)
     }
 
+    /** Review of #3734: a tab of one short post can still scroll the summary away and keep the tabs pinned. */
+    @Test
+    @Config(qualifiers = "w360dp-h1000dp")
+    fun aShortTabStillPinsTheTabsUnderTheBar() {
+        node.postCount = 1
+        launch(AppScreen.Profile("alice"))
+        waitFor("card:alice/blog-one")
+        repeat(4) {
+            compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 600) }
+            compose.mainClock.advanceTimeBy(500); idleMain()
+        }
+        compose.waitForIdle()
+        assertTrue("the bar shows the user", exists("profileCompactHeader"))
+        assertEquals("the tabs right under the bar", bounds("profileCompactHeader").bottom, bounds("profileTabs").top, 1f)
+    }
+
+    /** Review of #3734: a switch from a long tab to the one comment of Comments keeps the tabs pinned under the bar. */
+    @Test
+    @Config(qualifiers = "w360dp-h1000dp")
+    fun aSwitchToAShortTabKeepsTheTabsPinnedUnderTheBar() {
+        node.postCount = 30
+        launch(AppScreen.Profile("alice"))
+        waitFor("card:alice/blog-one")
+        compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-12")
+        waitFor("profileCompactHeader")
+        compose.onNodeWithTag("tab:comments").performClick()
+        repeat(4) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertTrue("the bar still shows the user", exists("profileCompactHeader"))
+        assertEquals("the tabs still right under the bar", bounds("profileCompactHeader").bottom, bounds("profileTabs").top, 1f)
+    }
+
+    /** Review of #3734: another account's wallet taller than the screen is not cut to the screen's height. */
+    @Test
+    @Config(qualifiers = "w640dp-h240dp")
+    fun aWalletTallerThanTheScreenKeepsItsWholeHeight() {
+        launch(AppScreen.Profile("alice", "wallet"))
+        waitFor("profileList")
+        compose.waitUntil(15_000) {
+            runCatching { compose.onNodeWithTag("profileList").performScrollToNode(hasTestTag("profileWallet")) }.isSuccess
+        }
+        waitFor("walletLine:Savings")
+        // to the end of the profile: every wallet line can be scrolled into view
+        repeat(6) {
+            compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 400) }
+            compose.mainClock.advanceTimeBy(500); idleMain()
+        }
+        compose.waitForIdle()
+        val lines = compose.onAllNodes(hasTestTagPrefix("walletLine:"), useUnmergedTree = true).fetchSemanticsNodes()
+        assertTrue("a wallet of several lines", lines.size >= 3)
+        val end = lines.maxOf { it.positionInRoot.y + it.size.height }
+        val list = bounds("profileList")
+        val squashed = lines.filter { it.size.height < 10 }.map { it.config.getOrElseNullable(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { null } }
+        assertTrue("no wallet line squashed to the screen's height: $squashed", squashed.isEmpty())
+        assertTrue("the last wallet line reachable: it ends at $end, the list at ${list.bottom}", end <= list.bottom + 1f)
+    }
+
+    private fun hasTestTagPrefix(prefix: String) = androidx.compose.ui.test.SemanticsMatcher("tag starts with $prefix") {
+        it.config.getOrElseNullable(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { null }?.startsWith(prefix) == true
+    }
+
     @Test
     @Config(qualifiers = "w360dp-h640dp")
     fun aScrolledProfileIsKeptAfterAPostAndBackAndATabSwitchKeepsTheTabsPinned() {

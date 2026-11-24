@@ -86,14 +86,16 @@ internal fun OnShow(key: Any?, onShow: () -> Unit) {
  * keeps the card it shows (the lazy list keeps its first visible item by key), so nothing jumps under the reader.
  */
 @Composable
-internal fun NewCardsOnTop(listState: LazyListState, firstKey: Any?, firstCardIndex: Int) {
+internal fun NewCardsOnTop(listState: LazyListState, firstKey: Any?, firstCardIndex: Int, pinnedIndex: Int = -1) {
     val shown = remember(listState) { arrayOfNulls<Any>(1) }
     // in composition, before the list measures the new cards (the first page replacing the skeleton is FirstPageAnchor's)
     if (firstKey != shown[0]) {
         // the top: nothing but header rows above the first card (a header of no height is never the first visible item)
         val index = listState.firstVisibleItemIndex
         val atTop = index < firstCardIndex || (index == firstCardIndex && listState.firstVisibleItemScrollOffset == 0)
-        if (shown[0] != null && firstKey != null && atTop) listState.requestScrollToItem(0)
+        // with the tabs pinned (the header away, #3734) the top is right under them, not the header
+        val top = if (pinnedIndex >= 0 && index >= pinnedIndex) pinnedIndex else 0
+        if (shown[0] != null && firstKey != null && atTop) listState.requestScrollToItem(top)
         shown[0] = firstKey
     }
 }
@@ -123,7 +125,10 @@ internal fun FirstPageAnchor(listState: LazyListState, hasItems: Boolean, key: A
         if (hasItems && !hadItems[0]) {
             when {
                 // a list placed at its pinned row (another tab picked with the header gone, #3734) stays there
-                !dragged[0] -> if (listState.firstVisibleItemIndex <= 1 && listState.firstVisibleItemIndex != pinnedIndex) listState.scrollToItem(0)
+                // a header placed part of the way (another tab picked with it part shown, #3734) keeps that offset
+                !dragged[0] -> if (listState.firstVisibleItemIndex <= 1 && listState.firstVisibleItemIndex != pinnedIndex) {
+                    listState.scrollToItem(0, if (listState.firstVisibleItemIndex == 0) headerOffset[0].coerceAtLeast(0) else 0)
+                }
                 headerOffset[0] >= 0 -> listState.scrollToItem(0, headerOffset[0])
             }
         }
@@ -223,8 +228,10 @@ fun FeedList(
 
     val haptics = rememberHaptics()
     val motion = LocalMotion.current
-    FirstPageAnchor(listState, hasItems = state.items.isNotEmpty(), key = model, pinnedIndex = if (pinned == null) -1 else if (header != null) 1 else 0)
-    NewCardsOnTop(listState, state.items.firstOrNull()?.key, firstCardIndex = (if (header != null) 1 else 0) + (if (pinned != null) 1 else 0))
+    val pinnedIndex = if (pinned == null) -1 else if (header != null) 1 else 0
+    FirstPageAnchor(listState, hasItems = state.items.isNotEmpty(), key = model, pinnedIndex = pinnedIndex)
+    NewCardsOnTop(listState, state.items.firstOrNull()?.key, firstCardIndex = (if (header != null) 1 else 0) + (if (pinned != null) 1 else 0), pinnedIndex = pinnedIndex)
+    val filler = rememberPinFiller(listState)
     PullToRefreshBox(
         isRefreshing = state.isRefreshing,
         onRefresh = { haptics(com.ecency.core.app.HapticEvent.REFRESH); model.refresh() },
@@ -233,14 +240,15 @@ fun FeedList(
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
             if (header != null) item(key = "header") { header() }
             if (pinned != null) stickyHeader(key = "pinned") { pinned() }
-            // with a pinned row, a short state is a screen tall: the header can still scroll away and the row stay pinned
+            // with a pinned row, an empty or error state is a screen tall: the header can still scroll away and the row
+            // stay pinned. Loading rows keep their height; the filler stands in for them
             val short: LazyItemScope.() -> Modifier = { if (pinned != null) Modifier.fillParentMaxHeight() else Modifier }
             when {
-                state.items.isEmpty() && state.isLoading -> item(key = "loading") { Box(short()) { FeedSkeleton() } }
+                state.items.isEmpty() && state.isLoading -> item(key = "loading", contentType = ScrollingHeader.LOADING) { FeedSkeleton() }
                 state.items.isEmpty() && state.error != null -> item(key = "error") {
                     Box(short()) { ErrorBlock(state.error!!, Modifier.padding(top = 48.dp), com.ecency.core.esie.EsiePlacement.ERROR, model::retry) }
                 }
-                state.items.isEmpty() && state.isLoadingMore -> item(key = "loading") { Box(short()) { FeedSkeleton() } }
+                state.items.isEmpty() && state.isLoadingMore -> item(key = "loading", contentType = ScrollingHeader.LOADING) { FeedSkeleton() }
                 // the pages read so far were all filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
                 state.items.isEmpty() && state.loaded -> item(key = "empty") {
                     Box(short()) {
@@ -276,6 +284,8 @@ fun FeedList(
                     }
                 }
             }
+            // a short feed can still scroll the header away and keep the row pinned (#3734)
+            if (pinned != null) item(key = ScrollingHeader.FILLER_KEY) { PinFillerRow(filler) }
         }
         // RN postsTabContent's ScrollTopPopup (feed, tag, community lists)
         ScrollTopPopup(listState, modifier = scrollTopModifier)
