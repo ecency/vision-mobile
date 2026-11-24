@@ -105,7 +105,7 @@ internal fun NewCardsOnTop(listState: LazyListState, firstKey: Any?, firstCardIn
  * community or proposal header), and one scrolled past the header into the skeleton lets the cards take its place.
  */
 @Composable
-internal fun FirstPageAnchor(listState: LazyListState, hasItems: Boolean, key: Any?) {
+internal fun FirstPageAnchor(listState: LazyListState, hasItems: Boolean, key: Any?, pinnedIndex: Int = -1) {
     val loaded by rememberUpdatedState(hasItems)
     val hadItems = remember(key) { booleanArrayOf(hasItems) }
     val dragged = remember(key) { booleanArrayOf(false) }
@@ -122,7 +122,8 @@ internal fun FirstPageAnchor(listState: LazyListState, hasItems: Boolean, key: A
     LaunchedEffect(hasItems) {
         if (hasItems && !hadItems[0]) {
             when {
-                !dragged[0] -> if (listState.firstVisibleItemIndex <= 1) listState.scrollToItem(0)
+                // a list placed at its pinned row (another tab picked with the header gone, #3734) stays there
+                !dragged[0] -> if (listState.firstVisibleItemIndex <= 1 && listState.firstVisibleItemIndex != pinnedIndex) listState.scrollToItem(0)
                 headerOffset[0] >= 0 -> listState.scrollToItem(0, headerOffset[0])
             }
         }
@@ -222,7 +223,7 @@ fun FeedList(
 
     val haptics = rememberHaptics()
     val motion = LocalMotion.current
-    FirstPageAnchor(listState, hasItems = state.items.isNotEmpty(), key = model)
+    FirstPageAnchor(listState, hasItems = state.items.isNotEmpty(), key = model, pinnedIndex = if (pinned == null) -1 else if (header != null) 1 else 0)
     NewCardsOnTop(listState, state.items.firstOrNull()?.key, firstCardIndex = (if (header != null) 1 else 0) + (if (pinned != null) 1 else 0))
     PullToRefreshBox(
         isRefreshing = state.isRefreshing,

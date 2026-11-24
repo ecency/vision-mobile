@@ -1,10 +1,10 @@
 package com.ecency.app.ui
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.zIndex
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.heightIn
 
@@ -226,7 +226,7 @@ fun ProfileScreen(
     val scope = rememberCoroutineScope()
     val barPx = with(LocalDensity.current) { PROFILE_BAR.toPx() }
     // how far the summary has gone under the bar: the compact bar fades in, the pinned tabs stop under it
-    val progress by rememberHeaderProgress(listState, barPx)
+    val progress = rememberHeaderProgress(listState, barPx)
     val tabsShift = rememberTabsShift(listState, barPx)
     val toTop: () -> Unit = { scope.launch { listState.animateScrollToItem(0) } }
     Box(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().testTag("profile")) {
@@ -244,7 +244,7 @@ fun ProfileScreen(
         }
         val selectTab: (Int) -> Unit = { i ->
             // the summary gone: the new tab starts at its top with the tabs still pinned under the bar
-            val pinned = ScrollingHeader.gone(listState) || progress >= 1f
+            val pinned = ScrollingHeader.gone(listState) || progress.value >= 1f
             val summary = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == ScrollingHeader.HEADER_INDEX }?.size
             model.selectTab(i)
             if (pinned) {
@@ -277,7 +277,7 @@ fun ProfileScreen(
                 }
                 // pinned once it reaches the top, then held under the compact bar (drawn over the rows below it)
                 stickyHeader(key = "tabs", contentType = "tabs") {
-                    Column(Modifier.zIndex(1f).graphicsLayer { translationY = tabsShift.value }) {
+                    Column(Modifier.graphicsLayer { translationY = tabsShift.value }) {
                         ProfileTabs(state, rememberTabTap(state.selectedTab, { listState }, selectTab))
                     }
                 }
@@ -304,14 +304,15 @@ fun ProfileScreen(
                             }
                         }
                     }
-                    ProfileTab.WALLET -> item(key = "wallet") {
+                    // a screen tall, as the short states: the summary can stay away (#3734)
+                    ProfileTab.WALLET -> item(key = "wallet") { Box(Modifier.fillParentMaxHeight()) {
                         if (state.isOwn) {
                             PlaceholderTab(ProfileUiCopy.WALLET, ProfileUiCopy.YOUR_WALLET_IS_ON, ProfileUiCopy.OPEN_WALLET) { actions.onWallet(true) }
                         } else {
                             // RN profile wallet tab of another account: unclaimed rewards and Wallet Details, read only
                             ProfileWalletTab(env, state.username)
                         }
-                    }
+                    } }
                     else -> if (feedState != null) {
                         // a short state is a screen tall: the summary can still scroll away and the tabs stay pinned (#3734)
                         when {
@@ -355,7 +356,7 @@ fun ProfileScreen(
         }
         // RN's floating back button over the cover, then RN's Header (back, avatar, name) once the summary has gone:
         // one fades into the other as the summary scrolls under the bar; a tap on the user goes back to the top
-        ProfileTopBar(env, header, progress, actions.onBack, toTop)
+        ProfileTopBar(env, header, { progress.value }, actions.onBack, toTop)
     }
 
     if (confirmReport) {
@@ -387,24 +388,27 @@ private val PROFILE_BAR = 56.dp
  * gone ([progress] 1), crossfading as the summary scrolls under the bar. A tap on the user scrolls back to the summary.
  */
 @Composable
-private fun ProfileTopBar(env: AppEnvironment, header: ProfileHeader, progress: Float, onBack: () -> Unit, onExpand: () -> Unit) {
+private fun ProfileTopBar(env: AppEnvironment, header: ProfileHeader, progress: () -> Float, onBack: () -> Unit, onExpand: () -> Unit) {
     val colors = LocalEcencyColors.current
-    val compact = progress >= 0.5f
+    // read in drawing for the fades; composition only follows the switch from the floating button to the bar
+    val compact by remember { derivedStateOf { progress() >= 0.5f } }
     Box(Modifier.fillMaxWidth().height(PROFILE_BAR)) {
         // the bar's background turns opaque over the first half, its content fades in over the second: no summary text
         // ever shows through a half-faded title
-        Box(Modifier.fillMaxSize().graphicsLayer { alpha = (progress * 2f).coerceAtMost(1f) }.background(colors.background))
+        Box(Modifier.fillMaxSize().graphicsLayer { alpha = (progress() * 2f).coerceAtMost(1f) }.background(colors.background))
+        // while it is hidden the bar takes no touches (a drag on the cover scrolls the list) and TalkBack skips it
         Row(
-            Modifier.fillMaxSize().graphicsLayer { alpha = ((progress - 0.5f) * 2f).coerceIn(0f, 1f) }.padding(horizontal = 8.dp)
-                .then(if (compact) Modifier.testTag("profileCompactHeader") else Modifier),
+            Modifier.fillMaxSize().graphicsLayer { alpha = ((progress() - 0.5f) * 2f).coerceIn(0f, 1f) }.padding(horizontal = 8.dp)
+                .then(if (compact) Modifier.testTag("profileCompactHeader") else Modifier.clearAndSetSemantics {}),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(Modifier.iconClickable(radius = 24.dp, enabled = compact, onClick = onBack).padding(12.dp).then(if (compact) Modifier.testTag("back") else Modifier)) {
+            Box(Modifier.then(if (compact) Modifier.iconClickable(radius = 24.dp, onClick = onBack).testTag("back") else Modifier).padding(12.dp)) {
                 Glyph(AppIcon.BACK, colors.darkGray, 24.dp, description = if (compact) UiCopy.BACK else null)
             }
             Row(
-                Modifier.weight(1f).clip(RoundedCornerShape(8.dp)).clickable(enabled = compact, role = Role.Button, onClickLabel = ShellUiCopy.EXPAND, onClick = onExpand)
-                    .padding(horizontal = 8.dp, vertical = 6.dp).then(if (compact) Modifier.testTag("profileExpand") else Modifier),
+                Modifier.weight(1f).clip(RoundedCornerShape(8.dp))
+                    .then(if (compact) Modifier.clickable(role = Role.Button, onClickLabel = ShellUiCopy.EXPAND, onClick = onExpand).testTag("profileExpand") else Modifier)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Avatar(header.avatarUrl, 32.dp)
@@ -417,7 +421,7 @@ private fun ProfileTopBar(env: AppEnvironment, header: ProfileHeader, progress: 
         }
         if (!compact) {
             Box(
-                Modifier.padding(8.dp).size(40.dp).graphicsLayer { alpha = 1f - progress * 2f }.clip(CircleShape).background(Color.Black.copy(alpha = 0.35f))
+                Modifier.padding(8.dp).size(40.dp).graphicsLayer { alpha = 1f - progress() * 2f }.clip(CircleShape).background(Color.Black.copy(alpha = 0.35f))
                     .clickable(onClick = onBack, role = Role.Button).testTag("back"),
                 contentAlignment = Alignment.Center,
             ) { Glyph(AppIcon.BACK, Color.White, 22.dp, description = UiCopy.BACK) }

@@ -220,8 +220,9 @@ class CommunityFlowsTest {
         compose.onNode(androidx.compose.ui.test.hasScrollToIndexAction() and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("feed"))).performScrollToIndex(10)
         compose.await("!exists(\"communityDetails\")") { idleMain(); !exists("communityDetails") }
         assertEquals("the tabs pinned at the top", feedTop, compose.onNodeWithTag("tab:HOT").fetchSemanticsNode().boundsInRoot.top, 8f)
-        // another tab starts with the tabs still pinned
+        // another tab starts with the tabs still pinned, also once its first page has landed (review of #3734)
         tap("tab:HOT")
+        compose.await("HOT's first page") { idleMain(); compose.onAllNodes(hasTestTag("card:alice/long-1"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
         compose.waitForIdle()
         assertFalse("the card stays away", exists("communityDetails"))

@@ -336,7 +336,7 @@ class ProfileFlowsTest {
 
     @Test
     @Config(qualifiers = "w360dp-h640dp")
-    fun aScrollUpMidListKeepsTheSummaryClosedUntilTheTop() {
+    fun aScrollUpMidListDoesNotBringTheSummaryBackUntilTheTop() {
         node.postCount = 30
         launch(AppScreen.Profile("alice"))
         waitFor("card:alice/blog-one")
@@ -367,6 +367,54 @@ class ProfileFlowsTest {
         compose.onNodeWithTag("tab:blog").performClick()
         // back to the top of the profile: the summary first (#3734)
         waitFor("profileSummary")
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aDragFromTheTopOfTheCoverScrollsTheProfile() {
+        // review of #3734: the bar over the cover takes no touches while the summary shows
+        node.postCount = 30
+        launch(AppScreen.Profile("alice"))
+        waitFor("card:alice/blog-one")
+        // part of the way down, the summary still showing under the bar
+        compose.onNodeWithTag("profileList").performTouchInput { swipeUp(startY = bottom - 20.dp.toPx(), endY = bottom - 120.dp.toPx(), durationMillis = 600) }
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertFalse(exists("profileCompactHeader"))
+        val tabsTop = bounds("profileTabs").top
+        // a drag down that starts on the cover's top 56 dp, where the bar sits
+        compose.onNodeWithTag("profileList").performTouchInput { swipeDown(startY = top + 20.dp.toPx(), endY = top + 160.dp.toPx(), durationMillis = 600) }
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertTrue("the drag from the cover's top moved the profile: ${bounds("profileTabs").top} vs $tabsTop", bounds("profileTabs").top > tabsTop + 20f)
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun theHiddenBarIsNotReadWhileTheSummaryShows() {
+        // review of #3734: TalkBack reads the user once, from the summary, not from the faded out bar
+        launch(AppScreen.Profile("alice"))
+        waitFor("profileSummary")
+        assertEquals(1, compose.onAllNodes(androidx.compose.ui.test.hasText("@alice")).fetchSemanticsNodes().size)
+        assertTrue("no dead buttons", compose.onAllNodes(androidx.compose.ui.test.hasClickAction() and androidx.compose.ui.test.isNotEnabled()).fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aSwitchToTheWalletTabKeepsTheTabsPinned() {
+        // review of #3734: the wallet row is a screen tall too, so the list can keep the summary away
+        node.postCount = 30
+        launch(AppScreen.Profile("alice", "wallet"))
+        waitBelowSummary("tab:blog")
+        compose.onNodeWithTag("tab:blog").performClick()
+        waitBelowSummary("card:alice/blog-one")
+        compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-12")
+        waitFor("profileCompactHeader")
+        compose.onNodeWithTag("tab:wallet").performClick()
+        repeat(4) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertTrue("the bar still shows the user", exists("profileCompactHeader"))
+        assertEquals("the tabs still right under the bar", bounds("profileCompactHeader").bottom, bounds("profileTabs").top, 1f)
     }
 
     @Test
