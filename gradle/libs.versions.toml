@@ -87,7 +87,7 @@ camerax-view = { module = "androidx.camera:camera-view", version = "1.4.2" }
 # play-services-tasks) are Java-only: no class in their classes.jar carries kotlin/Metadata, so there is no Kotlin
 # version to match. The -ktx artifact is not used.
 play-review = { module = "com.google.android.play:review", version = "2.0.2" }
-firebase-messaging = { module = "com.google.firebase:firebase-messaging", version = "26.0.2" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version = "25.1.3" }
 # Google Play Billing 9 (in-app purchases; RN expo-iap runs Billing 9 too, Play wants 8+ from Aug 31, 2026). Its classes.jar
 # has no kotlin/Metadata (Java only); it pulls androidx.activity 1.2.3 and play-services 18.x, older than what the app has.
 play-billing = { module = "com.android.billingclient:billing", version = "9.1.0" }
