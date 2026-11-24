@@ -77,3 +77,19 @@ final class FeedReadingTests: XCTestCase {
 private extension PostMenuItem {
     static var muteAuthorTitle: String { PostMenuItem.mute.title }
 }
+
+/// The room under pinned tabs (#3734).
+final class PinFillerTests: XCTestCase {
+    /// Review of #3734: a taller window with the same content makes more room, so the header can still scroll away.
+    func testATallerWindowGrowsTheFiller() {
+        var filler = PinFiller()
+        // a 300 pt header, 450 pt of rows, a 600 pt window: 150 pt more under the rows
+        filler.update(content: 750, header: 300, viewport: 600)
+        XCTAssertEqual(filler.height, 150)
+        // the window grows to 900 pt; the content (with the filler) is still 900 pt, so no new content height comes
+        filler.resize(viewport: 900)
+        XCTAssertEqual(filler.height, 450, "the rows and the filler fill the taller window")
+        filler.resize(viewport: 600)
+        XCTAssertEqual(filler.height, 150, "and shrink back with it")
+    }
+}

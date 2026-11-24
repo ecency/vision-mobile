@@ -86,8 +86,10 @@ private struct PaneTitle: ViewModifier {
     @Environment(\.isInPane) private var isInPane
     @Environment(\.isPaneTop) private var isPaneTop
 
+    // one view on every path: an `if` around `content` would make a new screen (and put its scroll back at the top)
+    // whenever the screen becomes or stops being the pane's top one. A nil title is ignored by the key's reduce
     func body(content: Content) -> some View {
-        if isInPane && isPaneTop { content.preference(key: PaneTitleKey.self, value: title) } else { content }
+        content.preference(key: PaneTitleKey.self, value: isInPane && isPaneTop ? title : nil)
     }
 }
 

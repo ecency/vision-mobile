@@ -207,10 +207,11 @@ struct ProfileScreen: View {
                         ProfileSummaryView(state: state, header: header, model: model, onReport: { confirmReport = true })
                         // RN NewsletterSenderInfo: the own creator list's subscribers, link and "Manage"
                         if state.isOwn { DigestSenderRow(username: state.username, env: app.env) }
-                        // a tab switch with the summary gone scrolls here: the tabs right under the bar
-                        Color.clear.frame(height: 0).id("profile-summary-end")
                     }
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { summaryHeight = $0 }
+                    // a tab switch with the summary gone scrolls here: the tabs right under the bar. A row of its own:
+                    // the lazy stack unloads the summary row far down, and an id inside it is then not found
+                    Color.clear.frame(height: 0).id("profile-summary-end")
                     if state.isMuted {
                         Image(appIcon: .muted).scaledFont(96, relativeTo: .largeTitle).foregroundStyle(theme.icon)
                             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
@@ -243,13 +244,18 @@ struct ProfileScreen: View {
             .onPreferenceChange(ScrollContentHeightKey.self) { h in
                 MainActor.assumeIsolated { if let h { filler.update(content: h, header: summaryHeight, viewport: height) } }
             }
+            .onChange(of: height) { _, h in filler.resize(viewport: h) }
             .onChange(of: scrollTop) { _, _ in toTop(proxy) }
             .onChange(of: state.selectedTab) { _, _ in
-                if pinAfterSwitch {
-                    pinAfterSwitch = false
+                guard pinAfterSwitch else { filler.release(); return }
+                pinAfterSwitch = false
+                proxy.scrollTo("profile-summary-end", anchor: .top)
+                // a far jump lands on the lazy stack's estimated row heights; once the rows there are laid out, the
+                // same scroll lands exactly
+                DispatchQueue.main.async {
                     proxy.scrollTo("profile-summary-end", anchor: .top)
+                    filler.release()
                 }
-                filler.release()
             }
             // the screen's one child: it carries the screen's identifier ("profile")
         }
@@ -259,7 +265,7 @@ struct ProfileScreen: View {
     /// The scroll to top (popup, tab reselect, the user in the bar), mid-fling too: back to the summary.
     private func toTop(_ proxy: ScrollViewProxy) {
         momentum.stop()
-        withAnimation { proxy.scrollTo("profile-top", anchor: .top) }
+        withAnimation(motion.scroll) { proxy.scrollTo("profile-top", anchor: .top) }
     }
 
     @ViewBuilder private func tabContent(_ state: ProfileState, width: CGFloat) -> some View {

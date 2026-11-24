@@ -133,6 +133,25 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(element(app, "profile-name").isHittable, "back at the summary")
     }
 
+    /// Review of #3734: far down a tab (the summary row long unloaded by the lazy stack), a tab switch still starts
+    /// the new tab at its top with the tabs pinned under the bar.
+    func testATabSwitchFarDownKeepsTheTabsPinnedUnderTheBar() {
+        let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
+        XCTAssertTrue(element(app, "profile-name").waitForExistence(timeout: 20))
+        let list = app.scrollViews["profile"]
+        XCTAssertTrue(element(app, "post-options").waitForExistence(timeout: 15), "the blog has cards to scroll")
+        for _ in 0..<12 { list.swipeUp(velocity: .fast) }
+        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+        XCTAssertTrue(element(app, "profile-compact-header").waitForExistence(timeout: 5))
+        let bar = app.navigationBars.firstMatch
+        app.buttons["tab-posts"].tap()
+        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+        XCTAssertTrue(element(app, "profile-compact-header").exists, "the summary still away: summary \(element(app, "profile-summary").frame) tabs \(app.buttons["tab-posts"].frame) bar \(bar.frame)")
+        XCTAssertEqual(app.buttons["tab-posts"].frame.minY, bar.frame.maxY, accuracy: 1, "the tabs pinned: tabs \(app.buttons["tab-posts"].frame) bar \(bar.frame)")
+        let first = app.buttons.matching(identifier: "post-card").allElementsBoundByIndex.filter { $0.isHittable }.map { $0.frame.minY }.min() ?? 0
+        XCTAssertEqual(first, app.buttons["tab-posts"].frame.maxY, accuracy: 24, "the new tab at its top, right under the tabs")
+    }
+
     /// RN CommentView: a comment row of the profile's Comments tab has the gift, which opens the tipping sheet.
     func testACommentRowOfTheCommentsTabOffersTheTipSheet() {
         let app = launch(["-openLink", "https://ecency.com/@spike-bob"])

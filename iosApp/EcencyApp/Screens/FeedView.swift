@@ -22,6 +22,9 @@ struct FeedListView: View {
     @State private var frames = CardFrames()
     @State private var headerHeight: CGFloat = 0
     @State private var filler = PinFiller()
+    /// `startPinned` was applied: once per list (a tab switch makes a new one), never again on a return to the screen,
+    /// which keeps the reader's place.
+    @State private var placed = false
 
     private var model: FeedModel { feed.model as! FeedModel }
 
@@ -33,12 +36,12 @@ struct FeedListView: View {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     Color.clear.frame(height: 0).id("feed-top")
                     if let header {
-                        VStack(spacing: 0) {
-                            header
-                            // another tab picked with the header gone scrolls here: the pinned row right at the top
-                            Color.clear.frame(height: 0).id("feed-header-end")
-                        }
-                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
+                        header
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
+                        // another tab picked with the header gone scrolls here: the pinned row right at the top. A row
+                        // of its own: the lazy stack unloads the header row once it is far away, and an id inside it
+                        // is then not found
+                        Color.clear.frame(height: 0).id("feed-header-end")
                     }
                     Section {
                     if state.items.isEmpty {
@@ -101,6 +104,8 @@ struct FeedListView: View {
             .reportsHeaderGone(headerHeight: onHeaderGone == nil ? 0 : headerHeight) { onHeaderGone?($0) }
             .onChange(of: scrollToTop) { _, _ in toTop(proxy) }
             .onAppear {
+                guard !placed else { return }
+                placed = true
                 guard startPinned, pinned != nil, header != nil else { return }
                 filler.reserve(viewport: geo.size.height)
                 DispatchQueue.main.async {
@@ -111,6 +116,7 @@ struct FeedListView: View {
             .onPreferenceChange(ScrollContentHeightKey.self) { h in
                 MainActor.assumeIsolated { if let h, pinned != nil { filler.update(content: h, header: headerHeight, viewport: geo.size.height) } }
             }
+            .onChange(of: geo.size.height) { _, h in if pinned != nil { filler.resize(viewport: h) } }
             }
         }
         .background(theme.background)
@@ -545,9 +551,25 @@ struct PinFiller: Equatable {
     /// Reserved for a switch: only grows until `release`, so a late height of the old content cannot trim it.
     private var held = false
 
+    /// The header and the rows under it (without the filler) at the last `update`: a new window height measures
+    /// again from them, as the content height does not change with it.
+    private var header: CGFloat = 0
+    private var rest: CGFloat = 0
+
     mutating func update(content: CGFloat, header: CGFloat, viewport: CGFloat) {
         guard header > 0, viewport > 0 else { return }
-        let rest = content - height
+        self.header = header
+        rest = content - height
+        fit(viewport: viewport)
+    }
+
+    /// The window's height changed (a resized window, a pane), the content's did not.
+    mutating func resize(viewport: CGFloat) {
+        guard header > 0, viewport > 0 else { return }
+        fit(viewport: viewport)
+    }
+
+    private mutating func fit(viewport: CGFloat) {
         let next = max(0, (header + viewport - rest).rounded(.up))
         if held && next < height { return }
         if abs(next - height) > 0.5 { height = next }
@@ -562,4 +584,5 @@ struct PinFiller: Equatable {
 
     /// The new content is in: `update` may trim again.
     mutating func release() { held = false }
+
 }
