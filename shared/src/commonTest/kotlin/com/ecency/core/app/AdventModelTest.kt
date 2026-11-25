@@ -513,6 +513,34 @@ class AdventModelTest {
     }
 
     @Test
+    fun aSignInThatHandsBackTheRefusedTokenStopsAtTheSecondRefusal() = runTest {
+        val f = fixture()
+        val m = started(f)
+        // the session is refused, and signing in again hands back the same token
+        f.advent.reuseTokens = true
+        f.advent.refused += "demo-game-$user-1"
+        var signIns = 0
+        f.app.authBackend.gate = { r -> if ("/raidstead/session" in r.url && ++signIns > 5) error("signing in without end") }
+        m.refresh()
+        testScheduler.advanceUntilIdle()
+        assertTrue(signIns <= 2, "signed in $signIns times")
+        assertEquals(AdventSignIn.FAILED, m.current.signIn, "two refusals: the screen asks")
+    }
+
+    @Test
+    fun aCalendarThatFailedToLoadLoadsWhenTheAppComesBack() = runTest {
+        val f = fixture()
+        f.app.authBackend.rest = { HttpResult(503, "") }
+        val m = started(f)
+        assertFalse(m.current.loaded)
+        assertNotNull(m.current.error)
+        f.app.authBackend.rest = { r -> f.advent.http(r) }
+        m.resumed()
+        testScheduler.advanceUntilIdle()
+        assertTrue(m.current.loaded, "back from the background, the calendar loads again")
+    }
+
+    @Test
     fun twoCallsRefusedTogetherCountAsOneRefusal() = runTest {
         val f = fixture()
         val m = started(f)

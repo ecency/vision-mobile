@@ -45,6 +45,9 @@ class DemoAdvent(private val nowMillis: () -> Long) {
     /** Tests: the login proof is refused (401) this many times, as for a phone clock far off. */
     var refuseProofs = 0
 
+    /** Tests: a sign-in hands back the account's existing token (a session store that reuses sessions). */
+    var reuseTokens = false
+
     /** Tests: links to `.../wave` fail with this status (0: linked as usual). */
     var waveStatus = 0
 
@@ -144,7 +147,7 @@ class DemoAdvent(private val nowMillis: () -> Long) {
     }
 
     private fun session(account: String): HttpResult {
-        val token = "demo-game-$account-${sessions.size + 1}"
+        val token = sessions.entries.firstOrNull { reuseTokens && it.value == account }?.key ?: "demo-game-$account-${sessions.size + 1}"
         sessions[token] = account
         val expires = Instant.fromEpochMilliseconds(nowMillis() + 24 * 3_600_000L).toString()
         return HttpResult(200, """{"token":"$token","account":"$account","expiresAt":"$expires"}""")

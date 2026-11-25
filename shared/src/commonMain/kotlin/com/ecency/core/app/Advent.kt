@@ -268,9 +268,11 @@ class AdventService internal constructor(private val env: AppEnvironment) {
         return pending.await().token
     }
 
-    /** The session of [username] was refused (401): it is not used again. */
-    internal fun dropped(username: String, token: String) {
-        if (sessions[username]?.token == token) sessions.remove(username)
+    /** The session of [username] was refused (401): it is not used again. True when it was still the one kept. */
+    internal fun dropped(username: String, token: String): Boolean {
+        if (sessions[username]?.token != token) return false
+        sessions.remove(username)
+        return true
     }
 
     private suspend fun signIn(username: String): GameSession {

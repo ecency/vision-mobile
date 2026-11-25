@@ -151,11 +151,15 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
     /** Pull to refresh, the screen coming back, the season changing phase. */
     fun refresh() = load()
 
-    /** The app or the screen came back to the front: a new UTC day (a phone that slept through midnight) loads again. */
+    /**
+     * The app or the screen came back to the front: a new UTC day (a phone that slept through midnight) loads again, and
+     * so does a calendar that failed to load (offline overnight).
+     */
     fun resumed() {
+        if (!started) return
         val now = env.nowMillis()
-        if (current.loaded && (AdventSeason.phase(now) != current.phase || AdventSeason.todayDoor(now) != current.todayDoor)) load()
-        else tick(now)
+        val newDay = AdventSeason.phase(now) != current.phase || AdventSeason.todayDoor(now) != current.todayDoor
+        if (current.loaded && newDay || !current.loaded && !current.loading) load() else tick(now)
     }
 
     fun retrySignIn() {
@@ -493,9 +497,9 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
             block(token).also { refusals = 0; refusedToken = null }
         } catch (e: GamesApiException) {
             if (e.status != 401) throw e
-            env.advent.dropped(user, token)
-            // calls refused together with one session are one refusal
-            if (token != refusedToken) {
+            // calls refused together with one session are one refusal; the same token kept again after a new sign-in
+            // (a server that hands it back) and refused again is another
+            if (env.advent.dropped(user, token) || token != refusedToken) {
                 refusedToken = token
                 refusals++
             }
