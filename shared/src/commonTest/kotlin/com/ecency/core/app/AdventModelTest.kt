@@ -109,13 +109,16 @@ class AdventModelTest {
     private class Fixture(val app: TestApp, val advent: DemoAdvent) {
         /** What `database_api.find_comments` holds: a Wave posted earlier. */
         var onChain: String? = null
+
+        /** The Waves container cannot be read (the Wave fails before anything is kept or sent). */
+        var noContainer = false
     }
 
     private fun TestScope.fixture(now: Long = dec9, account: VaultAccount? = VaultAccount(TestApp.USER, AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF)): Fixture {
         lateinit var f: Fixture
         val app = TestApp(this) { req -> chain(f, req) }
         app.now = now
-        val advent = DemoAdvent { app.now }
+        val advent = DemoAdvent { app.clock() }
         f = Fixture(app, advent)
         app.authBackend.rest = { r -> advent.http(r) }
         if (account != null) KeyVault(app.store).run { save(account); setCurrentUsername(account.username) }
@@ -126,7 +129,8 @@ class AdventModelTest {
 
     private fun chain(f: Fixture, req: Sent): HttpResult = when (req.method) {
         "bridge.get_account_posts", "bridge.get_account_posts_v2" ->
-            if ("ecency.waves" in req.params.toString()) FakeTransport.result(req, """[{"author":"ecency.waves","permlink":"waves-20261209","json_metadata":{"tags":["waves-20261209","hive-125125"]}}]""")
+            if (f.noContainer) HttpResult(503, "")
+            else if ("ecency.waves" in req.params.toString()) FakeTransport.result(req, """[{"author":"ecency.waves","permlink":"waves-20261209","json_metadata":{"tags":["waves-20261209","hive-125125"]}}]""")
             else FakeTransport.result(req, "[]")
         "database_api.find_comments" -> TestApp.commentAsked(req).let { (a, l) ->
             TestApp.comments(req, f.onChain?.let { body -> """{"author":"$a","permlink":"$l","body":${Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(body))}}""" })
@@ -283,6 +287,130 @@ class AdventModelTest {
         assertEquals("spike-yan", m.current.account)
         assertNull(m.current.sheet, "the previous account's door is gone")
         assertTrue(waveBodies(f).isEmpty(), "no Wave for the previous account after it left the screen")
+    }
+
+    @Test
+    fun closingTheSheetWhileTheAnswerIsSentStillPostsItsWave() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/answer")) held.await() }
+        m.submit("Sent while the sheet closes.", 0)
+        testScheduler.runCurrent()
+        m.closeSheet()
+        testScheduler.runCurrent()
+        f.app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertNull(m.current.sheet)
+        assertEquals(1, waveBodies(f).size, "the answer's Wave went out after the sheet closed")
+        assertTrue(f.advent.calls.any { it == "POST /v1/advent/2026/doors/9/wave" }, "and was linked to the door")
+        assertNull(f.app.env.advent.pendingWave(user, 9))
+    }
+
+    @Test
+    fun anAnsweredDoorWithNoWaveOffersToPostOne() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        // the answer counts, the Wave fails before anything is kept or sent
+        f.noContainer = true
+        m.submit("No Wave yet.", 0)
+        testScheduler.advanceUntilIdle()
+        assertTrue(waveBodies(f).isEmpty())
+        assertNull(f.app.env.advent.pendingWave(user, 9))
+        m.closeSheet()
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.DONE, m.current.sheet?.mode)
+        assertEquals(AdventWaveState.FAILED, m.current.sheet?.wave, "answered and no Wave on the server: \"Post Wave\" shows")
+        f.noContainer = false
+        m.retryWave()
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventWaveState.POSTED, m.current.sheet?.wave)
+        assertEquals(1, waveBodies(f).size)
+    }
+
+    @Test
+    fun closingADoorDuringASignInDoesNotStrandARefreshWaitingOnIt() = runTest {
+        val f = fixture(account = VaultAccount(user, AuthType.HIVE_SIGNER, accessToken = "hs-access-$user"))
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        m.closeSheet()
+        // the session is refused from now on: the next call signs in again, slowly
+        f.advent.refused += "demo-game-$user-1"
+        var waiting = 0
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if ("/api/raidstead/session" in r.url) { waiting++; held.await() } }
+        m.openDoor(9)
+        testScheduler.advanceTimeBy(1)
+        testScheduler.runCurrent()
+        assertEquals(1, waiting, "the door waits on the new sign-in")
+        // a pull to refresh waits on the same sign-in; then the door is closed
+        m.refresh()
+        testScheduler.runCurrent()
+        m.closeSheet()
+        testScheduler.runCurrent()
+        f.app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertFalse(m.current.loading, "the refresh is not stuck loading")
+        assertEquals(AdventSignIn.READY, m.current.signIn)
+    }
+
+    @Test
+    fun aRefusedSignInStillShowsTheCalendar() = runTest {
+        val f = fixture()
+        f.advent.refuseProofs = 99
+        f.advent.refuseVouches = 99
+        val m = started(f)
+        assertEquals(AdventSignIn.FAILED, m.current.signIn)
+        assertTrue(m.current.loaded)
+        assertEquals(AdventDoorLook.TODAY, m.current.tiles.first { it.day == 9 }.look, "the doors as signed out readers see them")
+    }
+
+    @Test
+    fun aRefusedKeyProofFallsBackToTheEcencyVouch() = runTest {
+        val f = fixture()
+        com.ecency.core.auth.VaultAccountStore(KeyVault(f.app.store), f.app.store)
+            .saveSession(com.ecency.core.auth.TokenSession(user, "token-$user", "refresh-$user", f.app.now + 86_400_000))
+        // a phone clock far off: the signed proof is refused, the vouch does not depend on the clock
+        f.advent.refuseProofs = 1
+        val m = started(f)
+        assertEquals(AdventSignIn.READY, m.current.signIn)
+        assertEquals("$user|token-$user", f.advent.signIns.last())
+    }
+
+    @Test
+    fun anOpenCalendarMovesToTheNextDoorAtMidnightUtc() = runTest {
+        val f = fixture()
+        f.app.clock = { dec9 + testScheduler.currentTime }
+        val m = f.app.env.adventModel()
+        m.start()
+        testScheduler.advanceTimeBy(1_000)
+        testScheduler.runCurrent()
+        assertEquals(9, m.current.todayDoor)
+        // 14 hours on: 10 Dec, 00:00 UTC
+        testScheduler.advanceTimeBy(14 * 3_600_000L)
+        testScheduler.runCurrent()
+        assertEquals(10, m.current.todayDoor)
+        assertEquals(AdventDoorLook.TODAY, m.current.tiles.first { it.day == 10 }.look)
+        m.close()
+    }
+
+    @Test
+    fun aDoorTappedAfterTheSeasonEndedDoesNotOpen() = runTest {
+        val f = fixture()
+        val m = started(f)
+        f.app.now = AdventSeason.HIDE_AT
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        assertNull(m.current.sheet)
+        assertEquals(AdventPhase.HIDDEN, m.current.phase)
     }
 
     @Test

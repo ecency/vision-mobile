@@ -244,12 +244,12 @@ sealed interface AppScreen {
         override val route get() = RouteName.EMAIL_DIGESTS
     }
 
-    /** RN refer screen ("Refer & Earn") of the signed-in account. */
     /** The Ecency Advent Calendar (AdventModel), as ecency.com/advent. */
     data object Advent : AppScreen {
         override val route get() = RouteName.ADVENT
     }
 
+    /** RN refer screen ("Refer & Earn") of the signed-in account. */
     data object Refer : AppScreen {
         override val route get() = RouteName.REFER
     }

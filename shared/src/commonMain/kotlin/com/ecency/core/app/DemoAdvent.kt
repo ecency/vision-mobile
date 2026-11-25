@@ -42,6 +42,9 @@ class DemoAdvent(private val nowMillis: () -> Long) {
     /** Tests: the vouch route refuses this many calls (401) before it accepts. */
     var refuseVouches = 0
 
+    /** Tests: the login proof is refused (401) this many times, as for a phone clock far off. */
+    var refuseProofs = 0
+
     /** Tests: links to `.../wave` fail with this status (0: linked as usual). */
     var waveStatus = 0
 
@@ -119,6 +122,10 @@ class DemoAdvent(private val nowMillis: () -> Long) {
         val json = runCatching { Base64.Default.decode(proof).decodeToString() }.getOrNull() ?: return HttpResult(401, """{"error":"unauthorized"}""")
         val o = runCatching { Json.parseToJsonElement(json).jsonObject }.getOrNull() ?: return HttpResult(401, """{"error":"unauthorized"}""")
         signIns += json
+        if (refuseProofs > 0) {
+            refuseProofs--
+            return HttpResult(401, """{"error":"unauthorized"}""")
+        }
         val account = runCatching { o["authors"]!!.let { (it as kotlinx.serialization.json.JsonArray)[0].jsonPrimitive.content } }.getOrNull()
             ?: return HttpResult(401, """{"error":"unauthorized"}""")
         return session(account)

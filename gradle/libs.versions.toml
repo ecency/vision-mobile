@@ -78,7 +78,7 @@ androidx-webkit = { module = "androidx.webkit:webkit", version = "1.12.1" }
 androidx-biometric = { module = "androidx.biometric:biometric", version = "1.1.0" }
 # QR codes: the HiveAuth sign-in (encoder) and the QR scanner (decoder); a Java library with no Android or Kotlin dependencies.
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
-# The QR scanner's camera (preview and frame analysis; zxing above decodes). 1.4.2 is built with Kotlin 1.9.
+# The QR scanner's camera (preview and frame analysis; zxing above decodes).
 camerax-core = { module = "androidx.camera:camera-core", version = "1.7.0" }
 camerax-camera2 = { module = "androidx.camera:camera-camera2", version = "1.7.0" }
 camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version = "1.7.0" }

@@ -16,7 +16,8 @@ import com.ecency.core.auth.HiveSignerMessages
 import com.ecency.core.hive.PrivateKey
 import com.ecency.core.l10n.L
 import com.ecency.core.l10n.LocaleFormat
-import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
@@ -215,7 +216,7 @@ class AdventService internal constructor(private val env: AppEnvironment) {
     var api: AdventApi = AdventApi(env.auth.http)
 
     private val sessions = mutableMapOf<String, GameSession>()
-    private val signing = mutableMapOf<String, CompletableDeferred<GameSession>>()
+    private val signing = mutableMapOf<String, Deferred<GameSession>>()
 
     /** Bumped when accounts leave: a sign-in that started before is not kept. */
     private var generation = 0
@@ -231,20 +232,17 @@ class AdventService internal constructor(private val env: AppEnvironment) {
         sessions[username]?.let { if (it.expiresAtMillis == 0L || it.expiresAtMillis - env.nowMillis() > EXPIRY_MARGIN_MILLIS) return it.token }
         signing[username]?.let { return it.await().token }
         val started = generation
-        val pending = CompletableDeferred<GameSession>()
-        signing[username] = pending
-        try {
+        // in the app's scope, not the caller's: a caller that goes away (a closed door, a refresh) leaves the sign-in
+        // to the others waiting on it
+        val pending = env.background.async {
             val session = signIn(username)
             if (session.account != username) throw GamesApiException(401, "unauthorized", "Wrong account")
             if (started == generation) sessions[username] = session
-            pending.complete(session)
-            return session.token
-        } catch (e: Throwable) {
-            pending.completeExceptionally(e)
-            throw e
-        } finally {
-            if (signing[username] === pending) signing.remove(username)
+            session
         }
+        signing[username] = pending
+        pending.invokeOnCompletion { if (signing[username] === pending) signing.remove(username) }
+        return pending.await().token
     }
 
     /** The session of [username] was refused (401): it is not used again. */
@@ -255,7 +253,14 @@ class AdventService internal constructor(private val env: AppEnvironment) {
     private suspend fun signIn(username: String): GameSession {
         val wif = env.accounts.vaultAccount(username)?.postingKey?.takeIf { it.isNotEmpty() }
         val key = wif?.let { runCatching { PrivateKey.fromWif(it) }.getOrNull() }
-        if (key != null) return api.session(HiveSignerMessages.gameLoginProof(username, key, env.nowMillis()))
+        if (key != null) {
+            try {
+                return api.session(HiveSignerMessages.gameLoginProof(username, key, env.nowMillis()))
+            } catch (e: GamesApiException) { // not reported: rethrown, or the vouch below is tried
+                // a refused proof is most often a phone clock far off; the vouch does not depend on the phone's clock
+                if (e.status != 401 || env.accounts.code(username) == null) throw e
+            }
+        }
         val code = env.accounts.code(username) ?: throw GamesApiException(401, "unauthorized", "No Ecency token")
         return try {
             api.vouched(username, code)

@@ -614,10 +614,31 @@ private struct AdventDoorSheet: View {
 struct AdventFeedBanner: View {
     @EnvironmentObject private var app: AppContainer
     @State private var version = 0
+    @State private var events: Closeable?
+    /// The banner follows the UTC day by itself (a new door, the end of the season), as Android's minute tick.
+    private let minute = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
         let _ = version
-        if let banner = app.env.advent.banner(nowMillis: app.env.nowMillis().int64Value) {
+        VStack(spacing: 0) {
+            if let banner = app.env.advent.banner(nowMillis: app.env.nowMillis().int64Value) { card(banner) }
+        }
+        .onReceive(minute) { _ in version += 1 }
+        .onAppear {
+            if events == nil {
+                // answering today's door (on time) hides the banner for the UTC day
+                events = app.env.watchEvents { event in
+                    MainActor.assumeIsolated { if event is AppEventAdventBannerChanged { version += 1 } }
+                }
+            }
+        }
+        .onDisappear {
+            events?.close()
+            events = nil
+        }
+    }
+
+    private func card(_ banner: AdventBanner) -> some View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top, spacing: 12) {
                     ZStack {
@@ -675,6 +696,5 @@ struct AdventFeedBanner: View {
             .padding(.horizontal, 12).padding(.top, 12).padding(.bottom, 8)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("advent-banner")
-        }
     }
 }
