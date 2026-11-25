@@ -380,6 +380,7 @@ class ChatThreadModel internal constructor(
         dead = true
         loadJob?.cancel()
         previewJob?.cancel()
+        quoteJob?.cancel()
         socket.disconnect()
         posts = emptyList()
         roots.clear()
@@ -1384,25 +1385,33 @@ class ChatThreadModel internal constructor(
      * pages before, [QUOTE_PAGES] at most; one not found by then (removed, or very old) is said so.
      */
     fun openQuote(postId: String) {
-        if (quoteJob?.isActive == true) return
+        // the latest tap wins: an earlier lookup or mark is dropped (its finally takes its mark away)
+        quoteJob?.cancel()
         quoteJob = scope.launch {
             var pages = 0
             while (current.items.none { it.id == postId }) {
-                // a load in flight first (the older page an auto fill asked for); then the page before, if any
+                // a load in flight first (the older page an auto fill asked for); then the page before, if any. An
+                // error left by an earlier load does not stop a new lookup: only a page this lookup asked for does
                 loadJob?.join()
                 if (current.items.any { it.id == postId }) break
-                if (!current.hasMore || current.error != null || pages >= QUOTE_PAGES || user == null) break
+                if (!current.hasMore || pages >= QUOTE_PAGES || user == null) break
                 load(refresh = false)
                 loadJob?.join()
                 pages++
+                if (current.error != null) break
             }
+            // the account left during the lookup: nothing to say for it
+            if (user == null) return@launch
             if (current.items.none { it.id == postId }) {
                 env.ui.toast(L.native.chatThread.quotedMessageNotFound)
                 return@launch
             }
             setState { it.copy(scrollTo = postId, highlightId = postId) }
-            delay(HIGHLIGHT_MILLIS)
-            setState { if (it.highlightId == postId) it.copy(highlightId = null) else it }
+            try {
+                delay(HIGHLIGHT_MILLIS)
+            } finally {
+                setState { if (it.highlightId == postId) it.copy(highlightId = null) else it }
+            }
         }
     }
 
