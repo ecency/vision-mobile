@@ -27,9 +27,15 @@ object DemoAuthServices {
     var chat: DemoChat? = null
         private set
 
+    /** The offline games API (Advent Calendar) of the latest demo run. */
+    var advent: DemoAdvent? = null
+        private set
+
     fun create(nowMillis: () -> Long, waitMillis: Long = 5 * 60_000): AuthServices {
         val demoChat = DemoChat(nowMillis).also { chat = it }
+        val demoAdvent = DemoAdvent(nowMillis).also { it.autoSeed = true; advent = it }
         val http = AuthHttp { request ->
+            demoAdvent.http(request)?.let { return@AuthHttp it }
             if (demoChat.holdSignIn && "/api/mattermost/bootstrap" in request.url) delay(120_000)
             demoChat.http(request)?.let { return@AuthHttp it }
             DemoWallet.http(request.url, request.body)?.let { return@AuthHttp it }
