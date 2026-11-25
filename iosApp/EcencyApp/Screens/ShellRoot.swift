@@ -291,7 +291,7 @@ struct SideMenuDrawer: View {
                     .foregroundStyle(main ? theme.text : theme.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 // the Advent item's "Door 9" while a door is open today
-                if item == .advent, let badge = SideMenu.shared.adventBadge(nowMillis: app.env.nowMillis().int64Value) {
+                if item == .advent, let badge = SideMenu.shared.adventBadge(nowMillis: app.adventNowMillis()) {
                     Text(badge).scaledFont(12, weight: .bold).foregroundStyle(.white)
                         .padding(.horizontal, 8).padding(.vertical, 2)
                         .background(Color(red: 0.839, green: 0.184, blue: 0.227), in: Capsule())
@@ -360,7 +360,7 @@ struct SideMenuDrawer: View {
                     MenuGroupsLayout(available: geo.size.height) {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 0) {
-                                ForEach(SideMenu.shared.items(loggedIn: loggedIn, group: .main, nowMillis: app.env.nowMillis().int64Value), id: \.self) { menuRow($0, username: username) }
+                                ForEach(SideMenu.shared.items(loggedIn: loggedIn, group: .main, nowMillis: app.adventNowMillis()), id: \.self) { menuRow($0, username: username) }
                             }
                         }
                         .scrollBounceBehavior(.basedOnSize)

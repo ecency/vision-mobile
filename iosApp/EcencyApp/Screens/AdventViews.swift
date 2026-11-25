@@ -615,13 +615,14 @@ struct AdventFeedBanner: View {
     @EnvironmentObject private var app: AppContainer
     @State private var version = 0
     @State private var events: Closeable?
+    @Environment(\.dynamicTypeSize) private var typeSize
     /// The banner follows the UTC day by itself (a new door, the end of the season), as Android's minute tick.
     private let minute = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
         let _ = version
         VStack(spacing: 0) {
-            if let banner = app.env.advent.banner(nowMillis: app.env.nowMillis().int64Value) { card(banner) }
+            if let banner = app.env.advent.banner(nowMillis: app.adventNowMillis()) { card(banner) }
         }
         .onReceive(minute) { _ in version += 1 }
         .onAppear {
@@ -641,16 +642,20 @@ struct AdventFeedBanner: View {
     private func card(_ banner: AdventBanner) -> some View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top, spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10).fill(Festive.red)
-                        Festive.gold.frame(width: 8)
-                        Festive.gold.frame(height: 8)
+                    // at the accessibility text sizes the present gives its width to the words
+                    if !typeSize.isAccessibilitySize {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10).fill(Festive.red)
+                            Festive.gold.frame(width: 8)
+                            Festive.gold.frame(height: 8)
+                        }
+                        .frame(width: 50, height: 50).clipShape(RoundedRectangle(cornerRadius: 10)).shadow(color: Festive.gold.opacity(0.6), radius: 8)
+                        .padding(.top, 6).accessibilityHidden(true)
                     }
-                    .frame(width: 50, height: 50).clipShape(RoundedRectangle(cornerRadius: 10)).shadow(color: Festive.gold.opacity(0.6), radius: 8)
-                    .padding(.top, 6).accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 4) {
                         Text(banner.title).font(Festive.script(26)).foregroundStyle(Festive.gold).accessibilityAddTraits(.isHeader)
-                        Text(banner.text).scaledFont(13).foregroundStyle(Festive.inkSoft)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(banner.text).scaledFont(13).foregroundStyle(Festive.inkSoft).fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: 0)
                     Button {
@@ -664,7 +669,8 @@ struct AdventFeedBanner: View {
                 }
                 Button { app.push(AppScreenAdvent.shared) } label: {
                     Text(banner.action).scaledFont(14, weight: .bold).foregroundStyle(Festive.ink)
-                        .padding(.horizontal, 18).frame(minHeight: 44).background(Festive.gold, in: Capsule())
+                        .multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 18).padding(.vertical, 10).frame(minHeight: 44).background(Festive.gold, in: Capsule())
                 }
                 .buttonStyle(.plain).accessibilityIdentifier("advent-banner-open")
             }
