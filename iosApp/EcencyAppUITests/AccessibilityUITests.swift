@@ -87,6 +87,12 @@ final class AccessibilityUITests: XCTestCase {
                     unresolved.append(issue.detailedDescription)
                     return true
                 }
+                // text drawn inside a picture no element names (a community logo in its hidden avatar): counted
+                // against the screen's number too (#3729)
+                if issue.element == nil, issue.auditType == .elementDetection {
+                    unresolved.append(AuditExclusions.textInImage)
+                    return true
+                }
                 // a clipping reading on a screen with an allowance counts against it whether or not the audit names
                 // the element: on iOS 27 it names some of the nodes it left unnamed before, and which ones varies
                 // from run to run (the vote sheet: its own lines one run, the feed card behind it the next). Before
@@ -191,8 +197,7 @@ final class AccessibilityUITests: XCTestCase {
             ("wallet", ["-seedAccounts", "YES", "-startTab", "WALLET"], "wallet-total"),
             ("notifications", ["-seedAccounts", "YES", "-startTab", "NOTIFICATION"], "tab-notification"),
             ("chats", ["-seedAccounts", "YES", "-startTab", "CHATS"], "tab-chats"),
-            // at AX5 the summary starts closed (SummarySizeRule); auditAll opens it and audits it as well
-            ("profile", ["-openScreen", "route:PROFILE:spike-alice"], size.isEmpty ? "profile-summary" : "profile-compact-header"),
+            ("profile", ["-openScreen", "route:PROFILE:spike-alice"], "profile-summary"),
             ("communities", ["-openScreen", "route:COMMUNITIES"], "tab-Discover"),
             ("search", ["-openScreen", "route:SEARCH_RESULT"], "search-input"),
             ("settings", ["-openScreen", "settings"], "settings"),
@@ -206,13 +211,7 @@ final class AccessibilityUITests: XCTestCase {
         let suffix = (ax5 ? " (AX5)" : "") + (bold ? " (bold)" : "")
         for (name, args, ready) in screens(size) {
             let app = launch(args + (bold ? Self.boldText : []))
-            if name == "profile", ax5 {
-                audit(app, "profile closed" + suffix, ready: ready)
-                element(app, ready).tap()
-                audit(app, "profile" + suffix, ready: "profile-summary")
-            } else {
-                audit(app, name + suffix, ready: ready)
-            }
+            audit(app, name + suffix, ready: ready)
             app.terminate()
         }
     }
@@ -385,9 +384,15 @@ enum AuditExclusions {
     /// sometimes reports the same 2 clipped and 3 fixed size nodes as the light one, sometimes none).
     static let clipped = "Text of this element may be clipped at larger Dynamic Type sizes."
     static let fixedSize = "User will not be able to change the font size of this element"
+    /// "Potentially inaccessible text" with no element: letters inside an image (#3729).
+    static let textInImage = "Potentially inaccessible text inside an image"
     static let unresolvedAllowance: [String: [String: Int]] = [
         "feed": [clipped: 2, fixedSize: 3], "feed (AX5)": [clipped: 1],
-        "profile (AX5)": [clipped: 3], "communities (AX5)": [clipped: 2], "settings (AX5)": [clipped: 3],
+        "profile (AX5)": [clipped: 3], "communities (AX5)": [clipped: 2, textInImage: 1], "settings (AX5)": [clipped: 3],
+        // 2026-11-24 (#3729): the sample Spike Community's logo is a picture with words in it ("TRAVEL FEED"); avatars
+        // are hidden from VoiceOver on purpose (the row's title names the community), so the audit finds those letters
+        // with no element (shown on a screenshot, and gone with the avatar removed)
+        "communities": [textInImage: 1],
         // 2026-10-29: the closed profile's compact header, one line in the navigation bar
         "profile closed (AX5)": [clipped: 1],
         // 2026-11-02: the vote sheet over the feed, whose header the sheet dims but does not hide (the feed's one), and
@@ -422,9 +427,8 @@ enum AuditExclusions {
 
     /// The share of the element drawn where it can be read; nil when nothing cuts it. Two things cut it. A scroll view
     /// that holds it and clips it, or the window's edge: VoiceOver scrolls to such text, but the audit reads the pixels
-    /// drawn where it would be (at AX5 the profile summary is capped to 70 % of the screen and scrolls inside, so its
-    /// location and follower counts sit under the tabs and the first post; the reading then depended on which card had
-    /// loaded there). Then the system tab bar: list rows scroll on under its glass, as in Apple's own apps, and the
+    /// drawn where it would be (at AX5 the profile summary is taller than the screen, so its location and follower
+    /// counts sit below the window's edge). Then the system tab bar: list rows scroll on under its glass, as in Apple's own apps, and the
     /// audit reads them through it. The visible share is the smaller of the visible height and width shares, less the
     /// part under the bar. Both count together: a wallet card title half below the screen's edge has the rest of it
     /// under the bar (#3658), and neither share alone reached half.

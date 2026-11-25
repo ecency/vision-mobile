@@ -27,6 +27,31 @@ final class CommunityUITests: XCTestCase {
         XCTAssertTrue(element(app, "community-hive-100002").waitForExistence(timeout: 30), app.debugDescription)
     }
 
+    /// Review of #3734: a community feed scrolled past its Details card keeps its place after a post and back.
+    func testAScrolledCommunityFeedKeepsItsPlaceAfterAPostAndBack() {
+        let app = launch(["-openLink", "https://ecency.com/trending/hive-100001"])
+        XCTAssertTrue(element(app, "community-details").waitForExistence(timeout: 20), app.debugDescription)
+        let list = element(app, "feed-list")
+        XCTAssertTrue(app.buttons["post-card"].firstMatch.waitForExistence(timeout: 20))
+        for _ in 0..<4 { list.swipeUp() }
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        XCTAssertFalse(element(app, "community-details").isHittable, "scrolled past the card")
+        // a card wholly below the pinned tabs (a tap on them would pick a tab)
+        let tabsEnd = app.buttons["tab-TRENDING"].frame.maxY
+        let read = app.buttons.matching(identifier: "post-card").allElementsBoundByIndex.first { $0.isHittable && $0.frame.minY > tabsEnd }
+        XCTAssertNotNil(read)
+        let label = read!.label
+        let top = read!.frame.minY
+        read!.tap()
+        XCTAssertTrue(element(app, "post-views").waitForExistence(timeout: 15), app.debugDescription)
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(element(app, "feed-list").waitForExistence(timeout: 10))
+        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+        let again = app.buttons.matching(identifier: "post-card").matching(NSPredicate(format: "label == %@", label)).firstMatch
+        XCTAssertTrue(again.exists && again.isHittable, "the card read before is still in view")
+        XCTAssertEqual(again.frame.minY, top, accuracy: 2, "at the same place")
+    }
+
     /// Every step waits for what it needs next (a row, a text, an enabled button), never for the screen around it:
     /// the containers ("community-details", a member's row) show before their content has loaded.
     func testCommunitiesFromTheSideMenuThenACommunityAndItsMembers() {

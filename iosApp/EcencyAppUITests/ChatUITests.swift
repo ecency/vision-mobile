@@ -254,6 +254,29 @@ final class ChatUITests: XCTestCase {
         XCTAssertGreaterThan(long.frame.height, 200, "the long message shows whole")
     }
 
+    /// A tap on a reply's quote scrolls to the quoted message (an addition to RN, whose quote did nothing).
+    func testATapOnAQuoteScrollsToTheQuotedMessage() {
+        let app = launch(["-demoChatHistory", "60", "-openScreen", "chat:ch-dm-alice:D"])
+        let list = element(app, "chat-messages")
+        let reply = message(app, containing: "the final words of the long reply")
+        XCTAssertTrue(list.waitForExistence(timeout: 20))
+        sleep(2)
+        for _ in 0..<6 where !reply.isHittable { list.swipeDown() }
+        XCTAssertTrue(reply.isHittable)
+        // the reply's top (its quote) near the top of the list: the quoted message above it starts off screen
+        let long = message(app, containing: "the last line of the long message")
+        let drag = list.frame.minY + 60 - reply.frame.minY
+        if abs(drag) > 10 {
+            let from = list.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            from.press(forDuration: 0.1, thenDragTo: from.withOffset(CGVector(dx: 0, dy: drag)), withVelocity: .slow, thenHoldForDuration: 0.3)
+        }
+        XCTAssertTrue(!long.exists || long.frame.minY < list.frame.minY, "the quoted message starts above the list: \(long.frame) list \(list.frame)")
+        // the quote: the top of the reply's bubble, under the author's name
+        reply.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0)).withOffset(CGVector(dx: 0, dy: 40)).tap()
+        sleep(2)
+        XCTAssertTrue(long.exists && long.frame.minY >= list.frame.minY - 1 && long.frame.minY < list.frame.maxY, "the quoted message starts in view: \(long.frame) list \(list.frame)")
+    }
+
     /// The tallest run of the quote's accent bar (strong blue) in the first 60 pt of [frame], in points.
     private func quoteBarHeight(_ app: XCUIApplication, in frame: CGRect) -> CGFloat {
         let image = app.screenshot().image

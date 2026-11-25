@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performSemanticsAction
 import coil3.ImageLoader
@@ -275,6 +276,48 @@ class ChatFlowsTest {
 
     /** The pages of [channelId] read so far (`GET /channels/{id}/posts[?before=...]`, not a single post's calls). */
     private fun postReads(channelId: String) = node.chat.sent.count { it.method == "GET" && Regex("/channels/$channelId/posts(\\?|$)").containsMatchIn(it.url) }
+
+    /** A tap on a reply's quote scrolls to the quoted message and marks it a moment (an addition to RN). */
+    @Test
+    fun aTapOnAQuoteScrollsToTheQuotedMessage() {
+        node.chat.seedHistory("ch-ecency", 10, unread = 20)
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-ecency")
+        compose.onNodeWithTag("chatRow:ch-ecency").performClick()
+        waitFor("messages")
+        idleMain()
+        compose.waitForIdle()
+        val quoted = node.chat.idOf("ch-ecency", com.ecency.core.app.DemoChat.LONG_MESSAGE)!!
+        val reply = node.chat.idOf("ch-ecency", com.ecency.core.app.DemoChat.LONG_REPLY)!!
+        compose.onNodeWithTag("messages").performScrollToKey(reply)
+        idleMain()
+        compose.waitForIdle()
+        // the reply up near the top: the quoted message above it starts off screen
+        repeat(6) {
+            if (!topOnScreen("bubble:$quoted")) return@repeat
+            compose.onNodeWithTag("messages").performTouchInput { swipeUp(startY = centerY + 100f, endY = centerY - 20f, durationMillis = 400) }
+            idleMain()
+            compose.waitForIdle()
+        }
+        assertFalse("the quoted message's start is off screen", topOnScreen("bubble:$quoted"))
+        assertTrue("the reply's quote is on screen", topOnScreen("bubble:$reply"))
+        compose.onNode(hasTestTag("quote") and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("bubble:$reply")), useUnmergedTree = true)
+            .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        idleMain()
+        compose.waitForIdle()
+        assertTrue("the quoted message is marked", exists("highlight:$quoted"))
+        assertTrue("and its start on screen", topOnScreen("bubble:$quoted"))
+    }
+
+    /** Where [tag]'s node starts lies inside the message list (a message taller than the screen starts in view). */
+    private fun topOnScreen(tag: String): Boolean {
+        val list = compose.onNodeWithTag("messages").fetchSemanticsNode().boundsInRoot
+        return compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().any {
+            val b = it.boundsInRoot
+            b.height > 0 && it.positionInRoot.y >= list.top - 1 && it.positionInRoot.y < list.bottom
+        }
+    }
 
     @Test
     fun aLongChannelOpensAtItsUnreadMessagesAndPagesBackOnScroll() {

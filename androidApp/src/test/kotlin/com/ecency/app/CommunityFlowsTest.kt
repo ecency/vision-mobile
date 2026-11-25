@@ -200,8 +200,13 @@ class CommunityFlowsTest {
     }
 
     @Test
-    fun theDetailsCardClosesOnScrollAndOpensAtTheTopOrOnItsTitle() {
+    fun theDetailsCardScrollsWithTheFeedAndTheTabsPin() {
         launchSignedIn()
+        node.extra = { method, req ->
+            if (method != "bridge.get_ranked_posts") null
+            else if (req["params"].toString().contains("start_author")) "[]"
+            else (1..40).joinToString(",", "[", "]") { node.entry("alice", "long-$it") }
+        }
         push(AppScreen.Community("hive-100001"))
         waitFor("communityDetailsBody")
         // the title closes and opens it (RN CollapsibleCard)
@@ -209,21 +214,93 @@ class CommunityFlowsTest {
         compose.await("!exists(\"communityDetailsBody\")") { idleMain(); !exists("communityDetailsBody") }
         tap("communityDetailsToggle")
         waitFor("communityDetailsBody")
-        // scrolling the feed down closes it, the title and the tabs stay; back at the top it opens again
-        compose.mainClock.advanceTimeBy(1_000)
-        waitFor("card:alice/trending-one")
-        compose.onNodeWithTag("feed").performTouchInput { swipeUp(durationMillis = 600) }
-        compose.await("!exists(\"communityDetailsBody\")") { idleMain(); !exists("communityDetailsBody") }
-        assertTrue(exists("communityDetailsToggle"))
-        compose.mainClock.advanceTimeBy(1_000)
-        compose.onNodeWithTag("feed").performTouchInput { swipeDown(durationMillis = 600) }
-        waitFor("communityDetailsBody")
-        // closed, then another tab: it opens over that tab's list
-        compose.mainClock.advanceTimeBy(1_000)
-        compose.onNodeWithTag("feed").performTouchInput { swipeUp(durationMillis = 600) }
-        compose.await("!exists(\"communityDetailsBody\")") { idleMain(); !exists("communityDetailsBody") }
+        waitFor("card:alice/long-1")
+        // #3734: the card is the feed's first row and scrolls away; the tabs pin at the feed's top
+        val feedTop = compose.onNodeWithTag("feed").fetchSemanticsNode().boundsInRoot.top
+        compose.onNode(androidx.compose.ui.test.hasScrollToIndexAction() and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("feed"))).performScrollToIndex(10)
+        compose.await("!exists(\"communityDetails\")") { idleMain(); !exists("communityDetails") }
+        assertEquals("the tabs pinned at the top", feedTop, compose.onNodeWithTag("tab:HOT").fetchSemanticsNode().boundsInRoot.top, 8f)
+        // another tab starts with the tabs still pinned, also once its first page has landed (review of #3734)
         tap("tab:HOT")
-        waitFor("communityDetailsBody")
+        compose.await("HOT's first page") { idleMain(); compose.onAllNodes(hasTestTag("card:alice/long-1"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertFalse("the card stays away", exists("communityDetails"))
+    }
+
+    private fun longFeeds() {
+        node.extra = { method, req ->
+            if (method != "bridge.get_ranked_posts") null
+            else if (req["params"].toString().contains("start_author")) "[]"
+            else (1..40).joinToString(",", "[", "]") { node.entry("alice", "long-$it") }
+        }
+    }
+
+    private fun feedList() = compose.onNode(androidx.compose.ui.test.hasScrollToIndexAction() and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("feed")))
+
+    private fun settleTabs() {
+        repeat(3) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+    }
+
+    /** Review of #3734: a tab read further down before starts at its top under the pinned tabs when the card was away. */
+    @Test
+    fun aTabReadDownBeforeStartsAtItsTopWhenTheTabsArePinned() {
+        launchSignedIn()
+        longFeeds()
+        push(AppScreen.Community("hive-100001"))
+        waitFor("card:alice/long-1")
+        feedList().performScrollToIndex(12)
+        compose.await("!exists(\"communityDetails\")") { idleMain(); !exists("communityDetails") }
+        tap("tab:HOT")
+        compose.await("HOT's first page") { idleMain(); exists("card:alice/long-1") }
+        settleTabs()
+        tap("tab:TRENDING")
+        settleTabs()
+        assertFalse("the card stays away", exists("communityDetails"))
+        assertTrue("TRENDING starts at its first card", exists("card:alice/long-1"))
+    }
+
+    /** Review of #3734: with the card showing, a tab read further down before shows the card too. */
+    @Test
+    fun aTabReadDownBeforeShowsTheCardWhenTheCardShows() {
+        launchSignedIn()
+        longFeeds()
+        push(AppScreen.Community("hive-100001"))
+        waitFor("card:alice/long-1")
+        feedList().performScrollToIndex(12)
+        compose.await("!exists(\"communityDetails\")") { idleMain(); !exists("communityDetails") }
+        tap("tab:HOT")
+        compose.await("HOT's first page") { idleMain(); exists("card:alice/long-1") }
+        settleTabs()
+        feedList().performScrollToIndex(0)
+        waitFor("communityDetails")
+        tap("tab:TRENDING")
+        settleTabs()
+        assertTrue("the card shows on TRENDING too", exists("communityDetails"))
+    }
+
+    /** Review of #3734: a feed of one short card can still scroll the card away and keep the tabs pinned. */
+    @Test
+    @Config(qualifiers = "w360dp-h900dp")
+    fun aShortFeedStillPinsTheTabs() {
+        launchSignedIn()
+        node.extra = { method, req ->
+            if (method != "bridge.get_ranked_posts") null
+            else if (req["params"].toString().contains("start_author")) "[]"
+            else "[" + node.entry("alice", "short-1") + "]"
+        }
+        push(AppScreen.Community("hive-100001"))
+        waitFor("card:alice/short-1")
+        settleTabs()
+        val feedTop = compose.onNodeWithTag("feed").fetchSemanticsNode().boundsInRoot.top
+        repeat(4) { compose.onNodeWithTag("feed").performTouchInput { swipeUp(durationMillis = 600) }; settleTabs() }
+        // the lazy list may keep the scrolled away row composed: where it ends tells
+        val details = compose.onAllNodes(hasTestTag("communityDetails"), useUnmergedTree = true).fetchSemanticsNodes().firstOrNull()
+        val detailsEnd = details?.let { it.positionInRoot.y + it.size.height }
+        assertTrue("the card scrolled away: it ends at $detailsEnd, the feed starts at $feedTop", detailsEnd == null || detailsEnd <= feedTop)
+        assertEquals("the tabs pinned at the top", feedTop, compose.onNodeWithTag("tab:HOT").fetchSemanticsNode().boundsInRoot.top, 8f)
+        assertEquals("the first card right under the tabs", compose.onNodeWithTag("tab:HOT").fetchSemanticsNode().boundsInRoot.bottom, compose.onNodeWithTag("card:alice/short-1", useUnmergedTree = true).fetchSemanticsNode().positionInRoot.y, 16f)
     }
 
     @Test

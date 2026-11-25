@@ -81,16 +81,16 @@ final class ScrollTopUITests: XCTestCase {
 
     func testATapOnTheSelectedProfileTabScrollsToTheTop() {
         let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
-        let scroll = list(app, "profile-list")
+        let scroll = list(app, "profile")
         scrollAway(app, scroll)
         app.buttons["tab-blog"].tap()
         waitAtTop(app, "the selected profile tab scrolls its list to the top")
     }
 
-    /// The profile summary opens again only back at the top, not on a scroll up through the list.
+    /// The profile summary shows again only back at the top: it is the list's first row (#3734).
     func testTheProfileSummaryStaysClosedOnAScrollUpMidList() {
         let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
-        let scroll = list(app, "profile-list")
+        let scroll = list(app, "profile")
         scrollAway(app, scroll)
         let compact = element(app, "profile-compact-header")
         XCTAssertTrue(compact.waitForExistence(timeout: 5), "closed after scrolling down")

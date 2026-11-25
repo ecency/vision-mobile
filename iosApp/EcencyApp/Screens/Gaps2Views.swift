@@ -347,6 +347,13 @@ extension View {
         })
     }
 
+    /// On a ScrollView whose stack calls `reportsScrollOffset`: [gone] true once the list has scrolled past a header of
+    /// [headerHeight] at its top (#3734). Read from the stack's offset, which a lazy stack keeps reporting after the
+    /// header row itself was unloaded.
+    func reportsHeaderGone(headerHeight: CGFloat, gone: @escaping (Bool) -> Void) -> some View {
+        modifier(HeaderGoneModifier(headerHeight: headerHeight, gone: gone))
+    }
+
     /// RN ScrollTopPopup on a ScrollView whose stack calls `reportsScrollOffset(space)`: the arrow pill at the bottom
     /// left, by `ScrollTopRule` (5000 points scrolled up; post lists hide it on tap only, waves also on scroll down).
     func scrollTopPopup(space: String, hidesOnScrollDown: Bool = false, id: String = "scroll-top", onTap: @escaping () -> Void) -> some View {
@@ -370,6 +377,14 @@ extension View {
     var isAtTop: Bool {
         guard let view = scrollView else { return true }
         return view.contentOffset.y <= -view.adjustedContentInset.top + 1
+    }
+
+    /// Puts the content's point [y] at the top of the visible area, without animation. False when no scroll view was
+    /// found yet.
+    @discardableResult func place(contentY y: CGFloat) -> Bool {
+        guard let view = scrollView else { return false }
+        view.setContentOffset(CGPoint(x: view.contentOffset.x, y: y - view.adjustedContentInset.top), animated: false)
+        return true
     }
 
     /// Moves the content by [dy] without animation (README "Foreground refresh": rows that went in above the card
@@ -900,5 +915,31 @@ struct ProfileWalletTab: View {
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(theme.lightBackground, in: RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+
+/// `reportsHeaderGone`: the stack's offset is the distance scrolled from the list's top (the scroll view's space starts
+/// under the bar).
+private struct HeaderGoneModifier: ViewModifier {
+    let headerHeight: CGFloat
+    let gone: (Bool) -> Void
+    @State private var offset: CGFloat?
+
+    func body(content: Content) -> some View {
+        content
+            .onPreferenceChange(ScrollOffsetKey.self) { value in
+                MainActor.assumeIsolated {
+                    guard let value else { return }
+                    offset = value
+                    report()
+                }
+            }
+            .onChange(of: headerHeight) { _, _ in report() }
+    }
+
+    private func report() {
+        guard headerHeight > 0, let offset else { return }
+        gone(offset >= headerHeight - 0.5)
     }
 }

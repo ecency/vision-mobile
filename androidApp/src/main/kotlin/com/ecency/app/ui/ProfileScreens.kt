@@ -1,5 +1,10 @@
 package com.ecency.app.ui
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.heightIn
 
@@ -174,8 +179,9 @@ class ProfileActions(
 
 /**
  * RN profile: the summary (cover, avatar with Follow / Message / email / menu or Edit, name, bio, date, website,
- * location, follower counts, voting power and RC bars), then the tabs over the selected tab's list. The summary
- * sits above the list and collapses as it scrolls (RN profileView, [SummaryCollapseUi]); the tab row stays.
+ * location, follower counts, voting power and RC bars), then the tabs over the selected tab's list. The summary is
+ * the list's first row and scrolls away with it, the tabs pin under the compact bar that fades in over it, as
+ * Instagram and X (#3734, [ScrollingHeader]; RN profileView toggled the summary instead).
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -189,8 +195,6 @@ fun ProfileScreen(
     actions: ProfileActions,
     /** What the Waves tab's rows need (body links, reply, voters); null shows the tab without them wired. */
     wavesUi: WavesUi? = null,
-    /** The summary's collapse, kept in the stack entry with [listState]. */
-    collapseState: SummaryCollapseState = remember { SummaryCollapseState() },
 ) {
     val state by model.state.collectAsState()
     val colors = LocalEcencyColors.current
@@ -199,11 +203,13 @@ fun ProfileScreen(
     val tab = state.tab
     // RN wavesTabContent: the author's waves, loaded when the tab is first shown
     val waves = remember(tab, model) { if (tab == ProfileTab.WAVES) model.waves() else null }
-    val wavesState = waves?.state?.collectAsState()?.value
+    // keyed on the model: collectAsState keeps its last value across a new flow for a frame, which would show the
+    // previous tab's rows under the new tab (and measure the pinned tabs' filler on them, #3734)
+    val wavesState = waves?.let { w -> androidx.compose.runtime.key(w) { w.state.collectAsState().value } }
     OnShow(waves) { waves?.start() }
     val wavesWidth = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp - 32.dp
     val feed: FeedModel? = remember(tab) { model.feed(tab) }
-    val feedState = feed?.state?.collectAsState()?.value
+    val feedState = feed?.let { f -> androidx.compose.runtime.key(f) { f.state.collectAsState().value } }
     OnShow(feed) { feed?.start() }
     val nearEnd by remember(listState) {
         derivedStateOf {
@@ -216,84 +222,115 @@ fun ProfileScreen(
     LaunchedEffect(nearEnd, feedState?.pages, feed) { if (nearEnd && feedState?.items?.isNotEmpty() == true) feed?.loadMore() }
     LaunchedEffect(nearEnd, wavesState?.pages, waves) { if (nearEnd) waves?.loadMore() }
     var confirmReport by remember { mutableStateOf(false) }
+    // the summary's last measured height: a tab switch with it out of view keeps the tabs pinned at that point
+    var profileSummaryHeight by remember { mutableIntStateOf(0) }
 
-    val collapse = rememberSummaryCollapse(collapseState, listState)
+    val scope = rememberCoroutineScope()
+    val barPx = with(LocalDensity.current) { PROFILE_BAR.toPx() }
+    // how far the summary has gone under the bar: the compact bar fades in, the pinned tabs stop under it
+    val progress = rememberHeaderProgress(listState, barPx)
+    val tabsShift = rememberTabsShift(listState, barPx)
+    val filler = rememberPinFiller(listState)
+    val toTop: () -> Unit = { scope.launch { listState.animateScrollToItem(0) } }
     Box(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().testTag("profile")) {
         val header = state.header
-        Column(Modifier.fillMaxSize()) {
-            if (header == null) {
+        if (header == null) {
+            Column(Modifier.fillMaxSize()) {
                 if (state.error != null) {
                     TopBar("@${state.username}", onBack = actions.onBack)
                     ErrorBlock(state.error!!, Modifier.padding(top = 48.dp), com.ecency.core.esie.EsiePlacement.ERROR, model::retry)
                 } else {
                     ProfileHeaderSkeleton()
                 }
-                return@Column
             }
-            // RN profileView: the summary closes as the list scrolls down and RN's Header (back, avatar, name) takes its
-            // place; it opens again back at the top or on a tap on that header
-            if (!collapse.open) ProfileCompactHeader(env, header, actions.onBack, collapse::expand)
-            CollapsingSummary(collapse) {
-                ProfileSummary(env, state, header, model, actions, onReport = { confirmReport = true })
-                // RN NewsletterSenderInfo: the own creator list's subscribers, link and "Manage"
-                if (state.isOwn) DigestSenderRow(env, state.username, actions.onManageDigests)
+            return@Box
+        }
+        val selectTab: (Int) -> Unit = { i ->
+            // the summary gone: the new tab starts at its top with the tabs still pinned under the bar
+            val pinned = ScrollingHeader.gone(listState) || progress.value >= 1f
+            val summary = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == ScrollingHeader.HEADER_INDEX }?.size
+            model.selectTab(i)
+            if (pinned) {
+                // a screen tall filler while the new tab is placed: its rows may be shorter than the pinned position
+                filler.reserve()
+                scope.launch {
+                    val height = summary ?: profileSummaryHeight
+                    if (height > 0) listState.scrollToItem(ScrollingHeader.HEADER_INDEX, (height - barPx.toInt()).coerceAtLeast(0)) else listState.scrollToItem(ScrollingHeader.TABS_INDEX)
+                    filler.release()
+                }
             }
-            // another tab's list: the summary opens over it (the three ways in agree)
-            if (!state.isMuted) ProfileTabs(state, rememberTabTap(state.selectedTab, { listState }) { i -> collapse.reset(); model.selectTab(i) })
-            PullToRefreshBox(
-                isRefreshing = feedState?.isRefreshing == true || wavesState?.isRefreshing == true, onRefresh = model::refresh,
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-            ) {
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize().collapsesSummary(collapse).testTag("profileList")) {
-                    if (state.isMuted) {
-                        // RN _renderMutedView
-                        item(key = "muted") {
-                            Box(Modifier.fillMaxWidth().padding(top = 48.dp).testTag("mutedView"), contentAlignment = Alignment.Center) {
-                                Glyph(AppIcon.MUTED, colors.icon, 120.dp, description = UiCopy.MUTED)
-                            }
-                        }
-                        return@LazyColumn
+        }
+        PullToRefreshBox(
+            isRefreshing = feedState?.isRefreshing == true || wavesState?.isRefreshing == true, onRefresh = model::refresh,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            LazyColumn(state = listState, modifier = Modifier.fillMaxSize().testTag("profileList")) {
+                item(key = "summary", contentType = "summary") {
+                    Column(Modifier.onSizeChanged { profileSummaryHeight = it.height }) {
+                        ProfileSummary(env, state, header, model, actions, onReport = { confirmReport = true })
+                        // RN NewsletterSenderInfo: the own creator list's subscribers, link and "Manage"
+                        if (state.isOwn) DigestSenderRow(env, state.username, actions.onManageDigests)
                     }
-                    when (tab) {
-                        ProfileTab.WAVES -> if (wavesState != null && waves != null) {
+                }
+                if (state.isMuted) {
+                    // RN _renderMutedView
+                    item(key = "muted") {
+                        Box(Modifier.fillMaxWidth().padding(top = 48.dp).testTag("mutedView"), contentAlignment = Alignment.Center) {
+                            Glyph(AppIcon.MUTED, colors.icon, 120.dp, description = UiCopy.MUTED)
+                        }
+                    }
+                    return@LazyColumn
+                }
+                // pinned once it reaches the top, then held under the compact bar (drawn over the rows below it)
+                stickyHeader(key = "tabs", contentType = "tabs") {
+                    Column(Modifier.graphicsLayer { translationY = tabsShift.value }) {
+                        ProfileTabs(state, rememberTabTap(state.selectedTab, { listState }, selectTab))
+                    }
+                }
+                when (tab) {
+                    ProfileTab.WAVES -> if (wavesState != null && waves != null) {
+                        when {
+                            wavesState.items.isEmpty() && wavesState.error != null -> item(key = "waves:error") {
+                                Box(Modifier.fillParentMaxHeight()) { ErrorBlock(wavesState.error!!, Modifier.padding(top = 32.dp), com.ecency.core.esie.EsiePlacement.ERROR, waves::retry) }
+                            }
+                            wavesState.items.isEmpty() && wavesState.loaded -> item(key = "waves:empty") {
+                                Box(Modifier.fillParentMaxHeight()) { EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY, UiCopy.userHasNoPosts(state.username), Modifier.padding(top = 32.dp)) }
+                            }
+                            wavesState.items.isEmpty() -> item(key = "waves:loading", contentType = ScrollingHeader.LOADING) { LoadingBlock(Modifier.padding(top = 32.dp)) }
+                        }
+                        val ui = wavesUi ?: WavesUi(com.ecency.app.render.PostActions(), login = {}, requireLogin = { it() }, push = {})
+                        items(wavesState.items, key = { "waves:${it.key}" }, contentType = { "wave" }) { item ->
+                            WaveView(env, item, nowMillis, wavesWidth, voteInFlight(votes, item.key), feedActions, ui.body, ui)
+                        }
+                        if (wavesState.items.isNotEmpty()) item(key = "waves:footer") {
                             when {
-                                wavesState.items.isEmpty() && wavesState.error != null -> item(key = "waves:error") {
-                                    ErrorBlock(wavesState.error!!, Modifier.padding(top = 32.dp), com.ecency.core.esie.EsiePlacement.ERROR, waves::retry)
-                                }
-                                wavesState.items.isEmpty() && wavesState.loaded -> item(key = "waves:empty") {
-                                    EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY, UiCopy.userHasNoPosts(state.username), Modifier.padding(top = 32.dp))
-                                }
-                                wavesState.items.isEmpty() -> item(key = "waves:loading") { LoadingBlock(Modifier.padding(top = 32.dp)) }
-                            }
-                            val ui = wavesUi ?: WavesUi(com.ecency.app.render.PostActions(), login = {}, requireLogin = { it() }, push = {})
-                            items(wavesState.items, key = { "waves:${it.key}" }, contentType = { "wave" }) { item ->
-                                WaveView(env, item, nowMillis, wavesWidth, voteInFlight(votes, item.key), feedActions, ui.body, ui)
-                            }
-                            if (wavesState.items.isNotEmpty()) item(key = "waves:footer") {
-                                when {
-                                    wavesState.isLoadingMore -> LoadingBlock()
-                                    wavesState.error != null -> ErrorBlock(wavesState.error!!, onRetry = waves::retry)
-                                    else -> Spacer(Modifier.height(72.dp))
-                                }
+                                wavesState.isLoadingMore -> LoadingBlock()
+                                wavesState.error != null -> ErrorBlock(wavesState.error!!, onRetry = waves::retry)
+                                else -> Spacer(Modifier.height(72.dp))
                             }
                         }
-                        ProfileTab.WALLET -> item(key = "wallet") {
-                            if (state.isOwn) {
-                                PlaceholderTab(ProfileUiCopy.WALLET, ProfileUiCopy.YOUR_WALLET_IS_ON, ProfileUiCopy.OPEN_WALLET) { actions.onWallet(true) }
-                            } else {
-                                // RN profile wallet tab of another account: unclaimed rewards and Wallet Details, read only
-                                ProfileWalletTab(env, state.username)
-                            }
+                    }
+                    // its own height, however tall; the filler below keeps the summary away when it is short (#3734)
+                    ProfileTab.WALLET -> item(key = "wallet") {
+                        if (state.isOwn) {
+                            PlaceholderTab(ProfileUiCopy.WALLET, ProfileUiCopy.YOUR_WALLET_IS_ON, ProfileUiCopy.OPEN_WALLET) { actions.onWallet(true) }
+                        } else {
+                            // RN profile wallet tab of another account: unclaimed rewards and Wallet Details, read only
+                            ProfileWalletTab(env, state.username)
                         }
-                        else -> if (feedState != null) {
-                            when {
-                                feedState.items.isEmpty() && feedState.isLoading -> item(key = "loading") { FeedSkeleton(2) }
-                                feedState.items.isEmpty() && feedState.error != null -> item(key = "error") {
-                                    ErrorBlock(feedState.error!!, Modifier.padding(top = 32.dp), com.ecency.core.esie.EsiePlacement.ERROR, feed!!::retry)
-                                }
-                                feedState.items.isEmpty() && feedState.isLoadingMore -> item(key = "loading") { FeedSkeleton(2) }
-                                feedState.items.isEmpty() && feedState.loaded -> item(key = "empty") {
-                                    // RN profile.havent_posted / havent_commented; the pages read so far may all be filtered out
+                    }
+                    else -> if (feedState != null) {
+                        // an empty or error state is a screen tall: the summary can still scroll away and the tabs stay
+                        // pinned (#3734); loading rows keep their height, the filler stands in for them
+                        when {
+                            feedState.items.isEmpty() && feedState.isLoading -> item(key = "loading", contentType = ScrollingHeader.LOADING) { FeedSkeleton(2) }
+                            feedState.items.isEmpty() && feedState.error != null -> item(key = "error") {
+                                Box(Modifier.fillParentMaxHeight()) { ErrorBlock(feedState.error!!, Modifier.padding(top = 32.dp), com.ecency.core.esie.EsiePlacement.ERROR, feed!!::retry) }
+                            }
+                            feedState.items.isEmpty() && feedState.isLoadingMore -> item(key = "loading", contentType = ScrollingHeader.LOADING) { FeedSkeleton(2) }
+                            feedState.items.isEmpty() && feedState.loaded -> item(key = "empty") {
+                                // RN profile.havent_posted / havent_commented; the pages read so far may all be filtered out
+                                Box(Modifier.fillParentMaxHeight()) {
                                     EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY,
                                         if (tab.isComments) ProfileUiCopy.userHasNoComments(state.username) else UiCopy.userHasNoPosts(state.username),
                                         Modifier.padding(top = 32.dp),
@@ -301,37 +338,34 @@ fun ProfileScreen(
                                     )
                                 }
                             }
-                            items(feedState.items, key = { "${tab.key}:${it.key}" }, contentType = { if (tab.isComments) "comment" else "card" }) { card ->
-                                if (tab.isComments) {
-                                    CommentRow(card, nowMillis, feedActions)
-                                } else {
-                                    // the options menu and the payout breakdown, as in a feed (user report: no breakdown on a profile)
-                                    PostCardView(card, nowMillis, voteInFlight(votes, card.key), rememberCardActions(feedActions, feed))
-                                }
+                        }
+                        items(feedState.items, key = { "${tab.key}:${it.key}" }, contentType = { if (tab.isComments) "comment" else "card" }) { card ->
+                            if (tab.isComments) {
+                                CommentRow(card, nowMillis, feedActions)
+                            } else {
+                                // the options menu and the payout breakdown, as in a feed (user report: no breakdown on a profile)
+                                PostCardView(card, nowMillis, voteInFlight(votes, card.key), rememberCardActions(feedActions, feed))
                             }
-                            if (feedState.items.isNotEmpty()) item(key = "footer") {
-                                when {
-                                    feedState.isLoadingMore -> LoadingBlock()
-                                    feedState.error != null -> ErrorBlock(feedState.error!!, onRetry = feed!!::retry)
-                                    feedState.endReached -> MessageBlock(ReadingUiCopy.NO_MORE_POSTS)
-                                    else -> Spacer(Modifier.height(72.dp))
-                                }
+                        }
+                        if (feedState.items.isNotEmpty()) item(key = "footer") {
+                            when {
+                                feedState.isLoadingMore -> LoadingBlock()
+                                feedState.error != null -> ErrorBlock(feedState.error!!, onRetry = feed!!::retry)
+                                feedState.endReached -> MessageBlock(ReadingUiCopy.NO_MORE_POSTS)
+                                else -> Spacer(Modifier.height(72.dp))
                             }
                         }
                     }
                 }
-                // RN postsTabContent's ScrollTopPopup (the profile's post tabs)
-                ScrollTopPopup(listState, "profileScrollTop", modifier = Modifier.navigationBarsPadding(), onTap = collapse::expand)
+                // a short tab can still scroll the summary away and keep the tabs pinned (#3734)
+                item(key = ScrollingHeader.FILLER_KEY) { PinFillerRow(filler) }
             }
+            // RN postsTabContent's ScrollTopPopup (the profile's post tabs)
+            ScrollTopPopup(listState, "profileScrollTop", modifier = Modifier.navigationBarsPadding())
         }
-        // RN's floating back button over the cover, while the summary is open
-        if (header != null && collapse.open) {
-            Box(
-                Modifier.padding(8.dp).size(40.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.35f))
-                    .clickable(onClick = actions.onBack, role = Role.Button).testTag("back"),
-                contentAlignment = Alignment.Center,
-            ) { Glyph(AppIcon.BACK, Color.White, 22.dp, description = UiCopy.BACK) }
-        }
+        // RN's floating back button over the cover, then RN's Header (back, avatar, name) once the summary has gone:
+        // one fades into the other as the summary scrolls under the bar; a tap on the user goes back to the top
+        ProfileTopBar(env, header, { progress.value }, actions.onBack, toTop)
     }
 
     if (confirmReport) {
@@ -355,29 +389,51 @@ fun ProfileScreen(
     }
 }
 
-/** RN Header with the selected user, shown while the summary is collapsed; a tap on the user opens the summary. */
+/** The bar over the profile's top: below it the pinned tabs stop. */
+private val PROFILE_BAR = 56.dp
+
+/**
+ * The floating back button over the cover while the summary shows; RN's Header with the selected user once it has
+ * gone ([progress] 1), crossfading as the summary scrolls under the bar. A tap on the user scrolls back to the summary.
+ */
 @Composable
-private fun ProfileCompactHeader(env: AppEnvironment, header: ProfileHeader, onBack: () -> Unit, onExpand: () -> Unit) {
+private fun ProfileTopBar(env: AppEnvironment, header: ProfileHeader, progress: () -> Float, onBack: () -> Unit, onExpand: () -> Unit) {
     val colors = LocalEcencyColors.current
-    Row(
-        Modifier.fillMaxWidth().background(colors.background).padding(horizontal = 8.dp).heightIn(min = 56.dp).testTag("profileCompactHeader"),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.iconClickable(radius = 24.dp, onClick = onBack).padding(12.dp).testTag("back")) {
-            Glyph(AppIcon.BACK, colors.darkGray, 24.dp, description = UiCopy.BACK)
-        }
+    // read in drawing for the fades; composition only follows the switch from the floating button to the bar
+    val compact by remember { derivedStateOf { progress() >= 0.5f } }
+    Box(Modifier.fillMaxWidth().height(PROFILE_BAR)) {
+        // the bar's background turns opaque over the first half, its content fades in over the second: no summary text
+        // ever shows through a half-faded title
+        Box(Modifier.fillMaxSize().graphicsLayer { alpha = (progress() * 2f).coerceAtMost(1f) }.background(colors.background))
+        // while it is hidden the bar takes no touches (a drag on the cover scrolls the list) and TalkBack skips it
         Row(
-            Modifier.weight(1f).clip(RoundedCornerShape(8.dp)).clickable(role = Role.Button, onClickLabel = ShellUiCopy.EXPAND, onClick = onExpand)
-                .semantics { stateDescription = ShellUiCopy.COLLAPSED }
-                .padding(horizontal = 8.dp, vertical = 6.dp).testTag("profileExpand"),
+            Modifier.fillMaxSize().graphicsLayer { alpha = ((progress() - 0.5f) * 2f).coerceIn(0f, 1f) }.padding(horizontal = 8.dp)
+                .then(if (compact) Modifier.testTag("profileCompactHeader") else Modifier.clearAndSetSemantics {}),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Avatar(header.avatarUrl, 32.dp)
-            Column(Modifier.padding(start = 10.dp)) {
-                Text(header.displayName, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.darkText, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
-                Text("@${header.username}", fontSize = 12.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Box(Modifier.then(if (compact) Modifier.iconClickable(radius = 24.dp, onClick = onBack).testTag("back") else Modifier).padding(12.dp)) {
+                Glyph(AppIcon.BACK, colors.darkGray, 24.dp, description = if (compact) UiCopy.BACK else null)
             }
+            Row(
+                Modifier.weight(1f).clip(RoundedCornerShape(8.dp))
+                    .then(if (compact) Modifier.clickable(role = Role.Button, onClickLabel = ShellUiCopy.EXPAND, onClick = onExpand).testTag("profileExpand") else Modifier)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Avatar(header.avatarUrl, 32.dp)
+                Column(Modifier.padding(start = 10.dp)) {
+                    Text(header.displayName, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.darkText, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
+                    Text("@${header.username}", fontSize = 12.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+        if (!compact) {
+            Box(
+                Modifier.padding(8.dp).size(40.dp).graphicsLayer { alpha = 1f - progress() * 2f }.clip(CircleShape).background(Color.Black.copy(alpha = 0.35f))
+                    .clickable(onClick = onBack, role = Role.Button).testTag("back"),
+                contentAlignment = Alignment.Center,
+            ) { Glyph(AppIcon.BACK, Color.White, 22.dp, description = UiCopy.BACK) }
         }
     }
 }

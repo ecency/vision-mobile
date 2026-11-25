@@ -100,33 +100,57 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(element(app, "rc-delegate-sheet").exists, "cancel kept the sheet and sent nothing")
     }
 
-    /// RN profileView: the summary closes as the list scrolls down (the bar shows the user, the tabs stay) and opens
-    /// again on a tap on the user in the bar or back at the top.
-    func testSummaryClosesOnScrollAndOpensFromTheBarOrTheTop() {
+    /// #3734: the summary is the list's first row and moves with the finger (no jump, nothing closes by itself); the
+    /// tabs pin under the bar, which then shows the user; a tab switch keeps them pinned; a tap on the user goes back.
+    func testTheSummaryScrollsWithTheListAndTheTabsPinUnderTheBar() {
         let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
         XCTAssertTrue(element(app, "profile-name").waitForExistence(timeout: 20))
         XCTAssertFalse(element(app, "profile-compact-header").exists)
-        let list = app.scrollViews["profile-list"]
+        let list = app.scrollViews["profile"]
         XCTAssertTrue(list.waitForExistence(timeout: 10))
         XCTAssertTrue(element(app, "post-options").waitForExistence(timeout: 15), "the blog has cards to scroll")
-        list.swipeUp()
+        let summary = element(app, "profile-summary")
+        let tabs = app.buttons["tab-blog"]
+        let summaryTop = summary.frame.minY
+        let tabsTop = tabs.frame.minY
+        // a slow drag held at its end: no fling, the content follows the finger
+        let start = list.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -120)), withVelocity: .slow, thenHoldForDuration: 0.5)
+        let moved = summaryTop - summary.frame.minY
+        XCTAssertGreaterThan(moved, 60, "the summary moved with the finger")
+        XCTAssertEqual(tabsTop - tabs.frame.minY, moved, accuracy: 1, "the tabs moved with it: one scroll, no jump")
+        XCTAssertTrue(summary.exists, "nothing closed")
+        let bar = app.navigationBars.firstMatch
+        for _ in 0..<3 { list.swipeUp() }
         XCTAssertTrue(element(app, "profile-compact-header").waitForExistence(timeout: 5), app.debugDescription)
-        XCTAssertTrue(element(app, "profile-summary").waitForNonExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["tab-blog"].exists, "the tabs stay")
-        element(app, "profile-compact-header").tap()
-        XCTAssertTrue(element(app, "profile-summary").waitForExistence(timeout: 5))
-        XCTAssertTrue(element(app, "profile-compact-header").waitForNonExistence(timeout: 5))
-        list.swipeUp()
-        XCTAssertTrue(element(app, "profile-compact-header").waitForExistence(timeout: 5))
-        list.swipeDown()
-        list.swipeDown()
-        XCTAssertTrue(element(app, "profile-summary").waitForExistence(timeout: 5))
-        // closed, then another tab: it opens over that tab's list
-        list.swipeUp()
-        XCTAssertTrue(element(app, "profile-compact-header").waitForExistence(timeout: 5))
+        XCTAssertEqual(tabs.frame.minY, bar.frame.maxY, accuracy: 1, "the tabs pinned under the bar")
         app.buttons["tab-posts"].tap()
-        XCTAssertTrue(element(app, "profile-summary").waitForExistence(timeout: 5))
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        XCTAssertTrue(element(app, "profile-compact-header").exists, "a tab switch keeps the summary away: summary \(element(app, "profile-summary").frame) tabs \(app.buttons["tab-posts"].frame) bar \(bar.frame)")
+        XCTAssertEqual(app.buttons["tab-posts"].frame.minY, bar.frame.maxY, accuracy: 1, "and the tabs pinned")
+        element(app, "profile-compact-header").tap()
         XCTAssertTrue(element(app, "profile-compact-header").waitForNonExistence(timeout: 5))
+        XCTAssertTrue(element(app, "profile-name").isHittable, "back at the summary")
+    }
+
+    /// Review of #3734: far down a tab (the summary row long unloaded by the lazy stack), a tab switch still starts
+    /// the new tab at its top with the tabs pinned under the bar.
+    func testATabSwitchFarDownKeepsTheTabsPinnedUnderTheBar() {
+        let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
+        XCTAssertTrue(element(app, "profile-name").waitForExistence(timeout: 20))
+        let list = app.scrollViews["profile"]
+        XCTAssertTrue(element(app, "post-options").waitForExistence(timeout: 15), "the blog has cards to scroll")
+        for _ in 0..<12 { list.swipeUp(velocity: .fast) }
+        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+        XCTAssertTrue(element(app, "profile-compact-header").waitForExistence(timeout: 5))
+        let bar = app.navigationBars.firstMatch
+        app.buttons["tab-posts"].tap()
+        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+        XCTAssertTrue(element(app, "profile-compact-header").exists, "the summary still away: summary \(element(app, "profile-summary").frame) tabs \(app.buttons["tab-posts"].frame) bar \(bar.frame)")
+        XCTAssertEqual(app.buttons["tab-posts"].frame.minY, bar.frame.maxY, accuracy: 1, "the tabs pinned: tabs \(app.buttons["tab-posts"].frame) bar \(bar.frame)")
+        // the card's top row (author, options) of the first card on screen: under the tabs, not behind them
+        let first = app.buttons.matching(identifier: "post-options").allElementsBoundByIndex.map { $0.frame.minY }.filter { $0 > bar.frame.maxY - 60 }.min() ?? 0
+        XCTAssertEqual(first, app.buttons["tab-posts"].frame.maxY, accuracy: 24, "the new tab at its top, right under the tabs")
     }
 
     /// RN CommentView: a comment row of the profile's Comments tab has the gift, which opens the tipping sheet.

@@ -54,16 +54,16 @@ private struct ScreenBarItem<Item: View>: ViewModifier {
     @Environment(\.isInPane) private var isInPane
     @Environment(\.isPaneTop) private var isPaneTop
 
+    // One branch per place, with [shown] inside it: switching between `content` and `content.toolbar` would give the
+    // screen a new identity on every toggle, rebuilding its scroll view at the top (#3734, the profile's bar title).
     func body(content: Content) -> some View {
-        if !shown || (isInPane && !isPaneTop) {
-            content
-        } else if isInPane {
+        if isInPane {
             // added to what the screen's own views set (a screen with a title item and actions has both)
-            content.transformPreference(PaneBarKey.self) { $0[placement] = AnyView(item) }
+            content.transformPreference(PaneBarKey.self) { if shown && isPaneTop { $0[placement] = AnyView(item) } }
         } else if placement == .principal {
-            content.toolbar { ToolbarItem(placement: .principal) { item } }
+            content.toolbar { if shown { ToolbarItem(placement: .principal) { item } } }
         } else {
-            content.toolbar { ToolbarItemGroup(placement: .topBarTrailing) { item } }
+            content.toolbar { if shown { ToolbarItemGroup(placement: .topBarTrailing) { item } } }
         }
     }
 }
@@ -86,8 +86,10 @@ private struct PaneTitle: ViewModifier {
     @Environment(\.isInPane) private var isInPane
     @Environment(\.isPaneTop) private var isPaneTop
 
+    // one view on every path: an `if` around `content` would make a new screen (and put its scroll back at the top)
+    // whenever the screen becomes or stops being the pane's top one. A nil title is ignored by the key's reduce
     func body(content: Content) -> some View {
-        if isInPane && isPaneTop { content.preference(key: PaneTitleKey.self, value: title) } else { content }
+        content.preference(key: PaneTitleKey.self, value: isInPane && isPaneTop ? title : nil)
     }
 }
 

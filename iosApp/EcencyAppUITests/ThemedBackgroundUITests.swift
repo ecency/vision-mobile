@@ -160,10 +160,14 @@ final class ThemedBackgroundUITests: XCTestCase {
         }
     }
 
-    /// Communities, Joined with no account: the empty state.
+    /// Communities, Joined with no account: the empty state. Signed out the screen opens on Discover (#3704), so the
+    /// Joined tab is picked first.
     func testCommunitiesJoinedEmpty() {
         for dark in [true, false] {
             let app = launch(dark: dark, ["-openScreen", "route:COMMUNITIES"])
+            let joined = app.buttons["tab-Membership"].firstMatch
+            XCTAssertTrue(joined.waitForExistence(timeout: 30))
+            joined.tap()
             let discover = app.buttons["discover-communities"]
             XCTAssertTrue(discover.waitForExistence(timeout: 30))
             let s = shot("communities-empty-\(dark ? "dark" : "light")", app)

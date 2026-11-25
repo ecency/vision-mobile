@@ -339,21 +339,37 @@ fun CommunityScreen(
     }
     val selected = CommunityTab.entries[tab.intValue]
     val listState = entry.get("list:${selected.name}") { LazyListState() }
-    // RN CollapsibleCard "Details" above the tabs: it closes as the feed scrolls down and opens back at the top or
-    // on a tap on its title, the same rule as the profile summary (RN closed it on any drag)
-    val collapse = rememberSummaryCollapse(entry.get("summary") { SummaryCollapseState() }, listState)
-    CommunityDetails(
-        state, collapse, onJoin = { if (!model.toggleSubscription()) nav.login() },
-        onNewPost = { nav.push(model.newPostScreen) },
-        // RN community header: the community's digest sheet
-        onNewsletter = { env.digest.show("community", state.name) },
-        onRetry = model::retry,
-    )
-    // another tab's list: the card opens over it (the three ways in agree)
-    PillTabs(CommunityTab.entries.map { it.label }, CommunityTab.entries.map { it.name }, tab.intValue, rememberTabTap(tab.intValue, { listState }) { collapse.reset(); tab.intValue = it })
+    // RN CollapsibleCard "Details": the feed's first row, scrolling away with it; the tabs pin under the top bar
+    // (#3734). Its title still opens and closes it.
+    val detailsOpen = entry.get("detailsOpen") { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+    val selectTab: (Int) -> Unit = { i ->
+        val from = listState
+        tab.intValue = i
+        // the card gone: the new tab starts at its top with the tabs still pinned
+        scope.launch { ScrollingHeader.keepPinned(from, entry.get("list:${CommunityTab.entries[i].name}") { LazyListState() }) }
+    }
     key(selected) {
         Guarded({ entry.get("feed:${selected.name}") { env.feedModel(model.feedSource(selected)) } }) { feed ->
-            FeedList(feed, listState, env.votes.state, now, feedActions, collapse = collapse, scrollTopModifier = Modifier.navigationBarsPadding())
+            FeedList(
+                feed, listState, env.votes.state, now, feedActions,
+                header = {
+                    CommunityDetails(
+                        state, detailsOpen.value, onToggle = { detailsOpen.value = !detailsOpen.value },
+                        onJoin = { if (!model.toggleSubscription()) nav.login() },
+                        onNewPost = { nav.push(model.newPostScreen) },
+                        // RN community header: the community's digest sheet
+                        onNewsletter = { env.digest.show("community", state.name) },
+                        onRetry = model::retry,
+                    )
+                },
+                pinned = {
+                    Box(Modifier.fillMaxWidth().background(colors.background)) {
+                        PillTabs(CommunityTab.entries.map { it.label }, CommunityTab.entries.map { it.name }, tab.intValue, rememberTabTap(tab.intValue, { listState }, selectTab))
+                    }
+                },
+                scrollTopModifier = Modifier.navigationBarsPadding(),
+            )
         }
     }
     if (manage) {
@@ -366,7 +382,8 @@ fun CommunityScreen(
 @Composable
 private fun CommunityDetails(
     state: com.ecency.core.app.CommunityState,
-    collapse: SummaryCollapseState,
+    open: Boolean,
+    onToggle: () -> Unit,
     onJoin: () -> Unit,
     onNewPost: () -> Unit,
     onNewsletter: () -> Unit,
@@ -376,8 +393,8 @@ private fun CommunityDetails(
     val community = state.community
     Column(Modifier.fillMaxWidth().padding(12.dp).clip(RoundedCornerShape(8.dp)).background(colors.lightBackground).testTag("communityDetails")) {
         Row(
-            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = collapse::toggle)
-                .semantics { stateDescription = if (collapse.open) ShellUiCopy.EXPANDED else ShellUiCopy.COLLAPSED }
+            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onToggle)
+                .semantics { stateDescription = if (open) ShellUiCopy.EXPANDED else ShellUiCopy.COLLAPSED }
                 .padding(12.dp).testTag("communityDetailsToggle"),
             horizontalArrangement = Arrangement.Center,
         ) {
@@ -386,7 +403,7 @@ private fun CommunityDetails(
         when {
             community == null && state.error != null -> ErrorBlock(state.error!!, esie = com.ecency.core.esie.EsiePlacement.ERROR, onRetry = onRetry)
             community == null -> LoadingBlock()
-            else -> CollapsingSummary(collapse) {
+            else -> androidx.compose.animation.AnimatedVisibility(open) {
                 Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp).testTag("communityDetailsBody")) {
                     Box(Modifier.heightIn(max = 160.dp).verticalScroll(rememberScrollState())) {
                         Text(community.description, color = colors.text, fontSize = 14.sp, modifier = Modifier.testTag("communityDescription"))

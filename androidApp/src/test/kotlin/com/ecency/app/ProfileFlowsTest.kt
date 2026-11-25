@@ -232,6 +232,21 @@ class ProfileFlowsTest {
         compose.waitForIdle()
     }
 
+    /**
+     * [tag] in the profile's list below the summary: on a small screen the summary fills it and the tabs and the first
+     * cards come only once the list is scrolled to them (#3734: the summary is the list's first row).
+     */
+    private fun waitBelowSummary(tag: String) {
+        compose.await("exists(tag) below the summary") {
+            idleMain()
+            exists(tag) || run {
+                runCatching { compose.onNodeWithTag("profileList").performScrollToKey("tabs") }
+                false
+            }
+        }
+        compose.waitForIdle()
+    }
+
     /** Runs what the shared models posted to the main looper (Robolectric pauses it between frames). */
     private fun idleMain() = org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
 
@@ -267,7 +282,7 @@ class ProfileFlowsTest {
         compose.onNodeWithTag("followers").assertTextContains("1.2K", substring = true)
         waitFor("proBadge")
         waitFor("follow")
-        waitFor("tab:comments")
+        waitBelowSummary("tab:comments")
         // the blog row comes from a load: retried until it is in the list (one scroll fails before it, on a busy machine)
         compose.await("the blog row in the profile list") { runCatching { compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-one") }.isSuccess }
         waitFor("card:alice/blog-one")
@@ -282,6 +297,7 @@ class ProfileFlowsTest {
         compose.onNodeWithTag("website").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         assertEquals(listOf("https://alice.example"), opened)
         // comments tab lists comment rows
+        waitBelowSummary("tab:comments")
         compose.onNodeWithTag("tab:comments").performClick()
         compose.await("runCatching { compose.onNodeWithTag(\"profileList\").performScrollToKey(\"comments:alice/r...") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
         waitFor("comment:alice/re-one")
@@ -289,33 +305,38 @@ class ProfileFlowsTest {
 
     @Test
     @Config(qualifiers = "w360dp-h640dp")
-    fun theSummaryCollapsesOnScrollDownAndOpensAtTheTopOrOnTap() {
+    fun theSummaryScrollsWithTheListAndTheTabsPinUnderTheBar() {
+        node.postCount = 30
         launch(AppScreen.Profile("alice"))
         waitFor("card:alice/blog-one")
         assertFalse(exists("profileCompactHeader"))
-        // RN profileView: scrolling the list down closes the summary; the header with the user and the tabs stay
-        compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 600) }
+        // #3734: one scroll, no jump: the summary and the tabs move together, by what the finger moved, and nothing closes
+        // its bottom edge: the top of a row partly scrolled out is clipped to the list
+        val summaryBottom = bounds("profileSummary").bottom
+        val tabsTop = bounds("profileTabs").top
+        compose.onNodeWithTag("profileList").performTouchInput { swipeUp(startY = bottom - 20.dp.toPx(), endY = bottom - 220.dp.toPx(), durationMillis = 600) }
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        val moved = summaryBottom - bounds("profileSummary").bottom
+        assertTrue("the summary moved up: $moved", moved > 50f)
+        assertEquals("the tabs moved with it", moved, tabsTop - bounds("profileTabs").top, 1f)
+        assertFalse(exists("profileCompactHeader"))
+        // further down the tabs pin under the bar, which shows the user
+        compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-12")
         waitFor("profileCompactHeader")
-        compose.await("!exists(\"profileSummary\")") { idleMain(); !exists("profileSummary") }
-        assertTrue(exists("profileTabs"))
-        assertTrue(exists("card:alice/blog-one"))
-        // a tap on the header opens it again
+        assertFalse(exists("profileSummary"))
+        val bar = bounds("profileCompactHeader")
+        assertEquals("the tabs right under the bar", bar.bottom, bounds("profileTabs").top, 1f)
+        // a tap on the user goes back to the summary
         compose.onNodeWithTag("profileExpand").performClick()
         waitFor("profileSummary")
         compose.await("!exists(\"profileCompactHeader\")") { idleMain(); !exists("profileCompactHeader") }
-        // closed again, then back to the top by scrolling: it opens without a tap
-        compose.mainClock.advanceTimeBy(1_000)
-        compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 600) }
-        waitFor("profileCompactHeader")
-        compose.mainClock.advanceTimeBy(1_000)
-        compose.onNodeWithTag("profileList").performTouchInput { swipeDown(durationMillis = 600) }
-        waitFor("profileSummary")
-        compose.await("!exists(\"profileCompactHeader\")") { idleMain(); !exists("profileCompactHeader") }
+        assertEquals("back at the top", summaryBottom, bounds("profileSummary").bottom, 1f)
     }
 
     @Test
     @Config(qualifiers = "w360dp-h640dp")
-    fun aScrollUpMidListKeepsTheSummaryClosedUntilTheTop() {
+    fun aScrollUpMidListDoesNotBringTheSummaryBackUntilTheTop() {
         node.postCount = 30
         launch(AppScreen.Profile("alice"))
         waitFor("card:alice/blog-one")
@@ -325,7 +346,7 @@ class ProfileFlowsTest {
         }
         waitFor("profileCompactHeader")
         assertFalse(exists("card:alice/blog-one"))
-        // the owner's rule: a scroll up through the list (well past RN's 60 dp reveal run) keeps it closed
+        // the summary is the list's first row: a scroll up through the list does not bring it back (#3734)
         compose.onNodeWithTag("profileList").performTouchInput { swipeDown(startY = centerY - 100.dp.toPx(), endY = centerY + 100.dp.toPx(), durationMillis = 600) }
         repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
         compose.waitForIdle()
@@ -340,41 +361,130 @@ class ProfileFlowsTest {
     fun aTapOnTheSelectedProfileTabScrollsItsListToTheTop() {
         node.postCount = 30
         launch(AppScreen.Profile("alice"))
-        waitFor("card:alice/blog-one")
+        waitBelowSummary("card:alice/blog-one")
         compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-25")
         compose.await("the first card scrolled away") { idleMain(); !exists("card:alice/blog-one") }
         compose.onNodeWithTag("tab:blog").performClick()
-        waitFor("card:alice/blog-one")
-    }
-
-    @Test
-    @Config(qualifiers = "w360dp-h640dp")
-    fun aShortListThatNoLongerScrollsOnceClosedStaysClosed() {
-        launch(AppScreen.Profile("alice"))
-        // one card: it scrolls under the open summary, and fits once the summary is gone
-        waitFor("card:alice/blog-one")
-        compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 600) }
-        waitFor("profileCompactHeader")
-        // the list clamps to its top once it has the room: layout, not the reader
-        repeat(4) { compose.mainClock.advanceTimeBy(500); idleMain() }
-        compose.waitForIdle()
-        assertTrue("held closed, no open and close loop", exists("profileCompactHeader"))
-        assertFalse(exists("profileSummary"))
-        // a short pull (under the 60 dp reveal run) does not undo the hold; a full pull opens it
-        compose.onNodeWithTag("profileList").performTouchInput { swipeDown(startY = top + 40f, endY = top + 40f + 20.dp.toPx(), durationMillis = 400) }
-        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
-        compose.waitForIdle()
-        assertTrue("a 20 dp pull keeps it closed", exists("profileCompactHeader"))
-        compose.onNodeWithTag("profileList").performTouchInput { swipeDown(durationMillis = 600) }
+        // back to the top of the profile: the summary first (#3734)
         waitFor("profileSummary")
     }
 
     @Test
     @Config(qualifiers = "w360dp-h640dp")
-    fun theClosedSummaryStaysClosedAfterAPostAndBackAndATabSwitchOpensIt() {
+    fun aDragFromTheTopOfTheCoverScrollsTheProfile() {
+        // review of #3734: the bar over the cover takes no touches while the summary shows
+        node.postCount = 30
         launch(AppScreen.Profile("alice"))
         waitFor("card:alice/blog-one")
-        compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 600) }
+        // part of the way down, the summary still showing under the bar
+        compose.onNodeWithTag("profileList").performTouchInput { swipeUp(startY = bottom - 20.dp.toPx(), endY = bottom - 120.dp.toPx(), durationMillis = 600) }
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertFalse(exists("profileCompactHeader"))
+        val tabsTop = bounds("profileTabs").top
+        // a drag down that starts on the cover's top 56 dp, where the bar sits
+        compose.onNodeWithTag("profileList").performTouchInput { swipeDown(startY = top + 20.dp.toPx(), endY = top + 160.dp.toPx(), durationMillis = 600) }
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertTrue("the drag from the cover's top moved the profile: ${bounds("profileTabs").top} vs $tabsTop", bounds("profileTabs").top > tabsTop + 20f)
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun theHiddenBarIsNotReadWhileTheSummaryShows() {
+        // review of #3734: TalkBack reads the user once, from the summary, not from the faded out bar
+        launch(AppScreen.Profile("alice"))
+        waitFor("profileSummary")
+        assertEquals(1, compose.onAllNodes(androidx.compose.ui.test.hasText("@alice")).fetchSemanticsNodes().size)
+        assertTrue("no dead buttons", compose.onAllNodes(androidx.compose.ui.test.hasClickAction() and androidx.compose.ui.test.isNotEnabled()).fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aSwitchToTheWalletTabKeepsTheTabsPinned() {
+        // review of #3734: the wallet row is a screen tall too, so the list can keep the summary away
+        node.postCount = 30
+        launch(AppScreen.Profile("alice", "wallet"))
+        waitBelowSummary("tab:blog")
+        compose.onNodeWithTag("tab:blog").performClick()
+        waitBelowSummary("card:alice/blog-one")
+        compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-12")
+        waitFor("profileCompactHeader")
+        compose.onNodeWithTag("tab:wallet").performClick()
+        repeat(4) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertTrue("the bar still shows the user", exists("profileCompactHeader"))
+        assertEquals("the tabs still right under the bar", bounds("profileCompactHeader").bottom, bounds("profileTabs").top, 1f)
+    }
+
+    /** Review of #3734: a tab of one short post can still scroll the summary away and keep the tabs pinned. */
+    @Test
+    @Config(qualifiers = "w360dp-h1000dp")
+    fun aShortTabStillPinsTheTabsUnderTheBar() {
+        node.postCount = 1
+        launch(AppScreen.Profile("alice"))
+        waitFor("card:alice/blog-one")
+        repeat(4) {
+            compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 600) }
+            compose.mainClock.advanceTimeBy(500); idleMain()
+        }
+        compose.waitForIdle()
+        assertTrue("the bar shows the user", exists("profileCompactHeader"))
+        assertEquals("the tabs right under the bar", bounds("profileCompactHeader").bottom, bounds("profileTabs").top, 1f)
+    }
+
+    /** Review of #3734: a switch from a long tab to the one comment of Comments keeps the tabs pinned under the bar. */
+    @Test
+    @Config(qualifiers = "w360dp-h1000dp")
+    fun aSwitchToAShortTabKeepsTheTabsPinnedUnderTheBar() {
+        node.postCount = 30
+        launch(AppScreen.Profile("alice"))
+        waitFor("card:alice/blog-one")
+        compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-12")
+        waitFor("profileCompactHeader")
+        compose.onNodeWithTag("tab:comments").performClick()
+        repeat(4) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertTrue("the bar still shows the user", exists("profileCompactHeader"))
+        assertEquals("the tabs still right under the bar", bounds("profileCompactHeader").bottom, bounds("profileTabs").top, 1f)
+    }
+
+    /** Review of #3734: another account's wallet taller than the screen is not cut to the screen's height. */
+    @Test
+    @Config(qualifiers = "w640dp-h240dp")
+    fun aWalletTallerThanTheScreenKeepsItsWholeHeight() {
+        launch(AppScreen.Profile("alice", "wallet"))
+        waitFor("profileList")
+        compose.waitUntil(15_000) {
+            runCatching { compose.onNodeWithTag("profileList").performScrollToNode(hasTestTag("profileWallet")) }.isSuccess
+        }
+        waitFor("walletLine:Savings")
+        // to the end of the profile: every wallet line can be scrolled into view
+        repeat(6) {
+            compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 400) }
+            compose.mainClock.advanceTimeBy(500); idleMain()
+        }
+        compose.waitForIdle()
+        val lines = compose.onAllNodes(hasTestTagPrefix("walletLine:"), useUnmergedTree = true).fetchSemanticsNodes()
+        assertTrue("a wallet of several lines", lines.size >= 3)
+        val end = lines.maxOf { it.positionInRoot.y + it.size.height }
+        val list = bounds("profileList")
+        val squashed = lines.filter { it.size.height < 10 }.map { it.config.getOrElseNullable(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { null } }
+        assertTrue("no wallet line squashed to the screen's height: $squashed", squashed.isEmpty())
+        assertTrue("the last wallet line reachable: it ends at $end, the list at ${list.bottom}", end <= list.bottom + 1f)
+    }
+
+    private fun hasTestTagPrefix(prefix: String) = androidx.compose.ui.test.SemanticsMatcher("tag starts with $prefix") {
+        it.config.getOrElseNullable(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { null }?.startsWith(prefix) == true
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aScrolledProfileIsKeptAfterAPostAndBackAndATabSwitchKeepsTheTabsPinned() {
+        node.postCount = 30
+        launch(AppScreen.Profile("alice"))
+        waitFor("card:alice/blog-one")
+        compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-12")
         waitFor("profileCompactHeader")
         compose.runOnIdle { navigator.push(AppScreen.Post("alice", "blog-one")) }
         compose.await("profile covered") { idleMain(); !exists("profileCompactHeader") }
@@ -382,10 +492,13 @@ class ProfileFlowsTest {
         waitFor("profileCompactHeader")
         compose.waitForIdle()
         assertFalse("kept in the stack entry", exists("profileSummary"))
-        // a tab switch opens it over the new list
+        // another tab: it starts at its top, the summary still away and the tabs pinned under the bar (#3734)
         compose.onNodeWithTag("tab:posts").performClick()
-        waitFor("profileSummary")
-        compose.await("!exists(\"profileCompactHeader\")") { idleMain(); !exists("profileCompactHeader") }
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertTrue(exists("profileCompactHeader"))
+        assertFalse(exists("profileSummary"))
+        assertEquals("the tabs right under the bar", bounds("profileCompactHeader").bottom, bounds("profileTabs").top, 1f)
     }
 
     @Test
@@ -419,7 +532,7 @@ class ProfileFlowsTest {
         node.signIn()
         launch(AppScreen.Profile("alice"))
         waitFor("profileSummary")
-        waitFor("tab:waves")
+        waitBelowSummary("tab:waves")
         compose.onNodeWithTag("tab:waves").performClick()
         compose.await("runCatching { compose.onNodeWithTag(\"profileList\").performScrollToKey(\"waves:alice/wave...") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("waves:alice/wave-own") }.isSuccess }
         waitFor("wave:alice/wave-own")
@@ -504,7 +617,7 @@ class ProfileFlowsTest {
     fun aCommentRowOfTheCommentsTabOffersTheTipSheet() {
         node.signIn()
         launch(AppScreen.Profile("alice"))
-        waitFor("tab:comments")
+        waitBelowSummary("tab:comments")
         compose.onNodeWithTag("tab:comments").performClick()
         compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
         waitFor("comment:alice/re-one")
@@ -526,7 +639,7 @@ class ProfileFlowsTest {
     fun followersOpenTheListAndSearchFilters() {
         launch(AppScreen.Profile("alice"))
         waitFor("followers")
-        // the summary scrolls inside its cap on a small screen
+        // the summary scrolls with the list on a small screen
         compose.onNodeWithTag("followers").performScrollTo().performClick()
         waitFor("user:carol")
         assertTrue(hasTextNode("Followers (1234)"))
@@ -688,6 +801,7 @@ class ProfileFlowsTest {
     private fun bounds(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
 
     @Test
+    @Config(qualifiers = "w360dp-h640dp")
     fun theCoverStartsAtTheTopOfAnotherProfileAndTheTabsFollowTheSummary() {
         launch(AppScreen.Profile("alice"))
         waitFor("profileSummary")

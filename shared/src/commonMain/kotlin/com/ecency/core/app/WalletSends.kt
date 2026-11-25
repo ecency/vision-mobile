@@ -133,6 +133,12 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         }
     }
 
+    /**
+     * Main thread. The job running [actionId]'s send right after [send], or null when none started (refused at once). It
+     * ends after an `onDone` heard the outcome, or when a logout stopped the send without one ([accountsLeft]).
+     */
+    internal fun jobOf(actionId: String): Job? = running[actionId]?.job
+
     /** The screen of [actionId] went away. A send still running goes on; its outcome is then toasted ([orphanDone]). */
     fun disown(actionId: String) {
         val left = (owners[actionId] ?: 0) - 1
