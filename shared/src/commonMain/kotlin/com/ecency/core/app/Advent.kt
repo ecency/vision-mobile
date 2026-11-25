@@ -156,6 +156,26 @@ object AdventCopy {
     /** A reward amount, grouped in the app language, at most 3 decimals. */
     fun amount(value: Double): String = LocaleFormat.decimal(value, 3, 0)
 
+    /** The time left to the first door, whole minutes rounded up ("5 days 14 h 0 min"). */
+    fun countdown(leftMillis: Long): String {
+        val minutes = (leftMillis.coerceAtLeast(0) + 59_999) / 60_000
+        return L.native.advent.countdown(
+            days = (minutes / 1_440).toInt(),
+            hours = LocaleFormat.integer(minutes % 1_440 / 60),
+            minutes = LocaleFormat.integer(minutes % 60),
+        )
+    }
+
+    /** At most [max] UTF-16 units (the limit both editors count), never cutting a surrogate pair in two. */
+    fun limit(text: String, max: Int): String {
+        if (text.length <= max) return text
+        val end = if (text[max - 1].isHighSurrogate()) max - 1 else max
+        return text.substring(0, end)
+    }
+
+    /** Under the answer field: "2,000 characters at most", the number in the app language. */
+    val MAX_CHARS: String get() = L.native.advent.maxChars(n = LocaleFormat.integer(AdventModel.MAX_ANSWER.toLong()))
+
     /** Web `rewardText`: "500 / 300 / 200 Points"; a spotlight reads "Promotion worth 1,000 Points". */
     fun reward(reward: AdventReward): String {
         val amounts = reward.amounts.joinToString(" / ") { amount(it) }
@@ -237,7 +257,10 @@ class AdventService internal constructor(private val env: AppEnvironment) {
         val pending = env.background.async {
             val session = signIn(username)
             if (session.account != username) throw GamesApiException(401, "unauthorized", "Wrong account")
-            if (started == generation) sessions[username] = session
+            // a session already "expired" by the phone's clock (a clock ahead of the server's) is kept with no expiry:
+            // the games API refusing it (401) is what replaces it then, not a new sign-in for every call
+            val kept = if (session.expiresAtMillis - env.nowMillis() > EXPIRY_MARGIN_MILLIS) session else session.copy(expiresAtMillis = 0L)
+            if (started == generation) sessions[username] = kept
             session
         }
         signing[username] = pending

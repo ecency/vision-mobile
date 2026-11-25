@@ -36,6 +36,7 @@ private enum Festive {
 struct AdventScreen: View {
     @EnvironmentObject private var app: AppContainer
     @Environment(\.motion) private var motion
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var observed: Observed<AdventState>
 
     init(env: AppEnvironment) {
@@ -78,6 +79,8 @@ struct AdventScreen: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear { model.start() }
+        // back from the background: a phone that slept through midnight UTC shows the new day's door
+        .onChange(of: scenePhase) { _, phase in if phase == .active { model.resumed() } }
         .onChange(of: state.askLogin) { _, ask in
             if ask {
                 model.consumeLogin()
@@ -217,6 +220,10 @@ private struct AdventHeader: View {
             Text(state.kicker.uppercased()).scaledFont(12, weight: .heavy).tracking(1.5).foregroundStyle(Festive.gold).padding(.top, 62)
             Text(state.headline).font(Festive.script(38)).foregroundStyle(.white).accessibilityAddTraits(.isHeader)
                 .accessibilityIdentifier("advent-headline")
+            if let countdown = state.countdown {
+                Text(countdown).scaledFont(20, weight: .bold).foregroundStyle(Festive.gold).padding(.top, 4)
+                    .accessibilityIdentifier("advent-countdown")
+            }
             if state.account != nil && state.phase == .season {
                 HStack(spacing: 10) {
                     stat(Fmt.int(Int(state.answered)) + " / " + Fmt.int(24), L.Native.Advent.doorsAnswered, tint: .white).accessibilityIdentifier("advent-answered")
@@ -479,12 +486,16 @@ private struct AdventDoorSheet: View {
                 Text(L.Native.Advent.yourAnswer).scaledFont(13, weight: .semibold).foregroundStyle(.secondary)
                 TextField(L.Native.Advent.writeHint, text: $text, axis: .vertical)
                     .lineLimit(5...12).textFieldStyle(.roundedBorder)
-                    .onChange(of: text) { _, t in if t.count > Int(AdventModel.companion.MAX_ANSWER) { text = String(t.prefix(Int(AdventModel.companion.MAX_ANSWER))) } }
+                    .onChange(of: text) { _, t in
+                        // UTF-16 units, as the core and Android count (an emoji is two)
+                        let max = Int(AdventModel.companion.MAX_ANSWER)
+                        if t.utf16.count > max { text = AdventCopy.shared.limit(text: t, max: Int32(max)) }
+                    }
                     .accessibilityIdentifier("advent-answer")
                 HStack {
                     Text(L.Native.Advent.words(n: text.split(whereSeparator: { $0.isWhitespace }).count))
                     Spacer()
-                    Text(L.Native.Advent.maxChars)
+                    Text(AdventCopy.shared.MAX_CHARS)
                 }
                 .scaledFont(12).foregroundStyle(.secondary)
             } else {

@@ -40,8 +40,8 @@ object HiveSignerMessages {
 
     /**
      * The games API's sign-in proof (web `@ecency/raidstead` `makeProof`): a `login` for audience `raidstead`, whole
-     * seconds as `Math.floor(now / 1000)`, sent as standard base64 (`btoa`) of the JSON with its signature. Good once,
-     * within 10 minutes; it cannot be exchanged for tokens or used to broadcast.
+     * seconds as `Math.floor(now / 1000)`, sent as standard base64 (`btoa`) of the JSON with its signature. It signs
+     * nothing but this login message.
      */
     fun gameLoginProof(account: String, key: PrivateKey, nowMillis: Long): String {
         val message = message("login", GAME_AUDIENCE, account, nowMillis / 1000 * 1000)

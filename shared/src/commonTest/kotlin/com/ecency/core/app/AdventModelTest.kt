@@ -114,11 +114,12 @@ class AdventModelTest {
         var noContainer = false
     }
 
-    private fun TestScope.fixture(now: Long = dec9, account: VaultAccount? = VaultAccount(TestApp.USER, AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF)): Fixture {
+    /** [phoneAhead]: how far the phone's clock runs ahead of the games API's. */
+    private fun TestScope.fixture(now: Long = dec9, account: VaultAccount? = VaultAccount(TestApp.USER, AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF), phoneAhead: Long = 0): Fixture {
         lateinit var f: Fixture
         val app = TestApp(this) { req -> chain(f, req) }
         app.now = now
-        val advent = DemoAdvent { app.clock() }
+        val advent = DemoAdvent { app.clock() - phoneAhead }
         f = Fixture(app, advent)
         app.authBackend.rest = { r -> advent.http(r) }
         if (account != null) KeyVault(app.store).run { save(account); setCurrentUsername(account.username) }
@@ -371,6 +372,7 @@ class AdventModelTest {
         assertEquals(AdventSignIn.FAILED, m.current.signIn)
         assertTrue(m.current.loaded)
         assertEquals(AdventDoorLook.TODAY, m.current.tiles.first { it.day == 9 }.look, "the doors as signed out readers see them")
+        assertEquals(AdventDoorLook.RESULTS, m.current.tiles.first { it.day == 5 }.look, "a drawn door shows its results, not \"Missed\": the account's answers are unknown")
     }
 
     @Test
@@ -411,6 +413,122 @@ class AdventModelTest {
         testScheduler.advanceUntilIdle()
         assertNull(m.current.sheet)
         assertEquals(AdventPhase.HIDDEN, m.current.phase)
+    }
+
+    @Test
+    fun theTeaserCountsDownToTheFirstDoor() = runTest {
+        // 25 Nov 2026, 10:00 UTC
+        val start = AdventSeason.SHOW_FROM + 10 * 3_600_000L
+        val f = fixture(now = start)
+        f.app.clock = { start + testScheduler.currentTime }
+        val m = f.app.env.adventModel()
+        m.start()
+        testScheduler.runCurrent()
+        assertEquals(AdventPhase.TEASER, m.current.phase)
+        assertEquals("5 days 14 h 0 min", m.current.countdown, "the headline \"The first door opens in\" goes on with the time left")
+        testScheduler.advanceTimeBy(60_001)
+        testScheduler.runCurrent()
+        assertEquals("5 days 13 h 59 min", m.current.countdown, "and ticks every minute")
+        m.close()
+    }
+
+    @Test
+    fun aWavePostingForOneDoorDoesNotBlockAnswersToAnother() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        // door 9's Wave is slow to link (a HiveAuth approval, a slow node)
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/wave")) held.await() }
+        m.submit("Door nine.", 0)
+        testScheduler.runCurrent()
+        m.closeSheet()
+        // door 3, drawn: "Answer anyway"
+        m.openDoor(3)
+        testScheduler.advanceUntilIdle()
+        m.answerFromResult()
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.ANSWER, m.current.sheet?.mode)
+        m.submit(null, 0)
+        testScheduler.runCurrent()
+        assertTrue(f.advent.calls.any { it == "POST /v1/advent/2026/doors/3/answer" }, "door 3's answer went out while door 9's Wave posts")
+        f.app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.DONE, m.current.sheet?.mode)
+    }
+
+    @Test
+    fun aCalendarComingBackOnANewUtcDayLoadsIt() = runTest {
+        val f = fixture()
+        var asleep = 0L
+        f.app.clock = { dec9 + asleep + testScheduler.currentTime }
+        val m = f.app.env.adventModel()
+        m.start()
+        testScheduler.runCurrent()
+        assertEquals(9, m.current.todayDoor)
+        val loads = f.advent.calls.count { it == "GET /v1/advent/2026" }
+        m.resumed()
+        testScheduler.runCurrent()
+        assertEquals(loads, f.advent.calls.count { it == "GET /v1/advent/2026" }, "the same UTC day: nothing loads again")
+        // the phone slept through midnight: the timer did not run, the clock moved on
+        asleep = 15 * 3_600_000L
+        m.resumed()
+        testScheduler.runCurrent()
+        assertEquals(10, m.current.todayDoor)
+        m.close()
+    }
+
+    @Test
+    fun aMidnightTimerThatWakesEarlyWaitsForTheRealMidnight() = runTest {
+        val f = fixture()
+        var shift = 0L
+        f.app.clock = { dec9 + shift + testScheduler.currentTime }
+        val m = f.app.env.adventModel()
+        m.start()
+        testScheduler.runCurrent()
+        // an hour before midnight the clock is set back an hour: the timer wakes at 23:00
+        testScheduler.advanceTimeBy(13 * 3_600_000L)
+        shift = -3_600_000L
+        testScheduler.advanceTimeBy(3_600_000L + 1)
+        testScheduler.runCurrent()
+        assertEquals(9, m.current.todayDoor)
+        testScheduler.advanceTimeBy(3_600_000L + 1)
+        testScheduler.runCurrent()
+        assertEquals(10, m.current.todayDoor, "the timer was set again for the clock's midnight")
+        m.close()
+    }
+
+    @Test
+    fun aPhoneClockAheadOfTheServerDoesNotSignInOnEveryCall() = runTest {
+        val f = fixture(phoneAhead = 2 * AdventSeason.DAY_MILLIS)
+        val m = started(f)
+        assertEquals(AdventSignIn.READY, m.current.signIn)
+        m.refresh()
+        testScheduler.advanceUntilIdle()
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, f.advent.signIns.size, "one session, kept until the games API refuses it")
+    }
+
+    @Test
+    fun twoCallsRefusedTogetherCountAsOneRefusal() = runTest {
+        val f = fixture()
+        val m = started(f)
+        // the session expired: both calls in flight are refused with the same token
+        f.advent.refused += "demo-game-$user-1"
+        var inFlight = 0
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if ("/v1/advent/" in r.url && !held.isCompleted) { inFlight++; held.await() } }
+        m.refresh()
+        m.openDoor(9)
+        testScheduler.runCurrent()
+        assertEquals(2, inFlight)
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSignIn.READY, m.current.signIn, "one expired session is one refusal: both sign in again")
+        assertEquals(AdventSheetMode.ANSWER, m.current.sheet?.mode)
     }
 
     @Test

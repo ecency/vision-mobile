@@ -113,7 +113,7 @@ class GamesApiException(val status: Int, val code: String, message: String) : Ex
 /**
  * The Ecency games API as ecency.com/advent calls it (web `features/advent/advent-api.ts`, `features/raidstead/client.ts`):
  * every call is JSON over [http], a game session token as `authorization: Bearer`, results and the grand draw public.
- * The vouched sign-in goes through ecency.com's own route ([vouchHost]), which alone holds the games API's vouch secret.
+ * The vouched sign-in goes through ecency.com's own route ([vouchHost]) with the account's Ecency token.
  */
 @OptIn(ExperimentalTime::class)
 class AdventApi(private val http: AuthHttp, val base: String = BASE, val vouchHost: String = VOUCH_HOST) {

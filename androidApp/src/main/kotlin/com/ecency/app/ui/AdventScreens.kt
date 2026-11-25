@@ -127,6 +127,15 @@ fun AdventScreen(env: AppEnvironment, model: AdventModel, onBack: () -> Unit, on
     val colors = LocalEcencyColors.current
     val state by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
+    // back from the background: a phone that slept through midnight UTC shows the new day's door
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    androidx.compose.runtime.DisposableEffect(lifecycle, model) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) model.resumed()
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
     LaunchedEffect(state.askLogin) {
         if (state.askLogin) {
             model.consumeLogin()
@@ -138,7 +147,7 @@ fun AdventScreen(env: AppEnvironment, model: AdventModel, onBack: () -> Unit, on
     Box(Modifier.fillMaxSize().background(Festive.snow).testTag("advent")) {
         PullToRefreshBox(isRefreshing = false, onRefresh = model::refresh, modifier = Modifier.fillMaxSize()) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                Header(state.kicker, state.headline, state.answered, state.poolLeft, state.account != null, state.phase, state.snow, falling, onBack, model::toggleSnow)
+                Header(state.kicker, state.headline, state.countdown, state.answered, state.poolLeft, state.account != null, state.phase, state.snow, falling, onBack, model::toggleSnow)
                 when {
                     state.signIn == AdventSignIn.FAILED -> Notice(L.native.advent.signRetry, model::retrySignIn, "adventSignRetry")
                     state.error != null && !state.loaded -> Notice(L.native.advent.calendarFailed, model::refresh, "adventRetry")
@@ -167,7 +176,7 @@ fun AdventScreen(env: AppEnvironment, model: AdventModel, onBack: () -> Unit, on
 
 @Composable
 private fun Header(
-    kicker: String, headline: String, answered: Int, poolLeft: String?, signedIn: Boolean, phase: AdventPhase,
+    kicker: String, headline: String, countdown: String?, answered: Int, poolLeft: String?, signedIn: Boolean, phase: AdventPhase,
     snow: Boolean, falling: Boolean, onBack: () -> Unit, onSnow: () -> Unit,
 ) {
     val fall = if (falling) {
@@ -196,6 +205,9 @@ private fun Header(
             Spacer(Modifier.height(34.dp))
             Text(kicker.uppercase(), color = Festive.gold, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp, modifier = Modifier.padding(start = 12.dp))
             Text(headline, color = Color.White, fontSize = 34.sp, lineHeight = 40.sp, fontFamily = Festive.script, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp).semantics { heading() }.testTag("adventHeadline"))
+            countdown?.let {
+                Text(it, color = Festive.gold, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp, top = 4.dp).testTag("adventCountdown"))
+            }
             if (signedIn && phase == AdventPhase.SEASON) {
                 Row(Modifier.padding(start = 12.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Stat(L.native.advent.doorsAnswered, "${LocaleFormat.integer(answered.toLong())} / ${LocaleFormat.integer(24)}", Color.White, Modifier.weight(1f).testTag("adventAnswered"))
@@ -502,14 +514,14 @@ private fun AnswerForm(sheet: AdventSheet, model: AdventModel) {
     if (sheet.late) Text(L.native.advent.lateNote, color = Festive.redText, fontSize = 13.sp, fontWeight = FontWeight.Bold)
     if (door.kind == AdventDoorKind.OPEN) {
         OutlinedTextField(
-            value = text, onValueChange = { text = it.take(AdventModel.MAX_ANSWER) },
+            value = text, onValueChange = { text = AdventCopy.limit(it, AdventModel.MAX_ANSWER) },
             label = { Text(L.native.advent.yourAnswer) }, placeholder = { Text(L.native.advent.writeHint) },
             minLines = 5, modifier = Modifier.fillMaxWidth().testTag("adventAnswer"),
         )
         val words = text.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
         Row(Modifier.fillMaxWidth()) {
             Text(L.native.advent.words(n = words), color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.weight(1f))
-            Text(L.native.advent.maxChars, color = colors.darkGray, fontSize = 12.sp)
+            Text(AdventCopy.MAX_CHARS, color = colors.darkGray, fontSize = 12.sp)
         }
     } else {
         Text(L.native.advent.labelPick, color = colors.darkGray, fontSize = 13.sp, fontWeight = FontWeight.Bold)
