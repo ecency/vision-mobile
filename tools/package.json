@@ -8,7 +8,7 @@
     "@hiveio/wax": "2.0.2",
     "@noble/curves": "^2.2.0",
     "@noble/hashes": "^2.2.0",
-    "@tanstack/react-query": "^5.0.0",
+    "@tanstack/react-query": "^5.108.2",
     "crypto-js": "4.2.0",
     "diff-match-patch": "1.0.5",
     "react": "^19.0.0",
