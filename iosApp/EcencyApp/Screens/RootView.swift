@@ -167,7 +167,6 @@ struct DestinationView: View {
         case is AppScreenSettings:
             SettingsView(observed: app.settings)
         case is AppScreenRefer: ReferScreen(env: app.env)
-        case is AppScreenAdvent: AdventScreen(env: app.env)
         // ---- points and perks (PerksViews.swift) ----
         case is AppScreenPerks: PerksScreen(env: app.env)
         case is AppScreenSpinGame: SpinGameScreen(env: app.env)

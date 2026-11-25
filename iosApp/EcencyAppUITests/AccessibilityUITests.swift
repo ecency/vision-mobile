@@ -192,8 +192,6 @@ final class AccessibilityUITests: XCTestCase {
     private func screens(_ size: [String]) -> [(String, [String], String)] {
         [
             ("feed", [], "post-card"),
-            // #3739: the feed in the Advent season (9 Dec 2026), with its banner on top
-            ("feed advent", ["-fakeNow", "1796810400000"], "advent-banner"),
             ("post", ["-openPost", "spike-alice/fake-post-1"], "post-title"),
             ("waves", ["-startTab", "WAVES"], "tab-waves"),
             ("wallet", ["-seedAccounts", "YES", "-startTab", "WALLET"], "wallet-total"),
@@ -247,7 +245,7 @@ final class AccessibilityUITests: XCTestCase {
     /// Dark mode: the screens heaviest on blue text (text buttons, links, tabs, the settings list, the login form).
     func testAuditInDarkMode() {
         let dark = ["-forceDarkTheme", "YES"]
-        for (name, args, ready) in screens(dark) where ["feed", "feed advent", "post", "settings", "login", "communities", "editor"].contains(name) {
+        for (name, args, ready) in screens(dark) where ["feed", "post", "settings", "login", "communities", "editor"].contains(name) {
             let app = launch(args)
             audit(app, name + " (dark)", ready: ready)
             app.terminate()
@@ -390,8 +388,6 @@ enum AuditExclusions {
     static let textInImage = "Potentially inaccessible text inside an image"
     static let unresolvedAllowance: [String: [String: Int]] = [
         "feed": [clipped: 2, fixedSize: 3], "feed (AX5)": [clipped: 1],
-        // the same feed under the Advent banner (#3739): the banner itself is allowed nothing
-        "feed advent": [clipped: 2, fixedSize: 3], "feed advent (AX5)": [clipped: 1],
         "profile (AX5)": [clipped: 3], "communities (AX5)": [clipped: 2, textInImage: 1], "settings (AX5)": [clipped: 3],
         // 2026-11-24 (#3729): the sample Spike Community's logo is a picture with words in it ("TRAVEL FEED"); avatars
         // are hidden from VoiceOver on purpose (the row's title names the community), so the audit finds those letters
