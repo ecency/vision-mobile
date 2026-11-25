@@ -253,6 +253,18 @@ class AdventModelTest {
     }
 
     @Test
+    fun aRefusedEcencyTokenIsRenewedOnceForTheVouch() = runTest {
+        val f = fixture(account = VaultAccount(user, AuthType.HIVE_SIGNER, accessToken = "hs-access-$user"))
+        com.ecency.core.auth.VaultAccountStore(KeyVault(f.app.store), f.app.store)
+            .saveSession(com.ecency.core.auth.TokenSession(user, "token-$user", "refresh-$user", f.app.now + 86_400_000))
+        // the first vouch refuses the stored token; the renewed one is accepted
+        f.advent.refuseVouches = 1
+        val m = started(f)
+        assertEquals(AdventSignIn.READY, m.current.signIn)
+        assertEquals(listOf("$user|token-$user", "$user|access-$user"), f.advent.signIns)
+    }
+
+    @Test
     fun anAnswerThatArrivesAfterAnAccountSwitchIsNotShownForTheNewAccount() = runTest {
         val f = fixture()
         KeyVault(f.app.store).save(VaultAccount("spike-yan", AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF))
