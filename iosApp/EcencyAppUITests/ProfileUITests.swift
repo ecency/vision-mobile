@@ -148,7 +148,8 @@ final class ProfileUITests: XCTestCase {
         RunLoop.current.run(until: Date().addingTimeInterval(1.5))
         XCTAssertTrue(element(app, "profile-compact-header").exists, "the summary still away: summary \(element(app, "profile-summary").frame) tabs \(app.buttons["tab-posts"].frame) bar \(bar.frame)")
         XCTAssertEqual(app.buttons["tab-posts"].frame.minY, bar.frame.maxY, accuracy: 1, "the tabs pinned: tabs \(app.buttons["tab-posts"].frame) bar \(bar.frame)")
-        let first = app.buttons.matching(identifier: "post-card").allElementsBoundByIndex.filter { $0.isHittable }.map { $0.frame.minY }.min() ?? 0
+        // the card's top row (author, options) of the first card on screen: under the tabs, not behind them
+        let first = app.buttons.matching(identifier: "post-options").allElementsBoundByIndex.map { $0.frame.minY }.filter { $0 > bar.frame.maxY - 60 }.min() ?? 0
         XCTAssertEqual(first, app.buttons["tab-posts"].frame.maxY, accuracy: 24, "the new tab at its top, right under the tabs")
     }
 

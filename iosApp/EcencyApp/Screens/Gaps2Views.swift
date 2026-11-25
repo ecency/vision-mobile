@@ -379,6 +379,14 @@ extension View {
         return view.contentOffset.y <= -view.adjustedContentInset.top + 1
     }
 
+    /// Puts the content's point [y] at the top of the visible area, without animation. False when no scroll view was
+    /// found yet.
+    @discardableResult func place(contentY y: CGFloat) -> Bool {
+        guard let view = scrollView else { return false }
+        view.setContentOffset(CGPoint(x: view.contentOffset.x, y: y - view.adjustedContentInset.top), animated: false)
+        return true
+    }
+
     /// Moves the content by [dy] without animation (README "Foreground refresh": rows that went in above the card
     /// being read). Never past the top.
     func shift(by dy: CGFloat) {

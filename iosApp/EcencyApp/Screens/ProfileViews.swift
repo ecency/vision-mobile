@@ -249,11 +249,13 @@ struct ProfileScreen: View {
             .onChange(of: state.selectedTab) { _, _ in
                 guard pinAfterSwitch else { filler.release(); return }
                 pinAfterSwitch = false
-                proxy.scrollTo("profile-summary-end", anchor: .top)
-                // a far jump lands on the lazy stack's estimated row heights; once the rows there are laid out, the
-                // same scroll lands exactly
+                // the tabs right under the bar: the summary's measured height. ScrollViewReader.scrollTo lands a far jump
+                // on the lazy stack's estimated row heights, tens of points off, and a second scrollTo kept that place
+                momentum.stop()
+                if !momentum.place(contentY: summaryHeight) { proxy.scrollTo("profile-summary-end", anchor: .top) }
+                // once the new tab's rows are laid out (the filler still reserved, so the offset is not clamped)
                 DispatchQueue.main.async {
-                    proxy.scrollTo("profile-summary-end", anchor: .top)
+                    momentum.place(contentY: summaryHeight)
                     filler.release()
                 }
             }
