@@ -35,8 +35,8 @@ uiautomator = "2.4.1"
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
 androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
-# test only: the CLDR 45 oracle for the generated plural rules and the ICU subset formatter (Java, no Kotlin)
-icu4j = { module = "com.ibm.icu:icu4j", version = "75.1" }
+# test only: the CLDR 49 oracle for the generated plural rules and the ICU subset formatter (Java, no Kotlin)
+icu4j = { module = "com.ibm.icu:icu4j", version = "79.1" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
