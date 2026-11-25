@@ -590,7 +590,7 @@ private fun Result(sheet: AdventSheet, account: String?, model: AdventModel) {
             Column(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
                 Row(Modifier.fillMaxWidth()) {
                     Text(c + if (result.answerIndex == i) " · ${L.native.advent.rightAnswer}" else "", color = colors.text, fontSize = 13.sp, fontWeight = if (result.answerIndex == i) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.weight(1f))
-                    Text(LocaleFormat.percent(share, 0, 0), color = colors.text, fontSize = 13.sp)
+                    Text(LocaleFormat.percent(kotlin.math.round(share * 100), 0, 0), color = colors.text, fontSize = 13.sp)
                 }
                 Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(Color(0xFFE9EDF5))) {
                     Box(Modifier.fillMaxWidth(share.toFloat()).height(8.dp).background(if (result.answerIndex == i) Festive.holly else Color(0xFF8AA6D6)))
