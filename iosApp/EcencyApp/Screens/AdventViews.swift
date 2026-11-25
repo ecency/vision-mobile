@@ -202,7 +202,7 @@ private struct AdventHeader: View {
                 Spacer()
                 Button(action: onSnow) {
                     HStack(spacing: 6) {
-                        Image(systemName: "snowflake").font(.footnote).accessibilityHidden(true)
+                        Image(appIcon: .snowflake).font(.footnote).accessibilityHidden(true)
                         Text(L.Native.Advent.snow).scaledFont(13)
                     }
                     .foregroundStyle(.white).opacity(state.snow ? 1 : 0.6)
@@ -492,7 +492,7 @@ private struct AdventDoorSheet: View {
                 ForEach(Array(door.choices.enumerated()), id: \.offset) { i, c in
                     Button { choice = i } label: {
                         HStack {
-                            Image(systemName: choice == i ? "largecircle.fill.circle" : "circle").accessibilityHidden(true)
+                            Image(appIcon: choice == i ? .checkCircle : .task, filled: choice == i).accessibilityHidden(true)
                             Text(c)
                             Spacer()
                         }
@@ -636,7 +636,7 @@ struct AdventFeedBanner: View {
                         app.env.advent.closeBanner()
                         version += 1
                     } label: {
-                        Image(systemName: "xmark").foregroundStyle(Festive.inkSoft).frame(width: 44, height: 44)
+                        Image(appIcon: .close).foregroundStyle(Festive.inkSoft).frame(width: 44, height: 44)
                     }
                     .accessibilityLabel(L.Native.Advent.bannerClose)
                     .accessibilityIdentifier("advent-banner-close")

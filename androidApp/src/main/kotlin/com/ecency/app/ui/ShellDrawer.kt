@@ -229,7 +229,7 @@ private fun MenuRow(item: SideMenuItem, onItem: (SideMenuItem) -> Unit, badge: S
             Text(
                 it, color = androidx.compose.ui.graphics.Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 10.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
-                    .background(androidx.compose.ui.graphics.Color(0xFFD62F3A)).padding(horizontal = 8.dp, vertical = 2.dp).testTag("menuBadge:${item.id}"),
+                    .background(colors.red).padding(horizontal = 8.dp, vertical = 2.dp).testTag("menuBadge:${item.id}"),
             )
         }
     }

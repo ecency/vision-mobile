@@ -317,7 +317,7 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
+            } catch (e: Exception) { // not reported: the sheet shows it and offers a retry; already_answered reloads the door
                 if (!owns(user)) return@launch
                 if (e is GamesApiException && e.code == "already_answered") {
                     loadDoor(user, door)
@@ -386,7 +386,7 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 return
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
+            } catch (e: Exception) { // not reported: retried, and the last failure is rethrown to the caller
                 last = e
             }
         }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -94,6 +95,8 @@ private object Festive {
     val gold = Color(0xFFFFD34E)
     val goldDark = Color(0xFFB8860B)
     val red = Color(0xFFD62F3A)
+    val redDeep = Color(0xFFA8222B)
+    val track = Color(0xFFE9EDF5)
     val redText = Color(0xFFB3202B)
     val holly = Color(0xFF1F7A4D)
     val hollyDark = Color(0xFF145537)
@@ -349,7 +352,7 @@ private fun DoorTile(tile: AdventTile, modifier: Modifier, onClick: () -> Unit) 
     ) {
         if (wrapped) {
             Box(Modifier.fillMaxSize().padding(horizontal = 0.dp), contentAlignment = Alignment.Center) {
-                Box(Modifier.width(8.dp).fillMaxSize().background(band.copy(alpha = 0.95f)))
+                Box(Modifier.width(8.dp).fillMaxHeight().background(band.copy(alpha = 0.95f)))
             }
             Box(Modifier.fillMaxWidth().height(8.dp).background(band.copy(alpha = 0.95f)))
             Canvas(Modifier.align(Alignment.TopCenter).size(26.dp, 14.dp)) { bow(band) }
@@ -417,14 +420,14 @@ private fun Steps() {
 @Composable
 private fun GrandCard(total: String, text: String, progress: String, fraction: Double) {
     Box(Modifier.fillMaxWidth().padding(12.dp).clip(RoundedCornerShape(16.dp)).background(Festive.red).testTag("adventGrand")) {
-        Box(Modifier.align(Alignment.CenterEnd).padding(end = 18.dp).width(10.dp).fillMaxSize().background(Festive.gold))
+        Box(Modifier.align(Alignment.CenterEnd).padding(end = 18.dp).width(10.dp).fillMaxHeight().background(Festive.gold))
         Column(Modifier.fillMaxWidth().padding(start = 14.dp, top = 14.dp, bottom = 14.dp, end = 44.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(L.native.advent.grandTitle, color = Color.White, fontFamily = Festive.script, fontWeight = FontWeight.Bold, fontSize = 26.sp, modifier = Modifier.weight(1f))
                 Text(total, color = Color(0xFF8F1D25), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color.White).padding(horizontal = 9.dp, vertical = 4.dp))
             }
             Text(text, color = Color.White, fontSize = 13.sp, lineHeight = 18.sp)
-            Box(Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)).background(Color(0xFFA8222B))) {
+            Box(Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)).background(Festive.redDeep)) {
                 Box(Modifier.fillMaxWidth(fraction.toFloat().coerceIn(0f, 1f)).height(10.dp).background(Festive.gold))
             }
             Text(progress, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -464,7 +467,7 @@ private fun DoorSheet(env: AppEnvironment, sheet: AdventSheet, account: String?,
                 if (drawn) {
                     Canvas(Modifier.size(30.dp)) { star(Offset(size.width / 2, size.height / 2), size.width / 2, Color.White) }
                 } else {
-                    Box(Modifier.width(8.dp).fillMaxSize().background(Festive.gold))
+                    Box(Modifier.width(8.dp).fillMaxHeight().background(Festive.gold))
                     Box(Modifier.fillMaxWidth().height(8.dp).background(Festive.gold))
                 }
             }
@@ -596,7 +599,7 @@ private fun Result(sheet: AdventSheet, account: String?, model: AdventModel) {
                     Text(c + if (result.answerIndex == i) " · ${L.native.advent.rightAnswer}" else "", color = colors.text, fontSize = 13.sp, fontWeight = if (result.answerIndex == i) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.weight(1f))
                     Text(LocaleFormat.percent(kotlin.math.round(share * 100), 0, 0), color = colors.text, fontSize = 13.sp)
                 }
-                Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(Color(0xFFE9EDF5))) {
+                Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(Festive.track)) {
                     Box(Modifier.fillMaxWidth(share.toFloat()).height(8.dp).background(if (result.answerIndex == i) Festive.holly else Color(0xFF8AA6D6)))
                 }
             }
@@ -628,7 +631,7 @@ fun AdventFeedBanner(env: AppEnvironment, now: Long, onOpen: () -> Unit) {
         Column(Modifier.fillMaxWidth().padding(start = 16.dp, top = 24.dp, bottom = 16.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Box(Modifier.padding(top = 6.dp).size(50.dp).clip(RoundedCornerShape(10.dp)).background(Festive.red), contentAlignment = Alignment.Center) {
-                    Box(Modifier.width(8.dp).fillMaxSize().background(Festive.gold))
+                    Box(Modifier.width(8.dp).fillMaxHeight().background(Festive.gold))
                     Box(Modifier.fillMaxWidth().height(8.dp).background(Festive.gold))
                 }
                 Column(Modifier.weight(1f).padding(start = 12.dp)) {

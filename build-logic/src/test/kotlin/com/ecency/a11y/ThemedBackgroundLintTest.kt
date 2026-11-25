@@ -38,6 +38,7 @@ class ThemedBackgroundLintTest {
         "NotificationScreens.kt" to "background(colors.blue).padding(horizontal = 24.dp)", // the swipe to read action under a row
         "Sheets.kt" to "testTag(\"videoSheet\")", // the video player sheet
         "Sheets.kt" to "testTag(\"gallery\")", // the image viewer
+        "AdventScreens.kt" to "testTag(\"advent\")", // the Advent calendar's festive scene, the same in both themes as on the website
     )
 
     private fun isAllowed(file: File, line: String) = allowed.any { (name, snippet) -> file.name == name && snippet in line }
