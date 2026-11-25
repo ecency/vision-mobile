@@ -877,6 +877,22 @@ Differences from RN
 
 Tests: shared `SignupTest` (23: the four golden sets, welcome gate, form, link prefill, signup request and failures, captcha, Turnstile rules), `LaunchRevealTest` (timing, easing, shapes, motion levels, line icons); Android `RegisterFlowsTest`, `WelcomeFlowsTest` (icons beside the points, the animation's 3.55 s, skipped with animations off or reduced); iOS `OnboardingUITests` (file of the same name), `TurnstileRulesTests` (in `EcencyAppTests/KeysTests.swift`), `WelcomeUITests` (icons, the animation covering the screen then gone, skipped under `-reduceMotion YES`).
 
+### Advent Calendar (native only, #3739)
+
+The Ecency Advent Calendar 2026 of ecency.com/advent, in the app over the same games API and game session (web `features/advent`). Not an RN screen: RN had none. Shared `app/Advent.kt` (dates, door looks, copy, banner, sessions, pending Waves), `app/AdventModel.kt`, `api/games/AdventApi.kt`, offline `app/DemoAdvent.kt`; Android `ui/AdventScreens.kt`; iOS `Screens/AdventViews.swift`. Design approved by the owner (festive version, 11-25).
+
+Behaviour
+- Dates (`AdventSeason`, UTC, the website's): shown from 25 Nov, doors 1 to 24 from 1 Dec (one a day at 00:00, open until the end of that day, drawn at 02:00 the next), hidden from 1 Jan. The side menu item (leading the main group, "Door N" badge), the feed banner and the screen all read it: the calendar shows and hides itself with no release and no flag. A link to `ecency.com/advent` opens the screen; after the season it says the calendar has ended.
+- Feed banner (web `advent-banner.tsx`): teaser, "Door N is open!", then "See the results" from 25 Dec; closed, it stays away for the UTC day; an on-time answer to today's door hides it for the day too.
+- Doors: the web's looks (`AdventDoors.look`): wrapped, today, waiting for the draw, answered ("+N Points" or "Late"), won, missed. A written answer (2000 characters at most) or a quiz or poll choice; a late answer counts for the calendar, not for prizes. A drawn door shows the winners, the account's prize, the tallies with the right answer and the seed block. Signed out, the calendar and results show; a door asks for the login.
+- The Wave (web `wave-text.ts`): every answer is shared as a Wave with `#ecencyadvent` and the calendar's link; a quiz or poll Wave only says the door was opened. It is a reply under the waves container signed like any Wave, then linked to the door (`POST .../wave`, 3 tries). Its container and body are kept until it is linked, so a retry (a lost answer, a restart) signs the same reply and one already on chain is only linked: never two Waves. The answer counts even when the Wave fails ("Post Wave").
+- Sign-in (games API `/v1/raidstead/session`, shared with Raidstead): an account with its posting key signs the web's login proof (`HiveSignerMessages.gameLoginProof`: a `login` for `raidstead`, whole seconds, standard base64), any other login (HiveSigner, HiveAuth) asks ecency.com's `/api/raidstead/session` to vouch with the account's Ecency access token (renewed once when refused). The session lives in memory per account; a 401 signs in again once, a second asks ("Could not sign in. Try again"). Accounts that leave end their session (on the server too) and drop their pending Waves.
+- Snow and the lights' glow follow Reduce Motion and the screen's Snow switch (`advent_snow`).
+
+Rules: the calendar belongs to the account that loaded it; an account change starts over and an answer for the previous account is dropped. Gate and prize rules live on the games API only, never in the app. Demo runs (`-fakeData`) answer from `DemoAdvent`; iOS `-fakeNow <epoch millis>` sets the demo clock (December screenshots and UI tests).
+
+Tests: shared `AdventSeasonTest`, `AdventModelTest`, `AdventNavigationTest`; Android `AdventFlowsTest`; iOS `AdventUITests`.
+
 ### Refer & Earn
 
 RN `screens/referScreen`, SDK `getReferralsInfiniteQueryOptions` and `getReferralsStatsQueryOptions`, `convertReferral`. Shared `app/ReferModel.kt`; Android `ui/ReferScreen.kt`; iOS `ReferScreen` in `Screens/RegisterViews.swift`.

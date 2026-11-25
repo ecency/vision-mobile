@@ -177,8 +177,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
         val teaser = s.phase == AdventPhase.TEASER
         val me = data.me?.takeIf { it.account == user }
         val tiles = data.doors.map { AdventDoors.tile(it, me?.doors?.get(it.day), user != null, teaser) }
-        val prizes = buildList {
-            me?.doors?.toSortedMap()?.forEach { (day, d) ->
+        val prizes = buildList<AdventPrizeRow> {
+            me?.doors?.entries?.sortedBy { it.key }?.forEach { (day, d) ->
                 d.prize?.takeIf { it.status != AdventPayoutStatus.CANCELLED }?.let { p ->
                     add(AdventPrizeRow(day, L.native.advent.prizeRow(day = LocaleFormat.integer(day.toLong()), place = LocaleFormat.integer(p.place.toLong())), AdventCopy.prize(p.kind, p.amount), AdventCopy.status(p.status), p.status == AdventPayoutStatus.PAID))
                 }
