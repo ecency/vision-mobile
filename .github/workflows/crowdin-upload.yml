@@ -31,7 +31,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Upload sources to Crowdin
-        uses: crowdin/github-action@5b9790df740c85af5412a3a3a91b24988d5d324f # v3.5.1
+        uses: crowdin/github-action@d651c77756acbe11a31d77a6fb79d8a239e1e05a # v3.6.0
         with:
           upload_sources: true
           upload_translations: false
@@ -65,7 +65,7 @@ jobs:
 
       - name: Upload the native.plurals translations to Crowdin
         if: github.event_name == 'workflow_dispatch' && inputs.native_plurals
-        uses: crowdin/github-action@5b9790df740c85af5412a3a3a91b24988d5d324f # v3.5.1
+        uses: crowdin/github-action@d651c77756acbe11a31d77a6fb79d8a239e1e05a # v3.6.0
         with:
           config: .crowdin-seed.yml
           upload_sources: false
