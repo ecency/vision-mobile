@@ -1398,6 +1398,32 @@ class ChatThreadTest {
         }
     }
 
+    /** Review of #3735: an older page that brings nothing new (a server that ignores the cursor) ends the history. */
+    @Test
+    fun anOlderPageOfOnlyLoadedMessagesEndsTheHistory() = runTest {
+        val f = ChatFixture(this)
+        f.chat.seedHistory("ch-ecency", read = 40, unread = 40)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            var asked = 0
+            f.before = { r ->
+                if (r.url.contains("/posts") && r.url.contains("before=")) {
+                    asked++
+                    f.chat.http(r.copy(url = r.url.substringBefore("?")))
+                } else null
+            }
+            m.openQuote("gone-post")
+            f.idle()
+            assertEquals(1, asked, "the same page is not asked for again")
+            assertFalse(m.current.hasMore)
+            assertEquals(L.native.chatThread.quotedMessageNotFound, f.env.ui.current.toast?.text)
+        } finally {
+            f.before = null
+            m.close()
+        }
+    }
+
     /** Review of #3706: a return while an older page is loading catches up once that load ends. */
     @Test
     fun aReturnDuringAnOlderPageLoadCatchesUpWhenItEnds() = runTest {

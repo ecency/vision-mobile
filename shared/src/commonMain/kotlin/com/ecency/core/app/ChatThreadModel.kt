@@ -646,11 +646,15 @@ class ChatThreadModel internal constructor(
                 applyRights(page, asked)
                 // the read time the posts page carries, when neither the list nor the members gave one
                 if (anchor == null) page.lastViewedAt?.takeIf { it != 0L }?.let { anchor = it }
+                val had = posts.size
+                val cursor = before
                 posts = if (refresh) page.posts else (posts + page.posts).distinctBy { it.id }
                 page.posts.lastOrNull()?.let { before = it.id }
+                // an older page that adds nothing or keeps the cursor (a server that ignored it) ends the history
+                val more = page.posts.isNotEmpty() && (refresh || (posts.size > had && before != cursor))
                 // a gap still owed is measured from the newest page just read
                 if (refresh && missed) missedFrom = posts.map { it.id }.toSet()
-                setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, hasMore = page.posts.isNotEmpty()) }
+                setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, hasMore = more) }
                 rebuild()
                 resolveUsers(u, posts.map { it.userId }.filter { it.isNotEmpty() && it !in lookup }.distinct())
                 val missingRoots = page.posts.map { it.rootId }.filter { it.isNotEmpty() && posts.none { p -> p.id == it } && it !in roots && it !in goneRoots }.distinct()
