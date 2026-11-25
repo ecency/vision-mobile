@@ -1811,7 +1811,7 @@ Why generated constants rather than bundled JSON resources: they need no resourc
 Shared copy objects:
 - Text both apps' screens show word for word lives in shared copy objects, read when shown: `UiCopy` (generic words: Cancel, Delete, Retry...), `EditorUiCopy`, `ReadingUiCopy`, `ChatUiCopy`, `ProfileUiCopy`, `WalletUiCopy`, `AuthUiCopy`, `ShellUiCopy` (`ScreenCopy.kt`), and the sign-in screens' `LoginCopy`, `HiveAuthCopy`, `AccountCopy`, `WelcomeCopy`, `BrowserCopy` (`AccountCopy.kt`). Keys follow the key choice rule (RN key when the English is the same, recorded in `rn-reuse.json`; else `native.ui.*` per area). Swift reads them as `EditorUiCopy.shared.ADD_CHOICE`, `UiCopy.shared.CANCEL`, `EditorUiCopy.shared.cost(cost:)`, `LoginCopy.shared.TITLE`.
 - Text only Android shows (biometric prompt, Play Billing, image saver errors) is `AndroidCopy` (`native.android.*`).
-- Messages are whole (`ChatUiCopy.editedAt(time)`, `ReadingUiCopy.tabSelected(title)`, `StakeCopy.alreadyDelegatedTo(recipient, hp)`); counts shown on screen go through `LocaleFormat.integer` or an ICU plural (`ProfileUiCopy.cardStats`, `EditorUiCopy.wordsCount`).
+- Messages are whole (`ChatUiCopy.editedAt(time)`, `ReadingUiCopy.tabSelected(title)`, `StakeCopy.alreadyDelegatedTo(recipient, hp)`); counts shown on screen go through `LocaleFormat.integer` or an ICU plural (`EditorUiCopy.wordsCount`).
 - Shared copy never names a member after an Objective-C macro (`YES`, `NO`): the framework header would not compile, so the editor's are `YES_BUTTON` and `NO_BUTTON` (`ObjcNamesTest`).
 - `ScreenCopyTest` reads every shared screen copy in English and in `en-XA`.
 

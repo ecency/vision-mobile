@@ -370,6 +370,8 @@ private struct ProfileCommentRow: View {
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// A wide window: the comment opens in the pane beside the list, as a card's post does.
+    @Environment(\.isInPane) private var isInPane
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -380,7 +382,7 @@ private struct ProfileCommentRow: View {
                 Spacer(minLength: 0)
                 MenuButton { app.openMenu(key: card.key) }
             }
-            Button { app.openPost(card.key) } label: {
+            Button { app.openPost(card.key, fromList: !isInPane) } label: {
                 VStack(alignment: .leading, spacing: 4) {
                     if !card.title.isEmpty {
                         Text(card.title).scaledFont(13).foregroundStyle(theme.secondary).lineLimit(1)
@@ -404,7 +406,7 @@ private struct ProfileCommentRow: View {
                 .accessibilityHint(L.Post.a11yVotersHint)
                 .accessibilityAddTraits(.isButton)
                 .accessibilityIdentifier("card-voters")
-                Button { app.openPost(card.key) } label: { CountLabel(appIcon: .comment, count: card.comments) }
+                Button { app.openPost(card.key, fromList: !isInPane) } label: { CountLabel(appIcon: .comment, count: card.comments) }
                     .buttonStyle(.plain)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(L.Post.a11yComments(count: Int(card.comments)))
