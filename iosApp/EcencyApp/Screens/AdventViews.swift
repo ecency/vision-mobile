@@ -193,7 +193,7 @@ struct AdventScreen: View {
     }
 }
 
-/// The night sky header: stars, moon, a string of lights, falling snow, a snowy hill with two trees.
+/// The night sky header: stars, moon, a string of lights, falling snow, a snowy hill with a tree (on the right, clear of the headline and the countdown).
 private struct AdventHeader: View {
     let state: AdventState
     let falling: Bool
@@ -286,7 +286,6 @@ enum AdventSky {
             ctx.fill(Path(ellipseIn: CGRect(x: cx - 5 * u, y: cy - 7 * u, width: 10 * u, height: 14 * u)), with: .color(c))
         }
         tree(ctx, at: CGPoint(x: 330 * u, y: h - 86 * u), u: u, green: Festive.holly)
-        tree(ctx, at: CGPoint(x: 46 * u, y: h - 74 * u), u: u * 0.7, green: Color(red: 0.165, green: 0.561, blue: 0.361))
         var hill = Path()
         hill.move(to: CGPoint(x: 0, y: h - 32 * u))
         hill.addQuadCurve(to: CGPoint(x: 200 * u, y: h - 42 * u), control: CGPoint(x: 90 * u, y: h - 60 * u))

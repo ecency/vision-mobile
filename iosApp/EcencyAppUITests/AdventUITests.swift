@@ -29,6 +29,7 @@ final class AdventUITests: XCTestCase {
         let countdown = element(app, "advent-countdown")
         XCTAssertTrue(countdown.waitForExistence(timeout: 20), app.debugDescription)
         XCTAssertTrue(countdown.label.hasPrefix("5 days 1"), countdown.label)
+        shot("teaser")
     }
 
     func testTodaysDoorTakesAWrittenAnswer() {

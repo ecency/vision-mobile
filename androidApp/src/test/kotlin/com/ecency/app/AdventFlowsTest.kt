@@ -212,4 +212,34 @@ class AdventFlowsTest {
         compose.onNodeWithTag("adventAnswer").performTextInput("Snow on the roofs and tea by the window.")
         save("door")
     }
+
+    /** As [screenshotsForTheDesignReview]: a drawn door the account won. */
+    @Test
+    @Config(qualifiers = "w390dp-h844dp")
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    fun resultScreenshotForTheDesignReview() {
+        val dir = System.getenv("ADVENT_SHOT_DIR")?.takeIf { it.isNotEmpty() } ?: return
+        signIn()
+        launch(NavState(tab = AppTab.FEED).push(AppScreen.Advent))
+        waitFor("adventDoor:3")
+        compose.onNodeWithTag("adventDoor:3").performScrollTo().performClick()
+        waitFor("adventWinner:1")
+        settle()
+        val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
+        java.io.File(dir, "advent-android-result.png").outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    /** As [screenshotsForTheDesignReview]: the teaser on 25 Nov with its countdown. */
+    @Test
+    @Config(qualifiers = "w390dp-h844dp")
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    fun teaserScreenshotForTheDesignReview() {
+        val dir = System.getenv("ADVENT_SHOT_DIR")?.takeIf { it.isNotEmpty() } ?: return
+        now = AdventSeason.SHOW_FROM + 10 * 3_600_000L
+        launch(NavState(tab = AppTab.FEED).push(AppScreen.Advent))
+        waitFor("adventCountdown")
+        settle()
+        val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
+        java.io.File(dir, "advent-android-teaser.png").outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+    }
 }

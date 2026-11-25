@@ -226,7 +226,7 @@ private fun Stat(label: String, value: String, tint: Color, modifier: Modifier) 
     }
 }
 
-/** Stars, a moon, a string of lights, falling snow and a snowy hill with two trees (decoration only). */
+/** Stars, a moon, a string of lights, falling snow and a snowy hill with a tree on the right, clear of the headline (decoration only). */
 private fun DrawScope.sky(fall: Float) {
     val w = size.width
     val h = size.height
@@ -266,7 +266,6 @@ private fun DrawScope.sky(fall: Float) {
         close()
     }
     tree(Offset(330 * u, h - 86 * u), u, Color(0xFF1F7A4D))
-    tree(Offset(46 * u, h - 74 * u), u * 0.7f, Color(0xFF2A8F5C))
     drawPath(hill, Festive.snow)
 }
 
