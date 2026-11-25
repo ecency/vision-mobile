@@ -335,7 +335,7 @@ private struct ProfileTabFeed: View {
             ForEach(state.items, id: \.key) { card in
                 Group {
                     if tab.isComments {
-                        ProfileCommentRow(card: card)
+                        ProfileCommentRow(card: card, width: width, payoutPost: { model.post(key: card.key) })
                     } else {
                         // the payout breakdown, as in a feed (user report: none on a profile)
                         PostCardView(card: card, width: width, payoutPost: { model.post(key: card.key) })
@@ -359,39 +359,63 @@ private struct ProfileTabFeed: View {
     }
 }
 
-/// A comment of the comments / replies tab: author, age, text and counts; a tap opens it.
+/// A comment of the comments / replies tab (RN commentsTabContent draws the post screen's Comment, RN CommentView):
+/// author, age and the options, the comment's text (a tap opens it), then the card's actions: the vote with the
+/// payout, the voters, the replies (open the comment) and RN's gift (`_handleOnTipPress`; signed out, the login).
 private struct ProfileCommentRow: View {
     let card: PostCard
+    let width: CGFloat
+    /// The comment's post for the payout popover (the list resolves it).
+    var payoutPost: (() -> Post?)? = nil
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        Button { app.openPost(card.key) } label: {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    AvatarView(url: card.avatarUrl, size: 24)
-                    Text(card.author).scaledFont(14, weight: .bold).foregroundStyle(theme.text)
-                    Text(CardText.age(card)).scaledFont(12, relativeTo: .caption).foregroundStyle(theme.secondary)
-                }
-                if !card.title.isEmpty {
-                    Text(card.title).scaledFont(13).foregroundStyle(theme.secondary).lineLimit(1)
-                }
-                Text(card.summary).scaledFont(15).foregroundStyle(theme.text).lineLimit(4).multilineTextAlignment(.leading)
-                Text(L.Native.Ios.Profile.commentStats(payout: card.payoutText, votes: Int(card.votes), replies: Int(card.comments)))
-                    .scaledFont(12, relativeTo: .caption).foregroundStyle(theme.secondary)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                AvatarView(url: card.avatarUrl, size: 24)
+                Text(card.author).scaledFont(14, weight: .bold).foregroundStyle(theme.text)
+                Text(CardText.age(card)).scaledFont(12, relativeTo: .caption).foregroundStyle(theme.secondary)
+                Spacer(minLength: 0)
+                MenuButton { app.openMenu(key: card.key) }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
+            Button { app.openPost(card.key) } label: {
+                VStack(alignment: .leading, spacing: 4) {
+                    if !card.title.isEmpty {
+                        Text(card.title).scaledFont(13).foregroundStyle(theme.secondary).lineLimit(1)
+                    }
+                    Text(card.summary).scaledFont(15).foregroundStyle(theme.text).lineLimit(4).multilineTextAlignment(.leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("comment-\(card.key.author)/\(card.key.permlink)")
+            FooterRow(spacing: 16, wraps: AccessibleFooter.wraps(typeSize, width: width)) {
+                VoteButton(key: card.key, votedByMe: card.votedByMe, downvotedByMe: card.downvotedByMe,
+                           payoutText: card.payoutText, payoutDeclined: card.isPayoutDeclined, iconSize: 18, payoutPost: payoutPost)
+                Button { app.push(AppScreenVoters(author: card.key.author, permlink: card.key.permlink)) } label: {
+                    CountLabel(appIcon: .heart, count: card.votes)
+                }
+                .buttonStyle(.plain)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(L.Post.a11yVotes(count: Int(card.votes)))
+                .accessibilityHint(L.Post.a11yVotersHint)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityIdentifier("card-voters")
+                Button { app.openPost(card.key) } label: { CountLabel(appIcon: .comment, count: card.comments) }
+                    .buttonStyle(.plain)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(L.Post.a11yComments(count: Int(card.comments)))
+                    .accessibilityAddTraits(.isButton)
+                    .footerTrailing()
+                TipButton(key: card.key, identifier: "comment-tip-\(card.key.author)/\(card.key.permlink)")
+            }
         }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("comment-\(card.key.author)/\(card.key.permlink)")
-        // RN CommentView `_handleOnTipPress`: the gift opens the tipping sheet for the comment (signed out: the login)
-        HStack {
-            TipButton(key: card.key, identifier: "comment-tip-\(card.key.author)/\(card.key.permlink)")
-            Spacer(minLength: 0)
-        }
-        .padding(.leading, 10)
+        .padding(.leading, 16)
+        .padding(.trailing, 8)
+        .padding(.top, 8)
         Rectangle().fill(theme.lightBackground).frame(height: 1)
     }
 }

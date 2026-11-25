@@ -69,7 +69,10 @@ final class FakeHiveTransport: NSObject, RpcTransport {
             result = (params["start_author"] as? String).map { $0.isEmpty } ?? true ? feed(tag: params["tag"] as? String) : []
         case "bridge.get_account_posts":
             let account = params["account"] as? String ?? "spike-alice"
-            result = (params["start_author"] as? String).map { $0.isEmpty } ?? true ? feed(author: account) : []
+            let sort = params["sort"] as? String ?? ""
+            result = (params["start_author"] as? String).map { $0.isEmpty } ?? true
+                ? (sort == "comments" || sort == "replies" ? comments(account: account, replies: sort == "replies") : feed(author: account))
+                : []
         case "bridge.get_post":
             let author = params["author"] as? String ?? ""
             let permlink = params["permlink"] as? String ?? ""
@@ -224,6 +227,25 @@ final class FakeHiveTransport: NSObject, RpcTransport {
             return entry(author: a, permlink: "fake-post-\(i)", title: "Fixture post number \(i)", children: 4, votes: i * 3)
         }
     }
+
+    /// A profile's Comments tab (the account's comments on others' posts) or Replies tab (others' replies to its posts).
+    static func comments(account: String, replies: Bool) -> [[String: Any]] {
+        let others = authors.filter { $0 != account }
+        return (1...3).map { i in
+            let other = others[(i - 1) % others.count]
+            return replies
+                ? entry(author: other, permlink: "re-\(account)-fake-post-\(i)", parent: (account, "fake-post-\(i)"), depth: 1,
+                        body: commentBodies[i - 1], children: i - 1, votes: i * 2)
+                : entry(author: account, permlink: "re-\(other)-fake-post-\(i)", parent: (other, "fake-post-\(i)"), depth: 1,
+                        body: commentBodies[i - 1], children: i - 1, votes: i * 2)
+        }
+    }
+
+    static let commentBodies = [
+        "Thanks for sharing this, the **second part** was the most useful for me.",
+        "Good point about the fixtures. I tried the same steps and it worked.",
+        "Following for the next post in the series.",
+    ]
 
     /// Root plus comments: two top-level threads, one nested past level 3 (shows "more replies").
     static func discussion(rootAuthor: String, rootPermlink: String) -> [String: [String: Any]] {

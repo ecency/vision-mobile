@@ -48,6 +48,16 @@ class DemoHiveTransportTest {
         assertNull(api.accounts.getAccount("someone-real"), "only the made-up accounts exist")
     }
 
+    /** The profile's Comments and Replies tabs list comments (replies to posts), not the account's posts. */
+    @Test
+    fun theProfilesCommentsAndRepliesTabsListComments() = runTest {
+        val comments = api.feeds.page(FeedSource.Account("spike-bob", AccountPostsSort.COMMENTS), null, "spike-alice").posts
+        assertTrue(comments.isNotEmpty(), "the Comments tab has demo comments")
+        assertTrue(comments.all { it.author == "spike-bob" && !it.parentAuthor.isNullOrEmpty() && it.parentAuthor != "spike-bob" }, "comments of spike-bob on others' posts")
+        val replies = api.feeds.page(FeedSource.Account("spike-alice", AccountPostsSort.REPLIES), null, "spike-alice").posts
+        assertTrue(replies.isNotEmpty() && replies.all { it.author != "spike-alice" && it.parentAuthor == "spike-alice" }, "replies of others to spike-alice")
+    }
+
     @Test
     fun theDemoTransactionIsInABlockWithTheDemoTransfer() = runTest {
         // what a HiveAuth send looks up once the wallet answered: where the transaction is, then its operations

@@ -58,7 +58,11 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         val v2 = method.startsWith("bridge.") && method.endsWith("_v2")
         val result: JsonElement = when (method.removeSuffix("_v2").takeIf { v2 } ?: method) {
             "bridge.get_ranked_posts" -> if (firstPage()) feed(null) else JsonArray(emptyList())
-            "bridge.get_account_posts" -> if (firstPage()) feed(text("account") ?: AUTHORS[0]) else JsonArray(emptyList())
+            "bridge.get_account_posts" -> when {
+                !firstPage() -> JsonArray(emptyList())
+                text("sort") == "comments" || text("sort") == "replies" -> comments(text("account") ?: AUTHORS[0], replies = text("sort") == "replies")
+                else -> feed(text("account") ?: AUTHORS[0])
+            }
             "bridge.get_post" -> {
                 val author = text("author").orEmpty()
                 val permlink = text("permlink").orEmpty()
@@ -198,6 +202,16 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         entry(author ?: AUTHORS[(i - 1) % AUTHORS.size], "fake-post-$i", title = "Fixture post number $i", children = 4, votes = i * 3)
     })
 
+    /** A profile's Comments tab (the account's comments on others' posts) or Replies tab (others' replies to its posts). */
+    private fun comments(account: String, replies: Boolean): JsonArray {
+        val others = AUTHORS.filter { it != account }
+        return JsonArray((1..3).map { i ->
+            val other = others[(i - 1) % others.size]
+            if (replies) entry(other, "re-$account-fake-post-$i", parent = account to "fake-post-$i", depth = 1, body = COMMENT_BODIES[i - 1], children = i - 1, votes = i * 2)
+            else entry(account, "re-$other-fake-post-$i", parent = other to "fake-post-$i", depth = 1, body = COMMENT_BODIES[i - 1], children = i - 1, votes = i * 2)
+        })
+    }
+
     /** Root plus comments: two top-level threads, one nested past level 3 (shows "more replies"). */
     private fun discussion(rootAuthor: String, rootPermlink: String): Map<String, JsonObject> {
         val root = rootAuthor to rootPermlink
@@ -249,6 +263,13 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
 
         val AUTHORS = listOf("spike-alice", "spike-bob", "spike-carol", "spike-dave", "spike-erin", "spike-frank")
         const val COMMUNITY = "hive-100001"
+
+        /** The demo comments of the profile's Comments and Replies tabs. */
+        private val COMMENT_BODIES = listOf(
+            "Thanks for sharing this, the **second part** was the most useful for me.",
+            "Good point about the fixtures. I tried the same steps and it worked.",
+            "Following for the next post in the series.",
+        )
 
         /** The throwaway master password every demo account's keys derive from (public, controls nothing). */
         const val PASSWORD = "P5UiTestThrowawayPasswordNotReal"

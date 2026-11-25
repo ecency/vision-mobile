@@ -621,9 +621,51 @@ class ProfileFlowsTest {
         compose.onNodeWithTag("tab:comments").performClick()
         compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
         waitFor("comment:alice/re-one")
-        compose.await("tip button in the row") { idleMain(); exists("commentTip:alice/re-one") }
-        compose.onNodeWithTag("commentTip:alice/re-one", useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        val tip = hasTestTag("tip") and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:alice/re-one"))
+        compose.await("tip button in the row") { idleMain(); compose.onAllNodes(tip, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(tip, useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         waitFor("tipSheet")
+    }
+
+    /**
+     * RN commentsTabContent draws the Comments and Replies tabs with the post screen's Comment (RN CommentView): the
+     * vote button with the payout, the voters, the replies, the options and the gift on every row. The vote goes
+     * through the app's one vote path (the weight sheet, then the broadcast).
+     */
+    @Test
+    fun aCommentRowOfTheCommentsTabVotesLikeAnyCard() {
+        node.signIn()
+        launch(AppScreen.Profile("alice"))
+        waitBelowSummary("tab:comments")
+        compose.onNodeWithTag("tab:comments").performClick()
+        compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
+        waitFor("comment:alice/re-one")
+        val inRow = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:alice/re-one"))
+        for (tag in listOf("vote", "payout", "voters", "postComments", "options")) {
+            assertTrue("the comment row has $tag", compose.onAllNodes(hasTestTag(tag) and inRow, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        }
+        compose.onAllNodes(hasTestTag("vote") and inRow, useUnmergedTree = true)[0].performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        waitFor("voteSheet")
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        compose.await("the vote on the comment is broadcast") {
+            idleMain()
+            node.broadcasts().any { it.contains("\"vote\"") && it.contains("re-one") }
+        }
+    }
+
+    /** The own Replies tab draws the same full comment rows (RN commentsTabContent, type "replies"). */
+    @Test
+    fun aRowOfTheOwnRepliesTabHasTheCardActions() {
+        node.signIn()
+        launch(AppScreen.Profile("tester"))
+        waitBelowSummary("tab:replies")
+        compose.onNodeWithTag("tab:replies").performClick()
+        compose.await("scroll to the reply") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("replies:tester/replies-one") }.isSuccess }
+        waitFor("comment:tester/replies-one")
+        val inRow = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:tester/replies-one"))
+        for (tag in listOf("vote", "payout", "voters", "postComments", "options")) {
+            assertTrue("the reply row has $tag", compose.onAllNodes(hasTestTag(tag) and inRow, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        }
     }
 
     @Test

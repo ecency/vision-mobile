@@ -165,6 +165,43 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(element(app, "tip-sheet").waitForExistence(timeout: 10), app.debugDescription)
     }
 
+    /// RN commentsTabContent draws its rows with the post screen's Comment: the vote button with the payout and the
+    /// voters on the gift's line, the options above; the vote opens the app's one vote sheet.
+    func testACommentRowOfTheCommentsTabHasTheVoteAndTheCardActions() {
+        let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
+        XCTAssertTrue(app.buttons["tab-comments"].waitForExistence(timeout: 20))
+        app.buttons["tab-comments"].tap()
+        let vote = assertCommentRowActions(app)
+        vote.tap()
+        XCTAssertTrue(app.buttons["vote-submit"].waitForExistence(timeout: 5), app.debugDescription)
+    }
+
+    /// The own Replies tab draws the same rows (RN commentsTabContent, type "replies").
+    func testARowOfTheOwnRepliesTabHasTheVoteAndTheCardActions() {
+        let app = launch(["-openLink", "https://ecency.com/@spike-alice"])
+        XCTAssertTrue(app.buttons["tab-replies"].waitForExistence(timeout: 20))
+        app.buttons["tab-replies"].tap()
+        assertCommentRowActions(app)
+    }
+
+    /// The first comment row's gift, with the vote button, the payout and the voters on its line; returns the vote.
+    @discardableResult
+    private func assertCommentRowActions(_ app: XCUIApplication) -> XCUIElement {
+        let tip = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'comment-tip-'")).firstMatch
+        XCTAssertTrue(tip.waitForExistence(timeout: 15), app.debugDescription)
+        func onTipLine(_ query: XCUIElementQuery) -> XCUIElement? {
+            query.allElementsBoundByIndex.first { abs($0.frame.midY - tip.frame.midY) < 30 }
+        }
+        let vote = onTipLine(app.buttons.matching(identifier: "vote-button"))
+        XCTAssertNotNil(vote, "the comment row has the vote button: \(app.debugDescription)")
+        XCTAssertNotNil(onTipLine(app.descendants(matching: .any).matching(identifier: "payout")), "the comment row has the payout")
+        XCTAssertNotNil(onTipLine(app.buttons.matching(identifier: "card-voters")), "the comment row has the voters")
+        let options = app.buttons.matching(identifier: "post-options").allElementsBoundByIndex
+            .first { $0.frame.maxY <= tip.frame.minY && tip.frame.minY - $0.frame.maxY < 200 }
+        XCTAssertNotNil(options, "the comment row has the options")
+        return vote ?? tip
+    }
+
     func testOwnProfileEditShowsSaveOnChange() {
         let app = launch(["-openScreen", "editProfile"])
         let name = element(app, "field-NAME")
