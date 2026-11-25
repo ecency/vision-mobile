@@ -122,6 +122,14 @@ class AdventFlowsTest {
     }
 
     @Test
+    fun theTeaserCountsDownToTheFirstDoorUnderItsHeadline() {
+        now = AdventSeason.SHOW_FROM + 10 * 3_600_000L
+        launch(NavState(tab = AppTab.FEED).push(AppScreen.Advent))
+        waitFor("adventCountdown")
+        assertTrue("the countdown", compose.onAllNodes(hasTestTag("adventCountdown") and androidx.compose.ui.test.hasText("5 days 14 h 0 min"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
     fun todaysDoorTakesAWrittenAnswerAndTheCalendarMarksItAnswered() {
         signIn()
         launch(NavState(tab = AppTab.FEED).push(AppScreen.Advent))

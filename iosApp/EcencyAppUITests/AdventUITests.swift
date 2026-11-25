@@ -23,6 +23,14 @@ final class AdventUITests: XCTestCase {
         app.descendants(matching: .any).matching(identifier: id).firstMatch
     }
 
+    /// 25 Nov 2026, 10:00 UTC: the teaser counts down to the first door under its headline.
+    func testTheTeaserCountsDownToTheFirstDoor() {
+        let app = launch(["-openScreen", "route:ADVENT"], now: "1795600800000")
+        let countdown = element(app, "advent-countdown")
+        XCTAssertTrue(countdown.waitForExistence(timeout: 20), app.debugDescription)
+        XCTAssertTrue(countdown.label.hasPrefix("5 days 1"), countdown.label)
+    }
+
     func testTodaysDoorTakesAWrittenAnswer() {
         let app = launch(["-openScreen", "route:ADVENT"])
         let door = element(app, "advent-door-9")
