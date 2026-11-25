@@ -59,6 +59,19 @@ final class AdventUITests: XCTestCase {
         shot("result")
     }
 
+    /// 26 Dec 2026, 01:00 UTC: the grand draw ran on 25 Dec, its card lists the winners.
+    func testTheGrandDrawCardListsItsWinnersOnceDrawn() {
+        let app = launch(["-openScreen", "route:ADVENT"], now: "1798246800000")
+        let grand = element(app, "advent-grand")
+        XCTAssertTrue(grand.waitForExistence(timeout: 20), app.debugDescription)
+        for _ in 0..<4 where !element(app, "advent-grand-seed").isHittable { app.swipeUp() }
+        let first = element(app, "advent-grand-winner-1")
+        XCTAssertTrue(first.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertTrue(first.label.contains("@demo-one"), first.label)
+        XCTAssertTrue(element(app, "advent-grand-seed").exists, "the seed block")
+        shot("grand")
+    }
+
     func testTheFeedBannerShowsInSeasonAndClosesForTheDay() {
         let app = launch([])
         let banner = element(app, "advent-banner")

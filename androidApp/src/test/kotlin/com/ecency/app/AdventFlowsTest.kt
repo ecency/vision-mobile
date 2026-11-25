@@ -64,6 +64,9 @@ class AdventFlowsTest {
     @Volatile private var now = AdventSeason.FIRST_DOOR + 8 * AdventSeason.DAY_MILLIS + 10 * 3_600_000L
     private val advent = DemoAdvent { now }
 
+    /** The games API cannot be reached (offline). */
+    @Volatile private var offline = false
+
     private val env by lazy {
         AppEnvironment(
             api = EcencyApi(listOf("https://node-a.example"), DemoHiveTransport { now / 1000 }),
@@ -74,7 +77,7 @@ class AdventFlowsTest {
             debugKeyImport = true,
             nowMillis = { now },
             security = SecurityConfig(pinIterations = 16, monotonicMillis = { 0L }),
-            auth = AuthServices(AuthHttp { request -> advent.http(request) ?: HttpResult(503, "{}") }, HasSocketFactory { error("no relay") }),
+            auth = AuthServices(AuthHttp { request -> (if (offline) null else advent.http(request)) ?: HttpResult(503, "{}") }, HasSocketFactory { error("no relay") }),
         )
     }
 
@@ -156,6 +159,32 @@ class AdventFlowsTest {
         waitFor("adventWinner:1")
         assertTrue("you won", exists("adventYouWon"))
         assertTrue("the seed block", exists("adventSeed"))
+    }
+
+    @Test
+    fun theGrandDrawCardListsItsWinnersOnceDrawn() {
+        // 26 Dec: the grand draw ran on 25 Dec at 12:00 UTC
+        now = AdventSeason.FIRST_DOOR + 25 * AdventSeason.DAY_MILLIS + 3_600_000L
+        signIn()
+        launch(NavState(tab = AppTab.FEED).push(AppScreen.Advent))
+        waitFor("adventGrand")
+        waitFor("adventGrandWinner:1")
+        assertTrue("the first winner", compose.onAllNodes(hasTestTag("adventGrandWinner:1") and androidx.compose.ui.test.hasText("@demo-one", substring = true)).fetchSemanticsNodes().isNotEmpty())
+        assertTrue("the seed block", exists("adventGrandSeed"))
+    }
+
+    @Test
+    fun aReloadThatFailsOverALoadedCalendarSaysSo() {
+        signIn()
+        launch(NavState(tab = AppTab.FEED).push(AppScreen.Advent))
+        waitFor("adventDoor:9")
+        // offline over midnight: the next day's reload fails and the previous calendar stays, with a notice to retry
+        offline = true
+        now += AdventSeason.DAY_MILLIS
+        compose.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.STARTED)
+        compose.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
+        waitFor("adventRetry")
+        assertTrue("the calendar stays", exists("adventDoor:9"))
     }
 
     @Test

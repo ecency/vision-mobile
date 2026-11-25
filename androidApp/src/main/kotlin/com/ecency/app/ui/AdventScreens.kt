@@ -150,7 +150,8 @@ fun AdventScreen(env: AppEnvironment, model: AdventModel, onBack: () -> Unit, on
                 Header(state.kicker, state.headline, state.countdown, state.answered, state.poolLeft, state.account != null, state.phase, state.snow, falling, onBack, model::toggleSnow)
                 when {
                     state.signIn == AdventSignIn.FAILED -> Notice(L.native.advent.signRetry, model::retrySignIn, "adventSignRetry")
-                    state.error != null && !state.loaded -> Notice(L.native.advent.calendarFailed, model::refresh, "adventRetry")
+                    // also over a calendar already shown: a reload that failed (offline at midnight) leaves yesterday's doors
+                    state.error != null -> Notice(L.native.advent.calendarFailed, model::refresh, "adventRetry")
                     state.account == null && state.phase == AdventPhase.SEASON -> Notice(L.native.advent.loginToOpen, onLogin, "adventLogin")
                 }
                 if (state.phase == AdventPhase.HIDDEN) {
@@ -159,7 +160,7 @@ fun AdventScreen(env: AppEnvironment, model: AdventModel, onBack: () -> Unit, on
                     Doors(state.tiles, onDoor = model::openDoor)
                     Legend()
                     if (state.phase == AdventPhase.TEASER) Steps()
-                    state.grand?.let { GrandCard(it.total, it.text, it.progress, it.fraction) }
+                    state.grand?.let { GrandCard(it, state.account) }
                     if (state.prizes.isNotEmpty()) Prizes(state.prizes, state.pointsSoFar)
                 }
                 Spacer(Modifier.height(32.dp))
@@ -169,7 +170,8 @@ fun AdventScreen(env: AppEnvironment, model: AdventModel, onBack: () -> Unit, on
     }
     state.sheet?.let { sheet ->
         ModalBottomSheet(onDismissRequest = model::closeSheet, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-            DoorSheet(env, sheet, state.account, model, onUrl)
+            // "View your Wave" leaves the calendar: the sheet (its own window) closes first
+            DoorSheet(env, sheet, state.account, model) { url -> model.closeSheet(); onUrl(url) }
         }
     }
 }
@@ -184,7 +186,7 @@ private fun Header(
         t.animateFloat(0f, 1f, infiniteRepeatable(tween(9000, easing = LinearEasing), RepeatMode.Restart), label = "fall").value
     } else 0f
     Box(Modifier.fillMaxWidth().background(Festive.night)) {
-        Canvas(Modifier.matchParentSize()) { sky(fall) }
+        Canvas(Modifier.matchParentSize()) { sky(fall, snow) }
         Column(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 4.dp, end = 16.dp, bottom = 46.dp)) {
             Row(Modifier.fillMaxWidth().height(52.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -226,8 +228,11 @@ private fun Stat(label: String, value: String, tint: Color, modifier: Modifier) 
     }
 }
 
-/** Stars, a moon, a string of lights, falling snow and a snowy hill with a tree on the right, clear of the headline (decoration only). */
-private fun DrawScope.sky(fall: Float) {
+/**
+ * Stars, a moon, a string of lights, falling snow and a snowy hill with a tree on the right, clear of the headline
+ * (decoration only). With [snow] off there are no flakes and no glow around the lights; [fall] 0 holds them still.
+ */
+private fun DrawScope.sky(fall: Float, snow: Boolean) {
     val w = size.width
     val h = size.height
     val u = w / 390f
@@ -237,7 +242,7 @@ private fun DrawScope.sky(fall: Float) {
         drawCircle(Color.White.copy(alpha = 0.85f), 1.5f * u, Offset(x * u, y * u))
     }
     val flakes = listOf(110 to 92, 220 to 64, 46 to 130, 275 to 175, 360 to 115, 160 to 40, 320 to 20)
-    flakes.forEachIndexed { i, (x, y) ->
+    if (snow) flakes.forEachIndexed { i, (x, y) ->
         val dy = (y * u + fall * h + i * 37 * u) % h
         flake(Offset(x * u + (if (i % 2 == 0) 6 else -6) * u * fall, dy), 5.5f * u * (0.7f + (i % 3) * 0.15f), Color.White.copy(alpha = 0.85f))
     }
@@ -254,7 +259,7 @@ private fun DrawScope.sky(fall: Float) {
         val x = (24 + i * 49) * u
         val y = (if (i % 3 == 1) 69 else if (i % 3 == 2) 62 else 64) * u
         val c = Festive.lights[i % 4]
-        drawCircle(c.copy(alpha = 0.25f), 11 * u, Offset(x, y))
+        if (snow) drawCircle(c.copy(alpha = 0.25f), 11 * u, Offset(x, y))
         drawOval(c, Offset(x - 5 * u, y - 7 * u), Size(10 * u, 14 * u))
     }
     val hill = Path().apply {
@@ -429,20 +434,45 @@ private fun Steps() {
 }
 
 @Composable
-private fun GrandCard(total: String, text: String, progress: String, fraction: Double) {
+private fun GrandCard(grand: com.ecency.core.app.AdventGrandCard, account: String?) {
     Box(Modifier.fillMaxWidth().padding(12.dp).clip(RoundedCornerShape(16.dp)).background(Festive.red).testTag("adventGrand")) {
         Box(Modifier.align(Alignment.CenterEnd).padding(end = 18.dp).width(10.dp).fillMaxHeight().background(Festive.gold))
         Column(Modifier.fillMaxWidth().padding(start = 14.dp, top = 14.dp, bottom = 14.dp, end = 44.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(L.native.advent.grandTitle, color = Color.White, fontFamily = Festive.script, fontWeight = FontWeight.Bold, fontSize = 26.sp, modifier = Modifier.weight(1f))
-                Text(total, color = Color(0xFF8F1D25), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color.White).padding(horizontal = 9.dp, vertical = 4.dp))
+                Text(grand.total, color = Color(0xFF8F1D25), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color.White).padding(horizontal = 9.dp, vertical = 4.dp))
             }
-            Text(text, color = Color.White, fontSize = 13.sp, lineHeight = 18.sp)
-            Box(Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)).background(Festive.redDeep)) {
-                Box(Modifier.fillMaxWidth(fraction.toFloat().coerceIn(0f, 1f)).height(10.dp).background(Festive.gold))
+            if (grand.drawn) {
+                // web GrandCard after the draw: the winners, a withdrawn prize struck through, and the seed block
+                grand.winners.forEach { w -> WinnerRow(w, "adventGrandWinner:${w.place}", Color.White, Color.White) }
+                grand.seed?.let { Text(it, color = Color.White, fontSize = 12.sp, modifier = Modifier.testTag("adventGrandSeed")) }
+            } else {
+                Text(grand.text, color = Color.White, fontSize = 13.sp, lineHeight = 18.sp)
+                if (account != null) {
+                    Box(Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)).background(Festive.redDeep)) {
+                        Box(Modifier.fillMaxWidth(grand.fraction.toFloat().coerceIn(0f, 1f)).height(10.dp).background(Festive.gold))
+                    }
+                    Text(grand.progress, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
             }
-            Text(progress, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
+    }
+}
+
+/** A winner as listed (web `adv-winner`): the place, the account, the prize; a withdrawn prize struck through. */
+@Composable
+private fun WinnerRow(w: com.ecency.core.app.AdventWinnerRow, tag: String, ink: Color, badge: Color) {
+    val strike = if (w.cancelled) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
+    // a withdrawn prize is struck through and says so, at full contrast
+    Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}.testTag(tag), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(26.dp).clip(CircleShape).background(if (w.place == 1) Festive.gold else badge), contentAlignment = Alignment.Center) {
+            Text(w.placeText, color = Festive.ink, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
+        }
+        Text(
+            w.name, color = ink, fontSize = 14.sp, textDecoration = strike,
+            fontWeight = if (w.you) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.padding(start = 10.dp).weight(1f),
+        )
+        Text(w.prize, color = ink, fontSize = 14.sp)
     }
 }
 
@@ -484,10 +514,10 @@ private fun DoorSheet(env: AppEnvironment, sheet: AdventSheet, account: String?,
             }
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
                 Text(
-                    if (drawn) "${L.native.advent.doorLabel(day = LocaleFormat.integer(sheet.day.toLong()))} · ${L.native.advent.labelDrawn}" else L.native.advent.doorLabel(day = LocaleFormat.integer(sheet.day.toLong())),
+                    AdventCopy.doorTitle(sheet.day, drawn),
                     color = Festive.redText, fontFamily = Festive.script, fontWeight = FontWeight.Bold, fontSize = 30.sp, modifier = Modifier.semantics { heading() }.testTag("adventSheetTitle"),
                 )
-                door?.let { Text("${AdventCopy.kindLabel(it.kind)} · ${AdventCopy.reward(it.reward)}", color = colors.darkGray, fontSize = 13.sp) }
+                door?.let { Text(AdventCopy.kindLine(it), color = colors.darkGray, fontSize = 13.sp) }
             }
         }
         when (sheet.mode) {
@@ -587,19 +617,13 @@ private fun Result(sheet: AdventSheet, account: String?, model: AdventModel) {
         if (mine != null && door != null) {
             Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Festive.cream).border(1.dp, Color(0xFFF0CF6A), RoundedCornerShape(14.dp)).padding(12.dp).testTag("adventYouWon")) {
                 Text(L.native.advent.youWon, color = Color(0xFF8F1D25), fontFamily = Festive.script, fontWeight = FontWeight.Bold, fontSize = 24.sp)
-                Text(L.native.advent.place(n = LocaleFormat.integer(mine.place.toLong())) + " · " + AdventCopy.prize(door.reward.kind, door.reward.amounts.getOrElse(mine.place - 1) { 0.0 }), color = Color(0xFF5C3F00), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(AdventCopy.wonLine(mine.place, door.reward.kind, door.reward.amounts.getOrElse(mine.place - 1) { 0.0 }), color = Color(0xFF5C3F00), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
         }
         Text(L.native.advent.winners, color = colors.darkGray, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         if (result.winners.isEmpty()) Text(L.native.advent.noWinners, color = colors.text)
-        result.winners.forEach { w ->
-            Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}.testTag("adventWinner:${w.place}"), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(26.dp).clip(CircleShape).background(if (w.place == 1) Festive.gold else Color(0xFFDFE5F0)), contentAlignment = Alignment.Center) {
-                    Text(LocaleFormat.integer(w.place.toLong()), color = Festive.ink, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
-                }
-                Text("@${w.account}" + if (w.account == account) " ${L.native.advent.you}" else "", color = colors.text, fontSize = 14.sp, fontWeight = if (w.account == account) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.padding(start = 10.dp).weight(1f))
-                door?.reward?.amounts?.getOrNull(w.place - 1)?.let { Text(AdventCopy.prize(door.reward.kind, it), color = colors.text, fontSize = 14.sp) }
-            }
+        if (door != null) AdventCopy.winners(result.winners, door.reward.kind, door.reward.amounts, account).forEach { w ->
+            WinnerRow(w, "adventWinner:${w.place}", colors.text, Color(0xFFDFE5F0))
         }
         Text(L.native.advent.entries(n = result.entries), color = colors.darkGray, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         val total = result.tallies.sum().coerceAtLeast(1)
@@ -607,7 +631,7 @@ private fun Result(sheet: AdventSheet, account: String?, model: AdventModel) {
             val share = (result.tallies.getOrElse(i) { 0 }.toDouble() / total)
             Column(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
                 Row(Modifier.fillMaxWidth()) {
-                    Text(c + if (result.answerIndex == i) " · ${L.native.advent.rightAnswer}" else "", color = colors.text, fontSize = 13.sp, fontWeight = if (result.answerIndex == i) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.weight(1f))
+                    Text(AdventCopy.choiceLine(c, result.answerIndex == i), color = colors.text, fontSize = 13.sp, fontWeight = if (result.answerIndex == i) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.weight(1f))
                     Text(LocaleFormat.percent(kotlin.math.round(share * 100), 0, 0), color = colors.text, fontSize = 13.sp)
                 }
                 Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(Festive.track)) {

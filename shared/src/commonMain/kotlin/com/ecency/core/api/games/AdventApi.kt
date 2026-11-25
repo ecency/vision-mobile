@@ -235,6 +235,8 @@ class AdventApi(private val http: AuthHttp, val base: String = BASE, val vouchHo
         if (response.status !in 200..299) {
             throw GamesApiException(response.status, o?.str("error")?.take(60) ?: "error", o?.str("message")?.take(200) ?: "Request failed (${response.status})")
         }
+        // an empty body is a plain "done"; anything else that is not JSON (a captive Wi-Fi page) is no answer at all
+        if (o == null && response.body.isNotBlank()) throw GamesApiException(response.status, "bad_answer", "Unexpected answer")
         return o ?: JsonObject(emptyMap())
     }
 
@@ -256,7 +258,8 @@ class AdventApi(private val http: AuthHttp, val base: String = BASE, val vouchHo
             reward = AdventReward(rewardKind(reward?.str("kind")), reward?.get("amounts").arr()?.mapNotNull { it.asDouble() }.orEmpty()),
             status = when (o.str("status")) { "open" -> AdventDoorStatus.OPEN; "closed" -> AdventDoorStatus.CLOSED; "drawn" -> AdventDoorStatus.DRAWN; else -> AdventDoorStatus.LOCKED },
             prompt = o.str("prompt")?.takeIf { it.isNotEmpty() },
-            choices = o["choices"].arr()?.mapNotNull { (it as? JsonPrimitive)?.contentOrNullSafe() }.orEmpty(),
+            // a choice missing from the list would move the ones after it to the wrong index: no choices then
+            choices = o["choices"].arr()?.map { (it as? JsonPrimitive)?.contentOrNullSafe() }?.takeIf { null !in it }?.filterNotNull().orEmpty(),
         )
     }
 

@@ -642,11 +642,13 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
                                 onDone = { navigator.pop() },
                             )
                         }
-                        AppScreen.Advent -> AdventScreen(
-                            env, entry.get("advent") { env.adventModel() },
-                            onBack = { navigator.pop() }, onLogin = { navigator.push(AppScreen.Login) },
-                            onUrl = { url -> com.ecency.core.app.ContentLinks.entry(url)?.screens?.forEach { routes.push(it) } ?: host.openExternal(url) },
-                        )
+                        AppScreen.Advent -> Guarded({ entry.get("advent") { env.adventModel() } }) { model ->
+                            AdventScreen(
+                                env, model,
+                                onBack = { navigator.pop() }, onLogin = { navigator.push(AppScreen.Login) },
+                                onUrl = { url -> com.ecency.core.app.ContentLinks.entry(url)?.screens?.forEach { routes.push(it) } ?: host.openExternal(url) },
+                            )
+                        }
                         AppScreen.Refer -> Box(Modifier.fillMaxSize().statusBarsPadding()) {
                             ReferScreen(
                                 env, host, entry.get("refer") { env.referModel() }, entry.get("list") { LazyListState() }, session.username,

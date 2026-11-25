@@ -52,7 +52,7 @@ struct AdventScreen: View {
                 AdventHeader(state: state, falling: state.snow && motion.level == .full, onSnow: { model.toggleSnow() })
                 if state.signIn == .failed {
                     notice(L.Native.Advent.signRetry, id: "advent-sign-retry") { model.retrySignIn() }
-                } else if state.error != nil && !state.loaded {
+                } else if state.error != nil { // also over a calendar shown: a reload that failed leaves yesterday's doors
                     notice(L.Native.Advent.calendarFailed, id: "advent-retry") { model.refresh() }
                 } else if state.account == nil && state.phase == .season {
                     notice(L.Native.Advent.loginToOpen, id: "advent-login") { app.push(AppScreenLogin.shared) }
@@ -64,7 +64,7 @@ struct AdventScreen: View {
                     doors(state.tiles).padding(.top, -20)
                     legend
                     if state.phase == .teaser { steps }
-                    if let grand = state.grand { grandCard(grand) }
+                    if let grand = state.grand { grandCard(grand, signedIn: state.account != nil) }
                     if !state.prizes.isEmpty { prizes(state.prizes, total: state.pointsSoFar) }
                 }
                 Spacer(minLength: 32)
@@ -90,7 +90,11 @@ struct AdventScreen: View {
         .themedSheet(isPresented: Binding(get: { state.sheet != nil }, set: { if !$0 { model.closeSheet() } })) {
             if let sheet = observed.state.sheet {
                 AdventDoorSheet(sheet: sheet, account: observed.state.account, model: model) { url in
-                    if let entry = ContentLinks.shared.entry(url: url) { app.open(entry: entry) }
+                    if let entry = ContentLinks.shared.entry(url: url) {
+                        // "View your Wave" leaves the calendar: the sheet closes first
+                        model.closeSheet()
+                        app.open(entry: entry)
+                    }
                 }
             }
         }
@@ -143,7 +147,7 @@ struct AdventScreen: View {
         .padding(12)
     }
 
-    private func grandCard(_ grand: AdventGrandCard) -> some View {
+    private func grandCard(_ grand: AdventGrandCard, signedIn: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(L.Native.Advent.grandTitle).font(Festive.script(26)).foregroundStyle(.white).accessibilityAddTraits(.isHeader)
@@ -151,21 +155,31 @@ struct AdventScreen: View {
                 Text(grand.total).scaledFont(12, weight: .heavy).foregroundStyle(Color(red: 0.561, green: 0.114, blue: 0.145))
                     .padding(.horizontal, 9).padding(.vertical, 4).background(Color.white, in: RoundedRectangle(cornerRadius: 10))
             }
-            Text(grand.text).scaledFont(13).foregroundStyle(.white)
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 5).fill(Color(red: 0.659, green: 0.133, blue: 0.169))
-                    RoundedRectangle(cornerRadius: 5).fill(Festive.gold).frame(width: geo.size.width * CGFloat(min(max(grand.fraction, 0), 1)))
+            if grand.drawn {
+                // web GrandCard after the draw: the winners, a withdrawn prize struck through, and the seed block
+                ForEach(grand.winners, id: \.place) { w in
+                    AdventWinnerLine(row: w, ink: .white, badge: .white).accessibilityIdentifier("advent-grand-winner-\(w.place)")
+                }
+                if let seed = grand.seed { Text(seed).scaledFont(12).foregroundStyle(.white).accessibilityIdentifier("advent-grand-seed") }
+            } else {
+                Text(grand.text).scaledFont(13).foregroundStyle(.white)
+                if signedIn {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 5).fill(Color(red: 0.659, green: 0.133, blue: 0.169))
+                            RoundedRectangle(cornerRadius: 5).fill(Festive.gold).frame(width: geo.size.width * CGFloat(min(max(grand.fraction, 0), 1)))
+                        }
+                    }
+                    .frame(height: 10).accessibilityHidden(true)
+                    Text(grand.progress).scaledFont(12, weight: .bold).foregroundStyle(.white)
                 }
             }
-            .frame(height: 10).accessibilityHidden(true)
-            Text(grand.progress).scaledFont(12, weight: .bold).foregroundStyle(.white)
         }
         .padding(.leading, 14).padding(.vertical, 14).padding(.trailing, 44)
         .background(alignment: .trailing) { Festive.gold.frame(width: 10).padding(.trailing, 18) }
         .background(Festive.red, in: RoundedRectangle(cornerRadius: 16))
         .padding(12)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: grand.drawn ? .contain : .combine)
         .accessibilityIdentifier("advent-grand")
     }
 
@@ -237,7 +251,7 @@ private struct AdventHeader: View {
         .background {
             TimelineView(.animation(minimumInterval: 1 / 20, paused: !falling)) { context in
                 let fall = falling ? CGFloat(context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 9) / 9) : 0
-                Canvas { ctx, size in AdventSky.draw(ctx, size: size, fall: fall) }
+                Canvas { ctx, size in AdventSky.draw(ctx, size: size, fall: fall, snow: state.snow) }
             }
             .background(Festive.night)
             .accessibilityHidden(true)
@@ -256,9 +270,29 @@ private struct AdventHeader: View {
     }
 }
 
+/// A winner as listed (web `adv-winner`): the place, the account, the prize; a withdrawn prize struck through.
+struct AdventWinnerLine: View {
+    let row: AdventWinnerRow
+    let ink: Color
+    let badge: Color
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Text(row.placeText).scaledFont(12, weight: .heavy).foregroundStyle(Festive.ink).frame(width: 26, height: 26)
+                .background(row.place == 1 ? Festive.gold : badge, in: Circle())
+            Text(row.name).bold(row.you).strikethrough(row.cancelled)
+            Spacer()
+            Text(row.prize)
+        }
+        // a withdrawn prize is struck through and says so, at full contrast
+        .scaledFont(14).foregroundStyle(ink).accessibilityElement(children: .combine)
+    }
+}
+
 /// Decoration only (hidden from VoiceOver).
 enum AdventSky {
-    static func draw(_ ctx: GraphicsContext, size: CGSize, fall: CGFloat) {
+    /// With [snow] off there are no flakes and no glow around the lights; [fall] 0 holds them still.
+    static func draw(_ ctx: GraphicsContext, size: CGSize, fall: CGFloat, snow: Bool) {
         let u = size.width / 390
         let h = size.height
         ctx.fill(Path(ellipseIn: CGRect(x: 310 * u, y: 50 * u, width: 40 * u, height: 40 * u)), with: .color(Color(red: 1, green: 0.965, blue: 0.847)))
@@ -266,7 +300,7 @@ enum AdventSky {
         for (x, y) in [(30, 80), (90, 110), (150, 70), (250, 100), (290, 140), (60, 160), (190, 150), (370, 160)] {
             ctx.fill(Path(ellipseIn: CGRect(x: CGFloat(x) * u - 1.5 * u, y: CGFloat(y) * u - 1.5 * u, width: 3 * u, height: 3 * u)), with: .color(.white.opacity(0.85)))
         }
-        for (i, (x, y)) in [(110, 92), (220, 64), (46, 130), (275, 175), (360, 115), (160, 40), (320, 20)].enumerated() {
+        for (i, (x, y)) in [(110, 92), (220, 64), (46, 130), (275, 175), (360, 115), (160, 40), (320, 20)].enumerated() where snow {
             let dy = (CGFloat(y) * u + fall * h + CGFloat(i) * 37 * u).truncatingRemainder(dividingBy: max(h, 1))
             flake(ctx, at: CGPoint(x: CGFloat(x) * u + (i % 2 == 0 ? 6 : -6) * u * fall, y: dy), r: 5.5 * u * (0.7 + CGFloat(i % 3) * 0.15))
         }
@@ -282,7 +316,7 @@ enum AdventSky {
             let cx = CGFloat(24 + i * 49) * u
             let cy = CGFloat(i % 3 == 1 ? 69 : i % 3 == 2 ? 62 : 64) * u
             let c = Festive.lights[i % 4]
-            ctx.fill(Path(ellipseIn: CGRect(x: cx - 11 * u, y: cy - 11 * u, width: 22 * u, height: 22 * u)), with: .color(c.opacity(0.25)))
+            if snow { ctx.fill(Path(ellipseIn: CGRect(x: cx - 11 * u, y: cy - 11 * u, width: 22 * u, height: 22 * u)), with: .color(c.opacity(0.25))) }
             ctx.fill(Path(ellipseIn: CGRect(x: cx - 5 * u, y: cy - 7 * u, width: 10 * u, height: 14 * u)), with: .color(c))
         }
         tree(ctx, at: CGPoint(x: 330 * u, y: h - 86 * u), u: u, green: Festive.holly)
@@ -467,11 +501,10 @@ private struct AdventDoorSheet: View {
             }
             .frame(width: 56, height: 56).clipShape(RoundedRectangle(cornerRadius: 12)).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                let title = L.Native.Advent.doorLabel(day: Fmt.int(Int(sheet.day)))
-                Text(drawn ? title + " · " + L.Native.Advent.labelDrawn : title).font(Festive.script(30)).foregroundStyle(Festive.redText)
+                Text(AdventCopy.shared.doorTitle(day: sheet.day, drawn: drawn)).font(Festive.script(30)).foregroundStyle(Festive.redText)
                     .accessibilityAddTraits(.isHeader).accessibilityIdentifier("advent-sheet-title")
                 if let door = sheet.door {
-                    Text(AdventCopy.shared.kindLabel(kind: door.kind) + " · " + AdventCopy.shared.reward(reward: door.reward)).scaledFont(13).foregroundStyle(.secondary)
+                    Text(AdventCopy.shared.kindLine(door: door)).scaledFont(13).foregroundStyle(.secondary)
                 }
             }
         }
@@ -561,7 +594,7 @@ private struct AdventDoorSheet: View {
             if let mine = r.winners.first(where: { $0.account == account && !$0.cancelled }), let door {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(L.Native.Advent.youWon).font(Festive.script(24)).foregroundStyle(Color(red: 0.561, green: 0.114, blue: 0.145))
-                    Text(L.Native.Advent.place(n: Fmt.int(Int(mine.place))) + " · " + AdventCopy.shared.prize(kind: door.reward.kind, amount: amount(door, mine.place)))
+                    Text(AdventCopy.shared.wonLine(place: mine.place, kind: door.reward.kind, amount: amount(door, mine.place)))
                         .scaledFont(14, weight: .semibold).foregroundStyle(Color(red: 0.361, green: 0.247, blue: 0))
                 }
                 .padding(12).frame(maxWidth: .infinity, alignment: .leading).background(Festive.cream, in: RoundedRectangle(cornerRadius: 14))
@@ -569,15 +602,10 @@ private struct AdventDoorSheet: View {
             }
             Text(L.Native.Advent.winners).scaledFont(13, weight: .bold).foregroundStyle(.secondary)
             if r.winners.isEmpty { Text(L.Native.Advent.noWinners) }
-            ForEach(r.winners, id: \.place) { w in
-                HStack(spacing: 10) {
-                    Text(Fmt.int(Int(w.place))).scaledFont(12, weight: .heavy).frame(width: 26, height: 26)
-                        .background(w.place == 1 ? Festive.gold : Color(red: 0.875, green: 0.898, blue: 0.941), in: Circle())
-                    Text("@" + w.account + (w.account == account ? " " + L.Native.Advent.you : "")).bold(w.account == account)
-                    Spacer()
-                    if let door { Text(AdventCopy.shared.prize(kind: door.reward.kind, amount: amount(door, w.place))) }
+            if let door {
+                ForEach(AdventCopy.shared.winners(winners: r.winners, kind: door.reward.kind, amounts: door.reward.amounts, account: account), id: \.place) { w in
+                    AdventWinnerLine(row: w, ink: .primary, badge: Color(red: 0.875, green: 0.898, blue: 0.941)).accessibilityIdentifier("advent-winner-\(w.place)")
                 }
-                .scaledFont(14).accessibilityElement(children: .combine).accessibilityIdentifier("advent-winner-\(w.place)")
             }
             Text(L.Native.Advent.entries(n: Int(r.entries))).scaledFont(13, weight: .bold).foregroundStyle(.secondary)
             if let door {
@@ -587,7 +615,7 @@ private struct AdventDoorSheet: View {
                     let right = r.answerIndex?.intValue == i
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text(c + (right ? " · " + L.Native.Advent.rightAnswer : "")).bold(right)
+                            Text(AdventCopy.shared.choiceLine(choice: c, right: right)).bold(right)
                             Spacer()
                             Text(Fmt.percent(Int((share * 100).rounded())))
                         }

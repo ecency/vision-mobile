@@ -10,6 +10,7 @@ import com.ecency.core.api.games.AdventPayoutStatus
 import com.ecency.core.api.games.AdventPrize
 import com.ecency.core.api.games.AdventReward
 import com.ecency.core.api.games.AdventRewardKind
+import com.ecency.core.api.games.AdventWinner
 import com.ecency.core.api.games.GameSession
 import com.ecency.core.api.games.GamesApiException
 import com.ecency.core.auth.HiveSignerMessages
@@ -17,6 +18,7 @@ import com.ecency.core.hive.PrivateKey
 import com.ecency.core.l10n.L
 import com.ecency.core.l10n.LocaleFormat
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -149,9 +151,21 @@ object AdventDoors {
     }
 }
 
+/**
+ * A winner of a door or of the grand draw as listed (web `adv-winner`): [prize] is the amount, or "Withdrawn" for a prize
+ * taken back ([cancelled], struck through); [you] marks the reader's own row.
+ */
+data class AdventWinnerRow(val place: Int, val placeText: String, val account: String, val prize: String, val cancelled: Boolean, val you: Boolean) {
+    /** "@account", or "@account (you)" on the reader's own row. */
+    val name: String get() = if (you) L.native.advent.winnerYou(account = account) else "@$account"
+}
+
 /** The calendar's copy that is more than one key. */
 object AdventCopy {
     val TITLE: String get() = L.native.advent.title
+
+    /** "Could not sign in. Try again": the games API refused the account's sign-in. */
+    val SIGN_RETRY: String get() = L.native.advent.signRetry
 
     /** A reward amount, grouped in the app language, at most 3 decimals. */
     fun amount(value: Double): String = LocaleFormat.decimal(value, 3, 0)
@@ -181,6 +195,34 @@ object AdventCopy {
         val amounts = reward.amounts.joinToString(" / ") { amount(it) }
         return if (reward.kind == AdventRewardKind.SPOTLIGHT) L.native.advent.spotlightAmount(n = amounts) else "$amounts ${rewardLabel(reward.kind)}"
     }
+
+    /** [winners] as listed, each with its place's prize from [amounts] of [kind]. */
+    fun winners(winners: List<AdventWinner>, kind: AdventRewardKind, amounts: List<Double>, account: String?): List<AdventWinnerRow> = winners.map { w ->
+        AdventWinnerRow(
+            place = w.place,
+            placeText = LocaleFormat.integer(w.place.toLong()),
+            account = w.account,
+            prize = if (w.cancelled) L.native.advent.withdrawn else amounts.getOrNull(w.place - 1)?.let { prize(kind, it) }.orEmpty(),
+            cancelled = w.cancelled,
+            you = w.account == account,
+        )
+    }
+
+    /** "#1 · 100 HIVE": the reader's own win. */
+    fun wonLine(place: Int, kind: AdventRewardKind, amount: Double): String =
+        L.native.advent.wonLine(n = LocaleFormat.integer(place.toLong()), prize = prize(kind, amount))
+
+    /** "Written answer · 500 / 300 / 200 Points" under a door's title. */
+    fun kindLine(door: AdventDoor): String = L.native.advent.kindLine(kind = kindLabel(door.kind), reward = reward(door.reward))
+
+    /** The door sheet's title: "Door 9", or "Door 9 · Drawn". */
+    fun doorTitle(day: Int, drawn: Boolean): String {
+        val n = LocaleFormat.integer(day.toLong())
+        return if (drawn) L.native.advent.drawnTitle(day = n) else L.native.advent.doorLabel(day = n)
+    }
+
+    /** A choice in a result, "· right answer" after the right one. */
+    fun choiceLine(choice: String, right: Boolean): String = if (right) L.native.advent.choiceRight(choice = choice) else choice
 
     /** One prize: "100 HIVE", or a spotlight's promotion. */
     fun prize(kind: AdventRewardKind, amount: Double): String = reward(AdventReward(kind, listOf(amount)))
@@ -236,10 +278,33 @@ class AdventService internal constructor(private val env: AppEnvironment) {
     var api: AdventApi = AdventApi(env.auth.http)
 
     private val sessions = mutableMapOf<String, GameSession>()
+
+    /**
+     * Each door's answer being sent and its Wave, per account: in the app's scope so they outlive the screen, and here so
+     * a calendar opened again sees them (no second "Post Wave"). Ended when the account leaves.
+     */
+    private val doorJobs = mutableMapOf<Pair<String, Int>, Job>()
+
+    internal fun doorBusy(username: String, day: Int): Boolean = doorJob(username, day) != null
+
+    /** The answer or Wave of [username] for door [day] still on its way, if any. */
+    internal fun doorJob(username: String, day: Int): Job? = doorJobs[username to day]?.takeIf { it.isActive }
+
+    internal fun startDoor(username: String, day: Int, work: suspend () -> Unit): Job {
+        val job = env.background.launch { work() }
+        doorJobs[username to day] = job
+        job.invokeOnCompletion { if (doorJobs[username to day] === job) doorJobs.remove(username to day) }
+        return job
+    }
+
+    /** Stops [username]'s answers and Waves on their way (an account change while the calendar is open). */
+    internal fun stopDoors(username: String) {
+        doorJobs.keys.filter { it.first == username }.forEach { doorJobs.remove(it)?.cancel() }
+    }
     private val signing = mutableMapOf<String, Deferred<GameSession>>()
 
-    /** Bumped when accounts leave: a sign-in that started before is not kept. */
-    private var generation = 0
+    /** Bumped for an account when it leaves: a sign-in for it that started before is ended, never used. */
+    private val leaves = mutableMapOf<String, Int>()
 
     /**
      * A game session token for [username], signed in when there is none (or [fresh]): a posting key signs the web's
@@ -251,16 +316,21 @@ class AdventService internal constructor(private val env: AppEnvironment) {
         if (fresh) sessions.remove(username)
         sessions[username]?.let { if (it.expiresAtMillis == 0L || it.expiresAtMillis - env.nowMillis() > EXPIRY_MARGIN_MILLIS) return it.token }
         signing[username]?.let { return it.await().token }
-        val started = generation
+        val started = leaves[username] ?: 0
         // in the app's scope, not the caller's: a caller that goes away (a closed door, a refresh) leaves the sign-in
         // to the others waiting on it
         val pending = env.background.async {
             val session = signIn(username)
+            if ((leaves[username] ?: 0) != started) {
+                // the account left while signing in: the new session ends at once, nobody uses it
+                end(listOf(session.token))
+                throw GamesApiException(401, "unauthorized", "Signed out")
+            }
             if (session.account != username) throw GamesApiException(401, "unauthorized", "Wrong account")
             // a session already "expired" by the phone's clock (a clock ahead of the server's) is kept with no expiry:
             // the games API refusing it (401) is what replaces it then, not a new sign-in for every call
             val kept = if (session.expiresAtMillis - env.nowMillis() > EXPIRY_MARGIN_MILLIS) session else session.copy(expiresAtMillis = 0L)
-            if (started == generation) sessions[username] = kept
+            sessions[username] = kept
             session
         }
         signing[username] = pending
@@ -299,14 +369,25 @@ class AdventService internal constructor(private val env: AppEnvironment) {
 
     /** Accounts left the device (null: all): their sessions end, here and on the server, and their pending Waves go. */
     internal fun forget(accounts: List<String>?) {
-        generation++
-        val leaving = if (accounts == null) sessions.keys.toList() else accounts.filter { it in sessions }
+        val leaving = accounts ?: (sessions.keys + signing.keys + doorJobs.keys.map { it.first }).toList()
+        for (account in leaving) {
+            // an answer or Wave still on its way for it: nothing more is signed or kept for an account that left
+            stopDoors(account)
+            leaves[account] = (leaves[account] ?: 0) + 1
+            // a sign-in still running is not joined by a later caller: it ends its session when it comes back
+            signing.remove(account)
+        }
         val tokens = leaving.mapNotNull { sessions.remove(it)?.token }
         val prefix = PENDING_PREFIX
         for (key in env.prefs.keys().filter { it.startsWith(prefix) }) {
             val owner = key.removePrefix(prefix).substringBeforeLast('_')
             if (accounts == null || owner in accounts) env.prefs.putString(key, null)
         }
+        end(tokens)
+    }
+
+    /** Ends [tokens] on the server; failures are left to the sessions' own expiry. */
+    private fun end(tokens: List<String>) {
         if (tokens.isEmpty()) return
         env.background.launch {
             for (token in tokens) {

@@ -36,6 +36,9 @@ class DemoAdvent(private val nowMillis: () -> Long) {
     /** Proofs and vouches seen: the proof JSON as decoded, the vouch `username|code`. */
     val signIns = mutableListOf<String>()
 
+    /** Sessions ended by a logout (`DELETE`): refused from then on. */
+    val ended = mutableSetOf<String>()
+
     /** Tests: tokens the API refuses (401) from now on. */
     val refused = mutableSetOf<String>()
 
@@ -101,12 +104,15 @@ class DemoAdvent(private val nowMillis: () -> Long) {
         if (!url.startsWith(AdventApi.BASE + "/v1/")) return null
         val path = url.removePrefix(AdventApi.BASE).substringBefore('?')
         calls += "${request.method} $path"
+        val token = request.headers["authorization"]?.removePrefix("Bearer ")
         if (path == "/v1/raidstead/session") return when (request.method) {
             "POST" -> proof(request)
-            else -> HttpResult(200, "{}")
+            else -> {
+                token?.let { sessions.remove(it); ended += it }
+                HttpResult(200, "{}")
+            }
         }
-        val token = request.headers["authorization"]?.removePrefix("Bearer ")
-        if (token != null && token in refused) return HttpResult(401, """{"error":"unauthorized"}""")
+        if (token != null && (token in refused || token in ended)) return HttpResult(401, """{"error":"unauthorized"}""")
         val account = token?.let { sessions[it] }
         val parts = path.removePrefix("/v1/advent/").split('/')
         if (parts.firstOrNull() != AdventSeason.SEASON.toString()) return HttpResult(404, """{"error":"no_season"}""")
@@ -205,13 +211,25 @@ class DemoAdvent(private val nowMillis: () -> Long) {
         }
     }
 
+    /** The grand draw: scheduled for 25 Dec 12:00 UTC, drawn after it with made-up winners. */
     private fun grand(): JsonObject = buildJsonObject {
+        val drawAt = AdventSeason.FIRST_DOOR + 24 * AdventSeason.DAY_MILLIS + 12 * 3_600_000L
+        val drawn = nowMillis() >= drawAt
         put("season", AdventSeason.SEASON)
-        put("status", "scheduled")
-        put("drawAt", Instant.fromEpochMilliseconds(AdventSeason.FIRST_DOOR + 24 * AdventSeason.DAY_MILLIS + 12 * 3_600_000L).toString())
+        put("status", if (drawn) "drawn" else "scheduled")
+        put("drawAt", Instant.fromEpochMilliseconds(drawAt).toString())
         put("minDoors", 20)
         putJsonArray("amounts") { listOf(5000, 3000, 2000).forEach { add(JsonPrimitive(it)) } }
+        if (drawn) {
+            put("seedBlock", 101_100_000)
+            putJsonArray("winners") {
+                listOf("demo-one", "demo-two", "demo-three").forEachIndexed { i, a -> add(buildJsonObject { put("place", i + 1); put("account", a) }) }
+            }
+        }
     }
+
+    /** Tests: the Wave linked to [account]'s answer to door [day]. */
+    fun wave(account: String, day: Int): String? = entries[account to day]?.wave
 
     private fun door(request: AuthHttpRequest, day: Int, action: String, account: String?): HttpResult {
         if (day !in 1..AdventSeason.DOORS) return HttpResult(404, """{"error":"no_door"}""")

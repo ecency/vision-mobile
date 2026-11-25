@@ -45,6 +45,8 @@ data class AdventSheet(
     val late: Boolean,
     /** RESULT: the account answered this door ("See your answer"); else "Answer anyway" while it is open to late answers. */
     val answered: Boolean,
+    /** The sheet asked for the door's result: "Try again" after a failure asks for the result again. */
+    val forResult: Boolean,
 ) {
     val canAnswerLate: Boolean get() = mode == AdventSheetMode.RESULT && !answered && door != null && door.status != AdventDoorStatus.LOCKED
 }
@@ -60,7 +62,10 @@ data class AdventGrandCard(
     /** 0..1 of the minimum doors answered. */
     val fraction: Double,
     val drawn: Boolean,
-    val winners: List<String>,
+    /** After the draw: every winner, a withdrawn prize struck through (web `GrandCard`). */
+    val winners: List<AdventWinnerRow>,
+    /** After the draw: "Seeded by Hive block N". */
+    val seed: String?,
 )
 
 data class AdventState(
@@ -107,11 +112,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
     private var loadJob: Job? = null
     private var sheetJob: Job? = null
 
-    /**
-     * Each door's answer being sent and its Wave: not tied to the sheet, so closing it or opening another door keeps
-     * them going. One per door: a slow Wave for one door never holds up an answer to another.
-     */
-    private val waveJobs = mutableMapOf<Int, Job>()
+    /** Reads the open door again when the answer or Wave it shows as on its way ends (one at a time). */
+    private var doorWatch: kotlinx.coroutines.DisposableHandle? = null
 
     /** Loads the calendar again at the next UTC midnight (a new door, the end of the season) while it is open. */
     private var dayJob: Job? = null
@@ -120,8 +122,14 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
     private var tickJob: Job? = null
     private var season: AdventSeasonData? = null
 
+    /** The UTC day of the calendar last loaded: a new day, or a reload that failed, loads it again when the app comes back. */
+    private var loadedDay: String? = null
+
     /** 401s answered by a new session since the last success (web `lost`: one automatic sign-in, then ask). */
     private var refusals = 0
+
+    /** The calendar shown is the public one, after a refused sign-in: a door that opens again brings the account's back. */
+    private var publicCalendar = false
 
     /** The session last refused: calls refused together with the same session count once. */
     private var refusedToken: String? = null
@@ -135,9 +143,9 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 if (event is AppEvent.SessionChanged && event.username != current.account) {
                     loadJob?.cancel()
                     sheetJob?.cancel()
-                    waveJobs.values.forEach { it.cancel() }
-                    waveJobs.clear()
+                    current.account?.let { env.advent.stopDoors(it) }
                     season = null
+                    loadedDay = null
                     refusals = 0
                     refusedToken = null
                     setState { AdventState(snow = it.snow) }
@@ -158,14 +166,22 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
     fun resumed() {
         if (!started) return
         val now = env.nowMillis()
-        val newDay = AdventSeason.phase(now) != current.phase || AdventSeason.todayDoor(now) != current.todayDoor
-        if (current.loaded && newDay || !current.loaded && !current.loading) load() else tick(now)
+        if (!current.loading && loadedDay != AdventSeason.utcDay(now)) load() else tick(now)
     }
 
     fun retrySignIn() {
+        freshSignIn()
+        load()
+    }
+
+    /**
+     * A tap of the reader's own (the sign-in retry, a sheet's "Try again", Submit, "Post Wave") after the sign-in was
+     * refused twice is the asking the web does: it signs in again, once more.
+     */
+    private fun freshSignIn() {
+        if (refusals < MAX_REFUSALS) return
         refusals = 0
         refusedToken = null
-        load()
     }
 
     fun toggleSnow() {
@@ -202,6 +218,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 val grand = runCatching { env.advent.api.grand(AdventSeason.SEASON) }.onFailure { if (it is CancellationException) throw it }.getOrNull()
                 if (!owns(user)) return@launch
                 season = data
+                publicCalendar = refused
+                loadedDay = AdventSeason.utcDay(now)
                 val signIn = when {
                     user == null -> AdventSignIn.NONE
                     refused -> AdventSignIn.FAILED
@@ -277,7 +295,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 progress = L.native.advent.grandProgress(n = LocaleFormat.integer(minOf(answered, g.minDoors).toLong()), of = LocaleFormat.integer(g.minDoors.toLong())),
                 fraction = (minOf(answered, min).toDouble() / min),
                 drawn = g.drawn,
-                winners = g.winners.filterNot { it.cancelled }.map { "${LocaleFormat.integer(it.place.toLong())}. @${it.account}" },
+                winners = if (g.drawn) AdventCopy.winners(g.winners, com.ecency.core.api.games.AdventRewardKind.POINTS, g.amounts, user) else emptyList(),
+                seed = g.seedBlock?.takeIf { g.drawn }?.let { L.native.advent.seedBlock(block = it.toString()) },
             )
         }
         return s.copy(
@@ -294,9 +313,10 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
     fun openDoor(day: Int) {
         val door = season?.doors?.firstOrNull { it.day == day } ?: return
         val now = env.nowMillis()
-        if (AdventSeason.phase(now) != current.phase || AdventSeason.todayDoor(now) != current.todayDoor) {
-            // a new UTC day since the calendar loaded (or the season ended): load it again first
-            load()
+        if (loadedDay != AdventSeason.utcDay(now)) {
+            // a new UTC day since the calendar loaded (or the season ended), or it did not load: load it again first
+            // (a load already on its way is left to finish)
+            if (!current.loading) load()
             return
         }
         if (door.status == AdventDoorStatus.LOCKED || current.phase != AdventPhase.SEASON) return
@@ -325,7 +345,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
     fun retrySheet() {
         val sheet = current.sheet ?: return
         val door = sheet.door ?: season?.doors?.firstOrNull { it.day == sheet.day } ?: return
-        if (sheet.mode == AdventSheetMode.RESULT || door.status == AdventDoorStatus.DRAWN && current.account == null) showResult(door, sheet.answered)
+        freshSignIn()
+        if (sheet.forResult) showResult(door, sheet.answered)
         else current.account?.let { loadDoor(it, door) }
     }
 
@@ -336,9 +357,21 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
             try {
                 val opened = withToken(user) { token -> env.advent.api.open(AdventSeason.SEASON, door.day, token!!) }
                 if (!owns(user)) return@launch
+                // an answer or Wave still on its way (sent from a calendar since closed) is shown as such, and the door
+                // is read again once it ends: that job reports to the screen that started it, not to this one
+                val busy = env.advent.doorJob(user, door.day)
+                doorWatch?.dispose()
+                // only a sheet still showing it as on its way: a failure or a Wave the job showed itself stays as shown
+                doorWatch = busy?.invokeOnCompletion {
+                    scope.launch {
+                        val shown = current.sheet?.takeIf { it.day == door.day } ?: return@launch
+                        if (owns(user) && (shown.submitting || shown.wave == AdventWaveState.POSTING)) loadDoor(user, door)
+                    }
+                }
                 val wave = when {
                     opened.entry.wave != null -> AdventWaveState.POSTED
-                    waveJobs[door.day]?.isActive == true -> AdventWaveState.POSTING
+                    // an answer still being sent shows as sending (below); its Wave comes after it
+                    busy != null && opened.entry.answered -> AdventWaveState.POSTING
                     // answered and no Wave linked: "Post Wave" (postWave only links a Wave already on chain)
                     opened.entry.answered -> AdventWaveState.FAILED
                     else -> AdventWaveState.NONE
@@ -348,8 +381,11 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                         entry = opened.entry, wave = wave, wavePermlink = opened.entry.wave,
                         late = !opened.entry.answered && env.nowMillis() > opened.door.closeAtMillis && opened.door.closeAtMillis > 0,
                         answered = opened.entry.answered,
+                        submitting = busy != null && !opened.entry.answered,
                     ))
                 }
+                // signed in again after a refusal: the account's own calendar replaces the public one
+                if (publicCalendar && !current.loading) refresh()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -361,7 +397,7 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
 
     private fun showResult(door: AdventDoor, answered: Boolean) {
         sheetJob?.cancel()
-        setState { it.copy(sheet = blank(door.day, AdventSheetMode.LOADING, door).copy(answered = answered)) }
+        setState { it.copy(sheet = blank(door.day, AdventSheetMode.LOADING, door).copy(answered = answered, forResult = true)) }
         val user = current.account
         sheetJob = scope.launch {
             try {
@@ -386,13 +422,16 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
         val sheet = current.sheet ?: return
         val door = sheet.door ?: return
         val user = current.account ?: return
-        if (sheet.mode != AdventSheetMode.ANSWER || sheet.submitting || waveJobs[door.day]?.isActive == true) return
+        if (sheet.mode != AdventSheetMode.ANSWER || sheet.submitting || env.advent.doorBusy(user, door.day)) return
         val text = answer?.trim()?.let { AdventCopy.limit(it, MAX_ANSWER) }
         if (door.kind == AdventDoorKind.OPEN && text.isNullOrEmpty()) return
         if (door.kind != AdventDoorKind.OPEN && choice !in door.choices.indices) return
+        freshSignIn()
         setState { it.copy(sheet = it.sheet?.copy(submitting = true, error = null)) }
         sheetJob?.cancel()
-        waveJobs[door.day] = scope.launch {
+        // in the app's scope (AdventService): leaving the calendar right after Submit still sends the answer and its Wave;
+        // each door on its own, so a slow Wave for one door never holds up an answer to another
+        env.advent.startDoor(user, door.day) {
             val late = try {
                 withToken(user) { token ->
                     env.advent.api.answer(AdventSeason.SEASON, door.day, token!!, if (door.kind == AdventDoorKind.OPEN) text else null, if (door.kind == AdventDoorKind.OPEN) null else choice)
@@ -400,15 +439,23 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) { // not reported: the sheet shows it and offers a retry; already_answered reloads the door
-                if (!owns(user)) return@launch
+                if (!owns(user)) return@startDoor
                 if (e is GamesApiException && e.code == "already_answered") {
                     if (current.sheet?.day == door.day) loadDoor(user, door)
-                    return@launch
+                    return@startDoor
                 }
-                sheetOf(door.day) { it.copy(submitting = false, error = AppError(ErrorKind.NETWORK, L.native.advent.answerFailed, true)) }
-                return@launch
+                if (e is SignInRefused) {
+                    // the sign-in, not the answer, was refused: say so, and the next Submit signs in again
+                    setState { it.copy(signIn = AdventSignIn.FAILED) }
+                    sheetOf(door.day) { it.copy(submitting = false, error = AppError(ErrorKind.NETWORK, AdventCopy.SIGN_RETRY, true)) }
+                } else {
+                    sheetOf(door.day) { it.copy(submitting = false, error = AppError(ErrorKind.NETWORK, L.native.advent.answerFailed, true)) }
+                }
+                return@startDoor
             }
-            if (!owns(user)) return@launch
+            if (!owns(user)) return@startDoor
+            // a read of this door that started before the answer landed would show it unanswered
+            if (current.sheet?.day == door.day) sheetJob?.cancel()
             if (!late && door.day == AdventSeason.todayDoor(env.nowMillis())) env.advent.answeredToday()
             val entry = AdventEntry(true, text, if (door.kind == AdventDoorKind.OPEN) null else choice, late, null)
             sheetOf(door.day) { it.copy(mode = AdventSheetMode.DONE, submitting = false, entry = entry, answered = true, wave = AdventWaveState.POSTING) }
@@ -423,9 +470,10 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
         val sheet = current.sheet ?: return
         val door = sheet.door ?: return
         val user = current.account ?: return
-        if (sheet.wave == AdventWaveState.POSTING || sheet.wave == AdventWaveState.POSTED || waveJobs[door.day]?.isActive == true) return
+        if (sheet.wave == AdventWaveState.POSTING || sheet.wave == AdventWaveState.POSTED || env.advent.doorBusy(user, door.day)) return
+        freshSignIn()
         setState { it.copy(sheet = it.sheet?.copy(wave = AdventWaveState.POSTING)) }
-        waveJobs[door.day] = scope.launch { postWave(user, door, sheet.entry?.answer) }
+        env.advent.startDoor(user, door.day) { postWave(user, door, sheet.entry?.answer) }
     }
 
     /**
@@ -439,6 +487,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 AdventPendingWave(container.author, container.permlink, WavePublish.containerTags(container.metadata.rawJson).orEmpty(), AdventWave.text(door.day, door.kind, answer))
                     .also { env.advent.savePendingWave(user, door.day, it) }
             }
+            // signed only for the current account: a Wave for one switched away from waits ("Post Wave" when back)
+            if (env.session.current.username != user) return
             val draft = WavePublish.draft(user, pending.containerAuthor, pending.containerPermlink, pending.tags, pending.body)
             if (env.api.hive.content(user, draft.permlink) == null) {
                 val signed = env.signing.broadcast(user, JsonArray(draft.operations.map(OperationJson::encode)))
@@ -453,7 +503,12 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
             throw e
         } catch (e: Exception) {
             ErrorReports.quiet(e, "advent.wave")
-            if (owns(user)) setState { it.copy(sheet = it.sheet?.takeIf { s -> s.day == door.day }?.copy(wave = AdventWaveState.FAILED) ?: it.sheet) }
+            if (owns(user)) setState {
+                it.copy(
+                    sheet = it.sheet?.takeIf { s -> s.day == door.day }?.copy(wave = AdventWaveState.FAILED) ?: it.sheet,
+                    signIn = if (e is SignInRefused) AdventSignIn.FAILED else it.signIn,
+                )
+            }
         }
     }
 
@@ -467,6 +522,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 return
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: SignInRefused) {
+                throw e // no session to link with: the sign-in retry shows at once
             } catch (e: Exception) { // not reported: retried, and the last failure is rethrown to the caller
                 last = e
             }
@@ -483,7 +540,10 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
         if (refusals >= MAX_REFUSALS) throw SignInRefused()
         if (current.signIn != AdventSignIn.READY && owns(user)) setState { it.copy(signIn = AdventSignIn.SIGNING) }
         val token = try {
-            env.advent.token(user, fresh = false)
+            env.advent.token(user, fresh = false).also {
+                // signed in, whatever the call it is for does next (an answer that fails offline)
+                if (current.signIn != AdventSignIn.READY && owns(user)) setState { s -> s.copy(signIn = AdventSignIn.READY) }
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: GamesApiException) {
@@ -494,7 +554,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
             throw e
         }
         return try {
-            block(token).also { refusals = 0; refusedToken = null }
+            // the last refused session is kept: a refusal of it that arrives late counts no more
+            block(token).also { refusals = 0 }
         } catch (e: GamesApiException) {
             if (e.status != 401) throw e
             // calls refused together with one session are one refusal; the same token kept again after a new sign-in
@@ -514,7 +575,7 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
 
     private fun owns(user: String?): Boolean = env.session.current.username == user && current.account == user
 
-    private fun blank(day: Int, mode: AdventSheetMode, door: AdventDoor?) = AdventSheet(day, mode, door, null, null, false, false, null, AdventWaveState.NONE, null, false, false)
+    private fun blank(day: Int, mode: AdventSheetMode, door: AdventDoor?) = AdventSheet(day, mode, door, null, null, false, false, null, AdventWaveState.NONE, null, false, false, false)
 
     /** The games API refused the account's sign-in twice: the screen asks ("Could not sign in. Try again"). */
     class SignInRefused : Exception("sign-in refused")

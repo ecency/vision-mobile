@@ -107,17 +107,24 @@ class AdventModelTest {
     private val dec9 = AdventSeason.FIRST_DOOR + 8 * AdventSeason.DAY_MILLIS + 10 * 3_600_000L
 
     private class Fixture(val app: TestApp, val advent: DemoAdvent) {
-        /** What `database_api.find_comments` holds: a Wave posted earlier. */
+        /** What `database_api.find_comments` holds: a Wave posted earlier, under [onChainPermlink] only. */
         var onChain: String? = null
+        var onChainPermlink: String? = null
 
         /** The Waves container cannot be read (the Wave fails before anything is kept or sent). */
         var noContainer = false
+
+        /** Holds the Waves container read back (a Wave still on its way) until completed. */
+        var containerHeld: kotlinx.coroutines.CompletableDeferred<Unit>? = null
     }
 
     /** [phoneAhead]: how far the phone's clock runs ahead of the games API's. */
     private fun TestScope.fixture(now: Long = dec9, account: VaultAccount? = VaultAccount(TestApp.USER, AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF), phoneAhead: Long = 0): Fixture {
         lateinit var f: Fixture
-        val app = TestApp(this) { req -> chain(f, req) }
+        val app = TestApp(this) { req ->
+            if (req.method.startsWith("bridge.get_account_posts")) f.containerHeld?.await()
+            chain(f, req)
+        }
         app.now = now
         val advent = DemoAdvent { app.clock() - phoneAhead }
         f = Fixture(app, advent)
@@ -134,7 +141,7 @@ class AdventModelTest {
             else if ("ecency.waves" in req.params.toString()) FakeTransport.result(req, """[{"author":"ecency.waves","permlink":"waves-20261209","json_metadata":{"tags":["waves-20261209","hive-125125"]}}]""")
             else FakeTransport.result(req, "[]")
         "database_api.find_comments" -> TestApp.commentAsked(req).let { (a, l) ->
-            TestApp.comments(req, f.onChain?.let { body -> """{"author":"$a","permlink":"$l","body":${Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(body))}}""" })
+            TestApp.comments(req, f.onChain?.takeIf { l == f.onChainPermlink }?.let { body -> """{"author":"$a","permlink":"$l","body":${Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(body))}}""" })
         }
         "condenser_api.broadcast_transaction" -> FakeTransport.result(req, "null")
         else -> TestApp.chain(req) ?: FakeTransport.result(req, "[]")
@@ -217,13 +224,16 @@ class AdventModelTest {
         val first = waveBodies(f)
         assertEquals(1, first.size)
         assertNotNull(f.app.env.advent.pendingWave(user, 9), "kept to link")
-        // the chain has it now
+        // the chain has it now, under the permlink it was posted with
+        val permlink = f.app.broadcasts().single().params.jsonArray[0].jsonObject.getValue("operations").jsonArray.single().jsonArray[1].jsonObject.getValue("permlink").jsonPrimitive.content
         f.onChain = first.single()
+        f.onChainPermlink = permlink
         f.advent.waveStatus = 0
         m.retryWave()
         testScheduler.advanceUntilIdle()
         assertEquals(1, waveBodies(f).size, "the retry linked the Wave on chain, it did not post a second one")
         assertEquals(AdventWaveState.POSTED, m.current.sheet?.wave)
+        assertEquals(permlink, f.advent.wave(user, 9), "the door links the Wave that was posted")
     }
 
     @Test
@@ -557,6 +567,405 @@ class AdventModelTest {
         testScheduler.advanceUntilIdle()
         assertEquals(AdventSignIn.READY, m.current.signIn, "one expired session is one refusal: both sign in again")
         assertEquals(AdventSheetMode.ANSWER, m.current.sheet?.mode)
+    }
+
+    /** Answers [path] (a suffix) with [result] (null: the demo games API's answer) instead of the demo games API. */
+    private fun answering(f: Fixture, path: String, result: (com.ecency.core.auth.AuthHttpRequest) -> HttpResult?) {
+        f.app.authBackend.rest = { r -> (if (r.url.substringBefore('?').endsWith(path)) result(r) else null) ?: f.advent.http(r) }
+    }
+
+    @Test
+    fun aDrawnDoorWhoseResultFailedRetriesTheResult() = runTest {
+        val f = fixture()
+        val m = started(f)
+        var down = true
+        answering(f, "/doors/3/result") { if (down) HttpResult(503, "") else null }
+        m.openDoor(3)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.FAILED, m.current.sheet?.mode)
+        down = false
+        m.retrySheet()
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.RESULT, m.current.sheet?.mode, "the result again, not the answer form")
+        assertNotNull(m.current.sheet?.result)
+    }
+
+    @Test
+    fun aMidnightReloadThatFailedOfflineLoadsWhenTheAppComesBack() = runTest {
+        val f = fixture()
+        var asleep = 0L
+        f.app.clock = { dec9 + asleep + testScheduler.currentTime }
+        val m = f.app.env.adventModel()
+        m.start()
+        testScheduler.runCurrent()
+        // offline over midnight: the reload fails
+        f.app.authBackend.rest = { HttpResult(503, "") }
+        asleep = 15 * 3_600_000L
+        m.refresh()
+        testScheduler.runCurrent()
+        assertNotNull(m.current.error, "the failed reload shows")
+        f.app.authBackend.rest = { r -> f.advent.http(r) }
+        m.resumed()
+        testScheduler.runCurrent()
+        assertEquals(AdventDoorLook.TODAY, m.current.tiles.first { it.day == 10 }.look, "today's door opens")
+        assertNull(m.current.error)
+        m.close()
+    }
+
+    @Test
+    fun aCalendarAfterTheLastDoorLoadsAgainOnTheNextUtcDay() = runTest {
+        // 26 Dec: no door today, as on 27 Dec
+        val dec26 = AdventSeason.FIRST_DOOR + 25 * AdventSeason.DAY_MILLIS + 3_600_000L
+        val f = fixture(now = dec26)
+        var asleep = 0L
+        f.app.clock = { dec26 + asleep + testScheduler.currentTime }
+        val m = f.app.env.adventModel()
+        m.start()
+        testScheduler.runCurrent()
+        val loads = f.advent.calls.count { it == "GET /v1/advent/2026" }
+        asleep = AdventSeason.DAY_MILLIS
+        m.resumed()
+        testScheduler.runCurrent()
+        assertEquals(loads + 1, f.advent.calls.count { it == "GET /v1/advent/2026" }, "a new UTC day loads the calendar again")
+        m.close()
+    }
+
+    @Test
+    fun aLateRefusalOfAReplacedSessionDoesNotCountAgainstTheNewOne() = runTest {
+        val f = fixture()
+        val m = started(f)
+        // session 1 expired: the door's call is refused late, after the refresh already signed in again
+        f.advent.refused += "demo-game-$user-1"
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/open")) held.await() }
+        m.openDoor(9)
+        testScheduler.runCurrent()
+        f.app.authBackend.gate = null
+        m.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSignIn.READY, m.current.signIn)
+        // and session 2 expires too: one more sign-in is still owed
+        f.advent.refused += "demo-game-$user-2"
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.ANSWER, m.current.sheet?.mode)
+        assertEquals(AdventSignIn.READY, m.current.signIn)
+    }
+
+    @Test
+    fun aDoorReadFromBeforeTheAnswerDoesNotUndoIt() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        val heldAnswer = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val heldOpen = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/answer")) heldAnswer.await() }
+        m.submit("Sent before the door was read again.", 0)
+        testScheduler.runCurrent()
+        m.closeSheet()
+        // the door read again before the answer lands, its answer delivered after it
+        val stale = f.advent.http(com.ecency.core.auth.AuthHttpRequest("POST", "${com.ecency.core.api.games.AdventApi.BASE}/v1/advent/2026/doors/9/open", mapOf("authorization" to "Bearer demo-game-$user-1"), null))!!
+        answering(f, "/doors/9/open") { stale }
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/open")) heldOpen.await() }
+        m.openDoor(9)
+        testScheduler.runCurrent()
+        heldAnswer.complete(Unit)
+        testScheduler.runCurrent()
+        heldOpen.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.DONE, m.current.sheet?.mode, "the answer stands")
+    }
+
+    @Test
+    fun leavingTheCalendarRightAfterSubmitStillSendsTheAnswerAndItsWave() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/answer")) held.await() }
+        m.submit("Sent as the screen closes.", 0)
+        testScheduler.runCurrent()
+        m.close()
+        f.app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(f.advent.calls.any { it == "POST /v1/advent/2026/doors/9/answer" })
+        assertEquals(1, waveBodies(f).size, "the Wave went out after the screen closed")
+        assertTrue(f.advent.calls.any { it == "POST /v1/advent/2026/doors/9/wave" }, "and was linked to the door")
+    }
+
+    /** Submits [text] to door 9 with the Waves container read held back: the answer lands, its Wave waits (no time passes). */
+    private fun TestScope.answeredWithTheWaveOnItsWay(f: Fixture, m: AdventModel, text: String) {
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        f.containerHeld = kotlinx.coroutines.CompletableDeferred()
+        m.submit(text, 0)
+        testScheduler.runCurrent()
+        assertTrue(f.advent.calls.contains("POST /v1/advent/2026/doors/9/answer"))
+        assertEquals(AdventWaveState.POSTING, m.current.sheet?.wave)
+    }
+
+    @Test
+    fun theCalendarOpenedAgainWhileAWaveIsPostingShowsItPosting() = runTest {
+        val f = fixture()
+        val m = started(f)
+        answeredWithTheWaveOnItsWay(f, m, "Still on its way.")
+        m.close()
+        val again = f.app.env.adventModel()
+        again.start()
+        testScheduler.runCurrent()
+        again.openDoor(9)
+        testScheduler.runCurrent()
+        assertEquals(AdventWaveState.POSTING, again.current.sheet?.wave, "no second \"Post Wave\" while the first is on its way")
+        f.containerHeld!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, waveBodies(f).size)
+        assertEquals(AdventWaveState.POSTED, again.current.sheet?.wave, "the reopened sheet follows the Wave to its end")
+        again.close()
+    }
+
+    @Test
+    fun anAnswerThatFailsAfterItsDoorWasOpenedAgainKeepsItsError() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/answer")) held.await() }
+        m.submit("Lost on the way.", 0)
+        testScheduler.runCurrent()
+        m.closeSheet()
+        m.openDoor(9)
+        testScheduler.runCurrent()
+        f.advent.answerStatus = 503
+        f.app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.ANSWER, m.current.sheet?.mode)
+        assertNotNull(m.current.sheet?.error, "the failure stays on the sheet")
+    }
+
+    @Test
+    fun theCalendarOpenedAgainWhileTheAnswerIsSentShowsItSending() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/answer")) held.await() }
+        m.submit("Sent while the calendar was closed and opened again.", 0)
+        testScheduler.runCurrent()
+        m.close()
+        val again = f.app.env.adventModel()
+        again.start()
+        testScheduler.runCurrent()
+        again.openDoor(9)
+        testScheduler.runCurrent()
+        assertEquals(true, again.current.sheet?.submitting, "the answer on its way shows as sending")
+        f.app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.DONE, again.current.sheet?.mode, "and as taken once it lands")
+        assertEquals(AdventWaveState.POSTED, again.current.sheet?.wave)
+        again.close()
+    }
+
+    @Test
+    fun aWaveOnItsWayWhenItsAccountLogsOutIsNeitherKeptNorPosted() = runTest {
+        val f = fixture()
+        val m = started(f)
+        answeredWithTheWaveOnItsWay(f, m, "Answered just before logging out.")
+        m.close()
+        f.app.env.session.logout(user)
+        testScheduler.runCurrent()
+        f.containerHeld!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(waveBodies(f).isEmpty(), "no Wave for an account that left")
+        assertNull(f.app.env.advent.pendingWave(user, 9), "nor its answer kept on the device")
+    }
+
+    @Test
+    fun aWaveOnItsWayWhenTheAccountIsSwitchedWaitsForItsAccount() = runTest {
+        val f = fixture()
+        KeyVault(f.app.store).save(VaultAccount("other-account", AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF))
+        val m = started(f)
+        answeredWithTheWaveOnItsWay(f, m, "Answered just before switching.")
+        m.close()
+        f.app.env.session.switchTo("other-account")
+        testScheduler.runCurrent()
+        f.containerHeld!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(waveBodies(f).isEmpty(), "nothing signed for an account that is not the current one")
+        // back on the account: its door offers "Post Wave"
+        f.app.env.session.switchTo(user)
+        testScheduler.advanceUntilIdle()
+        val again = started(f)
+        again.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventWaveState.FAILED, again.current.sheet?.wave)
+        again.close()
+    }
+
+    @Test
+    fun aSignInThatEndsAfterLogoutIsEndedNotUsed() = runTest {
+        val f = fixture()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/raidstead/session") && r.method == "POST") held.await() }
+        val m = f.app.env.adventModel()
+        m.start()
+        testScheduler.runCurrent()
+        f.app.env.session.logout(user)
+        testScheduler.runCurrent()
+        f.app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue("demo-game-$user-1" in f.advent.ended, "the session that came back after the logout was ended")
+        assertNull(m.current.account)
+        m.close()
+    }
+
+    @Test
+    fun aLoggedOutSessionNoLongerReadsTheAccountsDoors() = runTest {
+        val f = fixture()
+        started(f)
+        f.app.env.session.logout(user)
+        testScheduler.advanceUntilIdle()
+        val season = f.advent.http(com.ecency.core.auth.AuthHttpRequest("GET", "${com.ecency.core.api.games.AdventApi.BASE}/v1/advent/2026", mapOf("authorization" to "Bearer demo-game-$user-1"), null))!!
+        assertEquals(401, season.status, "the ended session is refused")
+    }
+
+    @Test
+    fun anUnreadableAnswerResponseIsNotTakenAsAccepted() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        // a captive Wi-Fi page answers 200 with HTML
+        answering(f, "/doors/9/answer") { HttpResult(200, "<html>Sign in to the Wi-Fi</html>") }
+        m.submit("Lost to a captive portal.", 0)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.ANSWER, m.current.sheet?.mode)
+        assertNotNull(m.current.sheet?.error)
+        assertTrue(waveBodies(f).isEmpty(), "no Wave for an answer the game never confirmed")
+    }
+
+    @Test
+    fun aQuizWithAMissingChoiceIsNotAnsweredAtTheWrongIndex() = runTest {
+        // 11 Dec: door 11 is a quiz
+        val f = fixture(now = dec9 + 2 * AdventSeason.DAY_MILLIS)
+        val m = started(f)
+        answering(f, "/doors/11/open") { r ->
+            val o = Json.parseToJsonElement(f.advent.http(r)!!.body).jsonObject
+            HttpResult(200, kotlinx.serialization.json.JsonObject(o + ("choices" to Json.parseToJsonElement("""["A",null,"C"]"""))).toString())
+        }
+        m.openDoor(11)
+        testScheduler.advanceUntilIdle()
+        assertEquals(emptyList(), m.current.sheet?.door?.choices, "a door whose choices are not all there offers none, not C at B's index")
+    }
+
+    @Test
+    fun theGrandDrawShowsItsWinnersOnceDrawn() = runTest {
+        // 26 Dec: the grand draw ran on 25 Dec at 12:00 UTC
+        val f = fixture(now = AdventSeason.FIRST_DOOR + 25 * AdventSeason.DAY_MILLIS + 3_600_000L)
+        val m = started(f)
+        val grand = m.current.grand!!
+        assertTrue(grand.drawn)
+        assertEquals(listOf("demo-one", "demo-two", "demo-three"), grand.winners.map { it.account })
+        assertEquals("5,000 Points", grand.winners.first().prize)
+        assertNotNull(grand.seed)
+    }
+
+    @Test
+    fun aWithdrawnPrizeIsShownAsWithdrawn() {
+        val rows = AdventCopy.winners(
+            listOf(com.ecency.core.api.games.AdventWinner(1, "first", false), com.ecency.core.api.games.AdventWinner(2, user, true)),
+            AdventRewardKind.HIVE, listOf(100.0, 60.0), user,
+        )
+        assertEquals("100 HIVE", rows[0].prize)
+        assertFalse(rows[0].you)
+        assertTrue(rows[1].cancelled)
+        assertEquals("Withdrawn", rows[1].prize, "no amount for a prize taken back")
+        assertTrue(rows[1].you)
+        assertEquals("@$user (you)", rows[1].name)
+        assertEquals("@first", rows[0].name)
+    }
+
+    @Test
+    fun doorsTappedWhileTheNewDayLoadsDoNotStartItOver() = runTest {
+        val f = fixture()
+        var later = 0L
+        f.app.clock = { dec9 + later + testScheduler.currentTime }
+        val m = f.app.env.adventModel()
+        m.start()
+        testScheduler.runCurrent()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        var started = 0
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/v1/advent/2026")) { started++; held.await() } }
+        later = 15 * 3_600_000L
+        repeat(3) { m.openDoor(9); testScheduler.runCurrent() }
+        f.app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.runCurrent()
+        assertEquals(1, started, "one load for the new day, not one per tap")
+        assertEquals(10, m.current.todayDoor)
+        m.close()
+    }
+
+    @Test
+    fun aDoorThatFailedOnARefusedSignInSignsInAgainOnTryAgain() = runTest {
+        val f = fixture()
+        // every session refused: two refusals, the screen asks over the public calendar
+        f.advent.refused += listOf("demo-game-$user-1", "demo-game-$user-2")
+        val m = started(f)
+        assertEquals(AdventDoorLook.RESULTS, m.current.tiles.first { it.day == 5 }.look, "the public calendar")
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.FAILED, m.current.sheet?.mode)
+        assertEquals(AdventSignIn.FAILED, m.current.signIn)
+        // the games API is back: the sheet's own "Try again" signs in again
+        f.advent.refused.clear()
+        m.retrySheet()
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.ANSWER, m.current.sheet?.mode)
+        assertEquals(AdventSignIn.READY, m.current.signIn)
+        assertEquals(AdventDoorLook.MISSED, m.current.tiles.first { it.day == 5 }.look, "the account's own calendar is back, not the public one")
+    }
+
+    @Test
+    fun aSignInThatWorksBeforeAnOfflineAnswerIsNotLeftSigningIn() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        f.advent.refused += listOf("demo-game-$user-1", "demo-game-$user-2")
+        m.submit("Refused twice.", 0)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSignIn.FAILED, m.current.signIn)
+        // signing in works again, the answer itself fails (offline)
+        f.advent.refused.clear()
+        f.advent.answerStatus = 503
+        m.submit("Refused twice.", 0)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSignIn.READY, m.current.signIn, "signed in, whatever the answer did")
+    }
+
+    @Test
+    fun anAnswerRefusedForItsSignInSaysSoAndSignsInAgainOnTheNextTap() = runTest {
+        val f = fixture()
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        f.advent.refused += listOf("demo-game-$user-1", "demo-game-$user-2")
+        m.submit("Refused twice.", 0)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSignIn.FAILED, m.current.signIn, "the sign-in retry shows")
+        assertEquals(AdventCopy.SIGN_RETRY, m.current.sheet?.error?.message)
+        f.advent.refused.clear()
+        m.submit("Refused twice.", 0)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.DONE, m.current.sheet?.mode, "the next Submit signs in again")
     }
 
     @Test
