@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 /**
  * The generated CLDR 49 plural rules, one golden list per language family (values from the CLDR rule samples). The
- * Android host test PluralRulesOracleTest compares every locale against ICU4J over a wide number range as well.
+ * Android host test IcuOracleTest compares every locale against ICU4J over a wide number range as well.
  */
 class PluralRulesTest {
     private fun cats(locale: String, vararg values: Number) = values.map { L10nPluralRules.select(locale, PluralOperands.of(it.toDouble())) }
