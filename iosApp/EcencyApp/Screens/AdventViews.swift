@@ -152,8 +152,10 @@ struct AdventScreen: View {
             HStack {
                 Text(L.Native.Advent.grandTitle).font(Festive.script(26)).foregroundStyle(.white).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Text(grand.total).scaledFont(12, weight: .heavy).foregroundStyle(Color(red: 0.561, green: 0.114, blue: 0.145))
-                    .padding(.horizontal, 9).padding(.vertical, 4).background(Color.white, in: RoundedRectangle(cornerRadius: 10))
+                if let total = grand.total {
+                    Text(total).scaledFont(12, weight: .heavy).foregroundStyle(Color(red: 0.561, green: 0.114, blue: 0.145))
+                        .padding(.horizontal, 9).padding(.vertical, 4).background(Color.white, in: RoundedRectangle(cornerRadius: 10))
+                }
             }
             if grand.drawn {
                 // web GrandCard after the draw: the winners, a withdrawn prize struck through, and the seed block

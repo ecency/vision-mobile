@@ -440,7 +440,7 @@ private fun GrandCard(grand: com.ecency.core.app.AdventGrandCard, account: Strin
         Column(Modifier.fillMaxWidth().padding(start = 14.dp, top = 14.dp, bottom = 14.dp, end = 44.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(L.native.advent.grandTitle, color = Color.White, fontFamily = Festive.script, fontWeight = FontWeight.Bold, fontSize = 26.sp, modifier = Modifier.weight(1f))
-                Text(grand.total, color = Color(0xFF8F1D25), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color.White).padding(horizontal = 9.dp, vertical = 4.dp))
+                grand.total?.let { total -> Text(total, color = Color(0xFF8F1D25), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color.White).padding(horizontal = 9.dp, vertical = 4.dp)) }
             }
             if (grand.drawn) {
                 // web GrandCard after the draw: the winners, a withdrawn prize struck through, and the seed block

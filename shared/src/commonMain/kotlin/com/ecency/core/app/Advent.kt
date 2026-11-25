@@ -192,6 +192,8 @@ object AdventCopy {
 
     /** Web `rewardText`: "500 / 300 / 200 Points"; a spotlight reads "Promotion worth 1,000 Points". */
     fun reward(reward: AdventReward): String {
+        // no readable amounts: the kind alone, never a blank number
+        if (reward.amounts.isEmpty()) return rewardLabel(reward.kind)
         val amounts = reward.amounts.joinToString(" / ") { amount(it) }
         return if (reward.kind == AdventRewardKind.SPOTLIGHT) L.native.advent.spotlightAmount(n = amounts) else "$amounts ${rewardLabel(reward.kind)}"
     }

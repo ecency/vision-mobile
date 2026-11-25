@@ -56,7 +56,8 @@ data class AdventPrizeRow(val day: Int, val text: String, val amount: String, va
 
 /** The grand draw card. */
 data class AdventGrandCard(
-    val total: String,
+    /** "7,000 Points"; null when the amounts did not come readable (no "0 Points"). */
+    val total: String?,
     val text: String,
     val progress: String,
     /** 0..1 of the minimum doors answered. */
@@ -290,7 +291,7 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
         val card = grand?.takeIf { s.phase == AdventPhase.SEASON }?.let { g ->
             val min = g.minDoors.coerceAtLeast(1)
             AdventGrandCard(
-                total = L.native.advent.grandTotal(n = AdventCopy.amount(g.amounts.sum())),
+                total = g.amounts.takeIf { it.isNotEmpty() }?.let { L.native.advent.grandTotal(n = AdventCopy.amount(it.sum())) },
                 text = L.native.advent.grandText(n = LocaleFormat.integer(g.minDoors.toLong()), time = LocaleFormat.dateTime(g.drawAtMillis)),
                 progress = L.native.advent.grandProgress(n = LocaleFormat.integer(minOf(answered, g.minDoors).toLong()), of = LocaleFormat.integer(g.minDoors.toLong())),
                 fraction = (minOf(answered, min).toDouble() / min),
@@ -355,8 +356,16 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
         setState { it.copy(sheet = blank(door.day, AdventSheetMode.LOADING, door)) }
         sheetJob = scope.launch {
             try {
+                val before = env.advent.doorJob(user, door.day)
                 val opened = withToken(user) { token -> env.advent.api.open(AdventSeason.SEASON, door.day, token!!) }
                 if (!owns(user)) return@launch
+                // the answer or Wave on its way ended during the read: the read may be from before it, so read again
+                if (before != null && before.isCompleted) {
+                    loadDoor(user, door)
+                    // the calendar behind it too: the job's own refresh went to the screen that started it
+                    if (!current.loading) refresh()
+                    return@launch
+                }
                 // an answer or Wave still on its way (sent from a calendar since closed) is shown as such, and the door
                 // is read again once it ends: that job reports to the screen that started it, not to this one
                 val busy = env.advent.doorJob(user, door.day)
@@ -502,7 +511,8 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
             }
             if (!owns(user)) return
             setState { it.copy(sheet = it.sheet?.takeIf { s -> s.day == door.day }?.copy(wavePermlink = draft.permlink) ?: it.sheet) }
-            link(user, door.day, draft.permlink)
+            // not linked for an account switched away from: kept for when it is back
+            if (!link(user, door.day, draft.permlink)) return
             env.advent.clearPendingWave(user, door.day)
             if (owns(user)) setState { it.copy(sheet = it.sheet?.takeIf { s -> s.day == door.day }?.copy(wave = AdventWaveState.POSTED) ?: it.sheet) }
         } catch (e: CancellationException) {
@@ -519,13 +529,15 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
     }
 
     /** Web `linkWave`: up to 3 tries, 800 then 1600 ms apart, each with the account's own session. */
-    private suspend fun link(user: String, day: Int, permlink: String) {
+    private suspend fun link(user: String, day: Int, permlink: String): Boolean {
         var last: Exception? = null
         for ((i, wait) in LINK_DELAYS.withIndex()) {
             if (i > 0) delay(wait)
+            // each try only for the current account (one switched away from during the wait: false, the Wave kept)
+            if (!owns(user)) return false
             try {
                 withToken(user) { token -> env.advent.api.wave(AdventSeason.SEASON, day, token!!, permlink) }
-                return
+                return true
             } catch (e: CancellationException) {
                 throw e
             } catch (e: SignInRefused) {

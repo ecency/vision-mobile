@@ -860,6 +860,94 @@ class AdventModelTest {
     }
 
     @Test
+    fun aDoorReadThatOverlapsTheAnswerLandingIsReadAgain() = runTest {
+        val f = fixture()
+        val m = started(f)
+        // the second read of door 9 left before the answer landed: it says unanswered
+        var opens = 0
+        var stale: HttpResult? = null
+        answering(f, "/doors/9/open") { r -> opens++; if (opens == 1) f.advent.http(r)!!.also { stale = it } else if (opens == 2) stale else null }
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        val answerHeld = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val readHeld = kotlinx.coroutines.CompletableDeferred<Unit>()
+        f.app.authBackend.gate = { r -> if (r.url.endsWith("/doors/9/answer")) answerHeld.await(); if (r.url.endsWith("/doors/9/open")) readHeld.await() }
+        m.submit("Landed while the calendar read the door.", 0)
+        testScheduler.runCurrent()
+        m.close()
+        val again = f.app.env.adventModel()
+        again.start()
+        testScheduler.runCurrent()
+        again.openDoor(9)
+        testScheduler.runCurrent()
+        answerHeld.complete(Unit)
+        repeat(20) { testScheduler.runCurrent() }
+        assertNull(f.app.env.advent.doorJob(user, 9), "the answer and its Wave ended while the door was read")
+        f.app.authBackend.gate = null
+        readHeld.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(AdventSheetMode.DONE, again.current.sheet?.mode, "a read from before the answer landed is read again, not shown as the answer form")
+        assertEquals(AdventDoorLook.WAITING, again.current.tiles.first { it.day == 9 }.look, "the calendar behind it shows the door answered too")
+        again.close()
+    }
+
+    @Test
+    fun aWaveLinkRetryStopsForAnAccountSwitchedAwayFrom() = runTest {
+        val f = fixture()
+        KeyVault(f.app.store).save(VaultAccount("other-account", AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF))
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        answering(f, "/doors/9/wave") { HttpResult(503, "") }
+        m.submit("Linked while switching.", 0)
+        testScheduler.runCurrent()
+        val links = { f.app.authBackend.sent.count { it.url.endsWith("/doors/9/wave") } }
+        assertEquals(1, links(), "the first link try failed")
+        m.close()
+        f.app.env.session.switchTo("other-account")
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, links(), "no link try for an account that is not current")
+        assertNotNull(f.app.env.advent.pendingWave(user, 9), "kept to link when the account is back")
+    }
+
+    @Test
+    fun anAccountThatLogsBackInGetsASessionThatWorks() = runTest {
+        val f = fixture()
+        started(f)
+        f.app.env.session.logout(user)
+        testScheduler.advanceUntilIdle()
+        val signIns = f.advent.signIns.size
+        KeyVault(f.app.store).run { save(VaultAccount(TestApp.USER, AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF)); setCurrentUsername(user) }
+        f.app.env.session.switchTo(user)
+        testScheduler.advanceUntilIdle()
+        val m = started(f)
+        assertEquals(AdventSignIn.READY, m.current.signIn)
+        assertEquals(signIns + 1, f.advent.signIns.size, "one sign-in: the new session is not the ended one handed out again")
+        m.close()
+    }
+
+    @Test
+    fun aGrandDrawWithAMissingAmountShowsNoAmountAtTheWrongPlace() = runTest {
+        val f = fixture(now = AdventSeason.FIRST_DOOR + 25 * AdventSeason.DAY_MILLIS + 3_600_000L)
+        answering(f, "/grand") { r ->
+            val o = Json.parseToJsonElement(f.advent.http(r)!!.body).jsonObject
+            HttpResult(200, kotlinx.serialization.json.JsonObject(o + ("amounts" to Json.parseToJsonElement("[5000,null,2000]"))).toString())
+        }
+        val m = started(f)
+        val second = m.current.grand!!.winners.first { it.place == 2 }
+        assertFalse("2,000" in second.prize, "the third place amount is not shown for the second: ${second.prize}")
+        assertNull(m.current.grand!!.total, "no total from amounts that did not come readable")
+    }
+
+    @Test
+    fun aSeasonAnswerWithoutDoorsIsAFailedLoad() = runTest {
+        val f = fixture()
+        answering(f, "/v1/advent/2026") { HttpResult(200, "") }
+        val m = started(f)
+        assertNotNull(m.current.error, "a blank answer is not an empty calendar")
+    }
+
+    @Test
     fun aSignInThatEndsAfterLogoutIsEndedNotUsed() = runTest {
         val f = fixture()
         val held = kotlinx.coroutines.CompletableDeferred<Unit>()
@@ -926,6 +1014,11 @@ class AdventModelTest {
         assertEquals(listOf("demo-one", "demo-two", "demo-three"), grand.winners.map { it.account })
         assertEquals("5,000 Points", grand.winners.first().prize)
         assertNotNull(grand.seed)
+    }
+
+    @Test
+    fun aRewardWithoutReadableAmountsNamesOnlyItsKind() {
+        assertEquals(AdventCopy.rewardLabel(AdventRewardKind.POINTS), AdventCopy.reward(AdventReward(AdventRewardKind.POINTS, emptyList())))
     }
 
     @Test

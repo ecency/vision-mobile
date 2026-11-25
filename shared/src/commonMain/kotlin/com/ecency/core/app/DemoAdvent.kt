@@ -30,6 +30,9 @@ class DemoAdvent(private val nowMillis: () -> Long) {
     private val prizes = mutableMapOf<Pair<String, Int>, Pair<Int, String>>()
     private val sessions = mutableMapOf<String, String>()
 
+    /** Tokens handed out so far: a new one is never one ended before. */
+    private var issued = 0
+
     /** Every call made, for tests (`METHOD path`). */
     val calls = mutableListOf<String>()
 
@@ -153,7 +156,7 @@ class DemoAdvent(private val nowMillis: () -> Long) {
     }
 
     private fun session(account: String): HttpResult {
-        val token = sessions.entries.firstOrNull { reuseTokens && it.value == account }?.key ?: "demo-game-$account-${sessions.size + 1}"
+        val token = sessions.entries.firstOrNull { reuseTokens && it.value == account }?.key ?: "demo-game-$account-${++issued}"
         sessions[token] = account
         val expires = Instant.fromEpochMilliseconds(nowMillis() + 24 * 3_600_000L).toString()
         return HttpResult(200, """{"token":"$token","account":"$account","expiresAt":"$expires"}""")

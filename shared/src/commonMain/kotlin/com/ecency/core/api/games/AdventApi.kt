@@ -136,9 +136,11 @@ class AdventApi(private val http: AuthHttp, val base: String = BASE, val vouchHo
     @Throws(Exception::class)
     suspend fun season(season: Int, token: String?): AdventSeasonData {
         val o = call("GET", "$base/v1/advent/$season", token, null)
+        // no doors list at all (a blank answer) is a failed load, kept to retry; an empty list is a calendar
+        val doors = o["doors"].arr() ?: throw GamesApiException(200, "bad_answer", "Unexpected answer")
         return AdventSeasonData(
             season = o.int("season") ?: season,
-            doors = o["doors"].arr()?.mapNotNull { door(it.obj()) }.orEmpty().sortedBy { it.day },
+            doors = doors.mapNotNull { door(it.obj()) }.sortedBy { it.day },
             poolLeft = o["pool"].obj()?.get("left").asDouble(),
             me = o["me"].obj()?.let(::me),
         )
@@ -205,7 +207,7 @@ class AdventApi(private val http: AuthHttp, val base: String = BASE, val vouchHo
             drawn = o.str("status") == "drawn",
             drawAtMillis = millis(o.str("drawAt")) ?: 0,
             minDoors = o.int("minDoors") ?: 0,
-            amounts = o["amounts"].arr()?.mapNotNull { it.asDouble() }.orEmpty(),
+            amounts = amounts(o["amounts"]),
             seedBlock = o["seedBlock"].asLong(),
             winners = winners(o["winners"]),
         )
@@ -246,6 +248,9 @@ class AdventApi(private val http: AuthHttp, val base: String = BASE, val vouchHo
         expiresAtMillis = millis(o.str("expiresAt")) ?: 0,
     )
 
+    /** Prize amounts by place: one missing would move the ones after it to the wrong place, so none then. */
+    private fun amounts(e: JsonElement?): List<Double> = e.arr()?.map { it.asDouble() }?.takeIf { null !in it }?.filterNotNull().orEmpty()
+
     private fun door(o: JsonObject?): AdventDoor? {
         if (o == null) return null
         val day = o.int("day")?.takeIf { it in 1..MAX_DOORS } ?: return null
@@ -255,7 +260,7 @@ class AdventApi(private val http: AuthHttp, val base: String = BASE, val vouchHo
             unlockAtMillis = millis(o.str("unlockAt")) ?: 0,
             closeAtMillis = millis(o.str("closeAt")) ?: 0,
             kind = when (o.str("kind")) { "quiz" -> AdventDoorKind.QUIZ; "poll" -> AdventDoorKind.POLL; else -> AdventDoorKind.OPEN },
-            reward = AdventReward(rewardKind(reward?.str("kind")), reward?.get("amounts").arr()?.mapNotNull { it.asDouble() }.orEmpty()),
+            reward = AdventReward(rewardKind(reward?.str("kind")), amounts(reward?.get("amounts"))),
             status = when (o.str("status")) { "open" -> AdventDoorStatus.OPEN; "closed" -> AdventDoorStatus.CLOSED; "drawn" -> AdventDoorStatus.DRAWN; else -> AdventDoorStatus.LOCKED },
             prompt = o.str("prompt")?.takeIf { it.isNotEmpty() },
             // a choice missing from the list would move the ones after it to the wrong index: no choices then
