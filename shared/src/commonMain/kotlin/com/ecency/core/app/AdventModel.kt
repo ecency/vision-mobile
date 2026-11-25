@@ -365,7 +365,12 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 doorWatch = busy?.invokeOnCompletion {
                     scope.launch {
                         val shown = current.sheet?.takeIf { it.day == door.day } ?: return@launch
-                        if (owns(user) && (shown.submitting || shown.wave == AdventWaveState.POSTING)) loadDoor(user, door)
+                        if (owns(user) && (shown.submitting || shown.wave == AdventWaveState.POSTING)) {
+                            loadDoor(user, door)
+                            // the calendar behind it too (answered count, the door's tile): the job's own refresh went to
+                            // the screen that started it
+                            if (!current.loading) refresh()
+                        }
                     }
                 }
                 val wave = when {
@@ -487,10 +492,11 @@ class AdventModel internal constructor(private val env: AppEnvironment) : StateM
                 AdventPendingWave(container.author, container.permlink, WavePublish.containerTags(container.metadata.rawJson).orEmpty(), AdventWave.text(door.day, door.kind, answer))
                     .also { env.advent.savePendingWave(user, door.day, it) }
             }
-            // signed only for the current account: a Wave for one switched away from waits ("Post Wave" when back)
-            if (env.session.current.username != user) return
             val draft = WavePublish.draft(user, pending.containerAuthor, pending.containerPermlink, pending.tags, pending.body)
             if (env.api.hive.content(user, draft.permlink) == null) {
+                // signed only for the current account, checked right before signing (after the reads above): a Wave for
+                // an account switched away from waits ("Post Wave" when back)
+                if (env.session.current.username != user) return
                 val signed = env.signing.broadcast(user, JsonArray(draft.operations.map(OperationJson::encode)))
                 env.pointActivities.recordBroadcast(user, PointActivity.content(pending.containerAuthor, isUpdate = false), signed)
             }

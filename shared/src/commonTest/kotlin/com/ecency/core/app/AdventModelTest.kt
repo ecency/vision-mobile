@@ -116,6 +116,9 @@ class AdventModelTest {
 
         /** Holds the Waves container read back (a Wave still on its way) until completed. */
         var containerHeld: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
+        /** Holds the read of a Wave's own reply back (the check that it is not on chain yet) until completed. */
+        var replyHeld: kotlinx.coroutines.CompletableDeferred<Unit>? = null
     }
 
     /** [phoneAhead]: how far the phone's clock runs ahead of the games API's. */
@@ -123,6 +126,7 @@ class AdventModelTest {
         lateinit var f: Fixture
         val app = TestApp(this) { req ->
             if (req.method.startsWith("bridge.get_account_posts")) f.containerHeld?.await()
+            if (req.method == "database_api.find_comments") f.replyHeld?.await()
             chain(f, req)
         }
         app.now = now
@@ -769,6 +773,7 @@ class AdventModelTest {
         testScheduler.advanceUntilIdle()
         assertEquals(AdventSheetMode.DONE, again.current.sheet?.mode, "and as taken once it lands")
         assertEquals(AdventWaveState.POSTED, again.current.sheet?.wave)
+        assertEquals(AdventDoorLook.WAITING, again.current.tiles.first { it.day == 9 }.look, "the calendar behind it shows the door answered too")
         again.close()
     }
 
@@ -806,6 +811,52 @@ class AdventModelTest {
         testScheduler.advanceUntilIdle()
         assertEquals(AdventWaveState.FAILED, again.current.sheet?.wave)
         again.close()
+    }
+
+    @Test
+    fun aWaveWhoseAccountIsSwitchedWhileItsReplyIsCheckedIsNotSigned() = runTest {
+        val f = fixture()
+        KeyVault(f.app.store).save(VaultAccount("other-account", AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF))
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        f.replyHeld = kotlinx.coroutines.CompletableDeferred()
+        m.submit("Switched while the chain was read.", 0)
+        testScheduler.runCurrent()
+        assertNotNull(f.app.env.advent.pendingWave(user, 9), "the Wave waits on the chain read")
+        m.close()
+        f.app.env.session.switchTo("other-account")
+        testScheduler.runCurrent()
+        f.replyHeld!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(waveBodies(f).isEmpty(), "nothing signed for an account that is not the current one")
+    }
+
+    @Test
+    fun aWaveAlreadyOnChainIsNotLinkedForAnAccountSwitchedAwayFrom() = runTest {
+        val f = fixture()
+        KeyVault(f.app.store).save(VaultAccount("other-account", AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF))
+        val m = started(f)
+        m.openDoor(9)
+        testScheduler.advanceUntilIdle()
+        f.replyHeld = kotlinx.coroutines.CompletableDeferred()
+        m.submit("Already on chain.", 0)
+        testScheduler.runCurrent()
+        // the Wave is on chain already (posted before a restart), and no game session is kept for the account
+        val pending = f.app.env.advent.pendingWave(user, 9)!!
+        val draft = com.ecency.core.api.waves.WavePublish.draft(user, pending.containerAuthor, pending.containerPermlink, pending.tags, pending.body)
+        f.onChain = pending.body
+        f.onChainPermlink = draft.permlink
+        f.app.env.advent.dropped(user, "demo-game-$user-1")
+        m.close()
+        f.app.env.session.switchTo("other-account")
+        testScheduler.runCurrent()
+        val signIns = f.advent.signIns.size
+        f.replyHeld!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertFalse(f.advent.calls.contains("POST /v1/advent/2026/doors/9/wave"), "not linked while another account is current")
+        assertEquals(signIns, f.advent.signIns.size, "no game sign-in for an account that is not current")
+        assertNotNull(f.app.env.advent.pendingWave(user, 9), "kept to link when the account is back")
     }
 
     @Test
