@@ -8,7 +8,9 @@ plugins {
 
 android {
     namespace = "com.ecency.baselineprofile"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk {
+        version = release(libs.versions.compileSdk.get().toInt()) { minorApiLevel = libs.versions.compileSdkMinor.get().toInt() }
+    }
 
     defaultConfig {
         // profile generation needs API 28+ (33+ without root)

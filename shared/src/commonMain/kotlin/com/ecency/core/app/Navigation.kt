@@ -44,6 +44,9 @@ enum class RouteName(val rnName: String, private val titleText: () -> String, va
     /** The system in-app browser (Custom Tabs, SFSafariViewController) stands in for RN's WebView screen. */
     WEB_BROWSER("WebBrowserScreen", { L.native.navigation.browser }, built = true),
     REFER("ReferScreen", { L.refer.referEarn }, built = true, requiresLogin = true),
+
+    /** Native only: the Ecency Advent Calendar (Advent.kt), shown by date; doors ask for a login, the calendar does not. */
+    ADVENT("AdventScreen", { L.native.advent.title }, built = true),
     ASSET_DETAILS("AssetDetailsScreen", { L.native.navigation.assetDetails }, built = true, requiresLogin = true),
     EDIT_HISTORY("EditHistoryScreen", { L.native.navigation.editHistory }, built = true),
     WELCOME("WelcomeScreen", { L.native.navigation.welcome }),
@@ -239,6 +242,11 @@ sealed interface AppScreen {
     /** RN emailDigestsScreen: every digest subscription of the signed-in account. */
     data object EmailDigests : AppScreen {
         override val route get() = RouteName.EMAIL_DIGESTS
+    }
+
+    /** The Ecency Advent Calendar (AdventModel), as ecency.com/advent. */
+    data object Advent : AppScreen {
+        override val route get() = RouteName.ADVENT
     }
 
     /** RN refer screen ("Refer & Earn") of the signed-in account. */
@@ -440,6 +448,7 @@ sealed interface AppScreen {
             RouteName.BACKUP_KEYS -> BackupKeys
             RouteName.REGISTER -> Register(arg)
             RouteName.REFER -> Refer
+            RouteName.ADVENT -> Advent
             RouteName.PERKS -> Perks
             RouteName.SPIN_GAME -> SpinGame
             RouteName.BOOST -> GetPoints(arg.takeIf { com.ecency.core.secure.KeyVault.isValidUsername(it) }.orEmpty())
@@ -700,6 +709,7 @@ data class NavState(
             AppScreen.BackupKeys -> join("backupKeys")
             is AppScreen.Register -> join("register", screen.referral)
             AppScreen.Refer -> join("refer")
+            AppScreen.Advent -> join("advent")
             AppScreen.EmailDigests -> join("emailDigests")
             is AppScreen.Post -> join("post", screen.author, screen.permlink)
             is AppScreen.Profile -> join("profile", screen.author, screen.section)
@@ -755,6 +765,7 @@ data class NavState(
                 "backupKeys" -> null
                 "register" -> AppScreen.Register(f.getOrElse(1) { "" })
                 "refer" -> AppScreen.Refer
+                "advent" -> AppScreen.Advent
                 "emailDigests" -> AppScreen.EmailDigests
                 "post" -> AppScreen.Post(f[1], f[2])
                 "profile" -> AppScreen.Profile(f[1], f.getOrElse(2) { "" })
@@ -909,6 +920,8 @@ object ContentLinks {
             }
             return if (com.ecency.core.api.waves.Waves.composeText(safe) != null) NavEntry.tab(AppTab.WAVES) else null
         }
+        // ecency.com/advent: the calendar (the screen itself says when the season is over)
+        if (firstParty && parts.size == 1 && parts[0].lowercase() == "advent") return NavEntry.screen(AppScreen.Advent)
         val target: com.ecency.core.render.blocks.LinkTarget? = when {
             // /@author/followers and /following: the follows list (RN deepLinkParser)
             parts.size == 2 && parts[0].startsWith("@") && (parts[1] == "followers" || parts[1] == "following") ->

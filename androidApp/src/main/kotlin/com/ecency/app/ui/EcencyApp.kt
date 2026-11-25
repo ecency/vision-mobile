@@ -642,6 +642,13 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
                                 onDone = { navigator.pop() },
                             )
                         }
+                        AppScreen.Advent -> Guarded({ entry.get("advent") { env.adventModel() } }) { model ->
+                            AdventScreen(
+                                env, model,
+                                onBack = { navigator.pop() }, onLogin = { navigator.push(AppScreen.Login) },
+                                onUrl = { url -> com.ecency.core.app.ContentLinks.entry(url)?.screens?.forEach { routes.push(it) } ?: host.openExternal(url) },
+                            )
+                        }
                         AppScreen.Refer -> Box(Modifier.fillMaxSize().statusBarsPadding()) {
                             ReferScreen(
                                 env, host, entry.get("refer") { env.referModel() }, entry.get("list") { LazyListState() }, session.username,
@@ -764,6 +771,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
                 header = header?.takeIf { it.username == username },
                 avatarUrl = username?.let { PostCard.avatarUrl(it, env.proxyBase, "medium") }.orEmpty(),
                 version = SideMenu.versionText(host.appVersion(), host.buildNumber()),
+                now = now,
                 onItem = { routes.menu(it, otherAccounts) },
                 onAccounts = { routes.menu(SideMenuItem.ADD_ACCOUNT, true) },
                 onClose = { navigator.closeDrawer() },
@@ -923,6 +931,8 @@ private fun TabsRoot(
                         // RN feedScreen: the WavesOnboardingChecklist above the feed for signed-in readers (it shows
                         // nothing for established accounts)
                         if (username != null) FeedWavesCard(env, username, onCheckIn = { push(AppScreen.of(RouteName.PERKS)) })
+                        // the Advent Calendar's banner while its season shows (closable for the UTC day)
+                        AdventFeedBanner(env, now, onOpen = { push(AppScreen.Advent) })
                         FilterHomeFeeds(
                             env, root, username, now, actions, onLogin = { push(AppScreen.Login) },
                             onTarget = { target ->

@@ -273,6 +273,8 @@ struct HomeView: View {
         VStack(spacing: 0) {
             // RN feedScreen: the WavesOnboardingChecklist above the feed for signed-in readers
             if let username = session.state.username { FeedWavesCard(username: username) }
+            // the Advent Calendar's banner while its season shows (closable for the UTC day)
+            AdventFeedBanner()
             FilterPills(titles: tabs.map(\.title), selected: tabs.firstIndex(of: selected) ?? 0,
                         onSelect: { selectedKey = tabs[$0].key },
                         onReselect: { scrollTop += 1 },
