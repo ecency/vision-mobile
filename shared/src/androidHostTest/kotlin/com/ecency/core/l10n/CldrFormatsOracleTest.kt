@@ -19,7 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * ICU4J 75.1 (CLDR 45) as the offline oracle of [LocaleFormatter], test classpath only: the vendored
+ * ICU4J 79.1 (CLDR 49) as the offline oracle of [LocaleFormatter], test classpath only: the vendored
  * `l10n/cldr-formats.json` is exactly what [CldrFormatsExtract] prints, and for every one of the 39 app languages the
  * formatter agrees with ICU4J on numbers (grouping, fraction digits, digits, minus), percent, compact numbers, every
  * date pattern (three time zones), relative times, durations and ages, and numbers inside messages. Rounding is

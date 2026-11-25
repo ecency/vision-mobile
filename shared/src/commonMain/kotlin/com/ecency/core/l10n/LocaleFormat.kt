@@ -97,7 +97,7 @@ object LocaleFormat {
 
 /**
  * Formatting for one app language ([languageId], one of [L10n.supported]; anything else formats as en-US) from the
- * CLDR data vendored in `shared/l10n/cldr-formats.json` (ICU4J 75.1, CLDR 45, checked against ICU4J by the host test
+ * CLDR data vendored in `shared/l10n/cldr-formats.json` (ICU4J 79.1, CLDR 49, checked against ICU4J by the host test
  * `CldrFormatsOracleTest` for all 39 languages). Pure Kotlin, so both platforms and the tests format alike.
  *
  * - Digits: the language's CLDR default numbering system, as Android and iOS use for that locale: Arabic-Indic

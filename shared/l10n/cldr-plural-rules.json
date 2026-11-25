@@ -1,5 +1,5 @@
 {
-  "source": "ICU4J 75.1 (CLDR 45): PluralRules.forLocale(ULocale.forLanguageTag(id)).getRules(keyword), samples dropped",
+  "source": "ICU4J 79.1 (CLDR 49): PluralRules.forLocale(ULocale.forLanguageTag(id)).getRules(keyword), samples dropped",
   "rules": {
     "ar-SA": {"zero": "n = 0", "one": "n = 1", "two": "n = 2", "few": "n % 100 = 3..10", "many": "n % 100 = 11..99"},
     "az-AZ": {"one": "n = 1"},
@@ -15,7 +15,7 @@
     "fa-IR": {"one": "i = 0 or n = 1"},
     "fi-FI": {"one": "i = 1 and v = 0"},
     "fil-PH": {"one": "v = 0 and i = 1,2,3 or v = 0 and i % 10 != 4,6,9 or v != 0 and f % 10 != 4,6,9"},
-    "fr-FR": {"one": "i = 0,1", "many": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0..5"},
+    "fr-FR": {"one": "i = 0..1", "many": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0..5"},
     "he-IL": {"one": "i = 1 and v = 0 or i = 0 and v != 0", "two": "i = 2 and v = 0"},
     "hi-IN": {"one": "i = 0 or n = 1"},
     "hu-HU": {"one": "n = 1"},
@@ -37,7 +37,7 @@
     "tr-TR": {"one": "n = 1"},
     "uk-UA": {"one": "v = 0 and i % 10 = 1 and i % 100 != 11", "few": "v = 0 and i % 10 = 2..4 and i % 100 != 12..14", "many": "v = 0 and i % 10 = 0 or v = 0 and i % 10 = 5..9 or v = 0 and i % 100 = 11..14"},
     "uz-UZ": {"one": "n = 1"},
-    "vi-VN": {},
+    "vi-VN": {"one": "i = 0 or n = 1"},
     "zh-CN": {},
     "zh-TW": {}
   }

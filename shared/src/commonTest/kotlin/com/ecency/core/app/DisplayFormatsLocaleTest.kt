@@ -30,7 +30,7 @@ class DisplayFormatsLocaleTest {
         at("de-DE") {
             assertEquals("jetzt", TimeAgo.short(now - 5_000, now))
             assertEquals("5 Min.", TimeAgo.short(now - 5 * 60_000, now))
-            assertEquals("3 Std.", TimeAgo.short(now - 3 * 3_600_000, now))
+            assertEquals("3h", TimeAgo.short(now - 3 * 3_600_000, now))
             assertEquals("2 W", TimeAgo.short(now - 14 * 86_400_000L, now))
         }
         at("ru-RU") { assertEquals("3 ч", TimeAgo.short(now - 3 * 3_600_000, now)) }

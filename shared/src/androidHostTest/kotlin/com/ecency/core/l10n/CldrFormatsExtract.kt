@@ -18,13 +18,14 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 /**
- * Prints `shared/l10n/cldr-formats.json` from ICU4J 75.1 (CLDR 45), test classpath only: per app language the
+ * Prints `shared/l10n/cldr-formats.json` from ICU4J 79.1 (CLDR 49), test classpath only: per app language the
  * number symbols and digits, grouping, percent affixes, short compact patterns, the date patterns of the skeletons
  * the app uses, month, weekday and day period names (Gregorian), and the relative time and duration unit patterns.
  * [CldrFormatsOracleTest] checks that the vendored file is exactly this output.
  */
 internal object CldrFormatsExtract {
-    const val SOURCE = "ICU4J 75.1 (CLDR 45), CldrFormatsExtract; Gregorian calendar in every language"
+    val SOURCE = "ICU4J ${com.ibm.icu.util.VersionInfo.ICU_VERSION.major}.${com.ibm.icu.util.VersionInfo.ICU_VERSION.minor} " +
+        "(CLDR ${com.ibm.icu.util.LocaleData.getCLDRVersion().major}), CldrFormatsExtract; Gregorian calendar in every language"
 
     /** The skeletons [LocaleFormatter] formats, in the order of [LocaleData.Pattern]. */
     val SKELETONS = listOf("yMd", "yMMMd", "yMMMMd", "jmm", "yMMMdjmm", "MMMdd", "MMMEdjmm")

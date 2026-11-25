@@ -4,8 +4,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The generated CLDR 45 plural rules, one golden list per language family (values from the CLDR rule samples). The
- * Android host test PluralRulesOracleTest compares every locale against ICU4J over a wide number range as well.
+ * The generated CLDR 49 plural rules, one golden list per language family (values from the CLDR rule samples). The
+ * Android host test IcuOracleTest compares every locale against ICU4J over a wide number range as well.
  */
 class PluralRulesTest {
     private fun cats(locale: String, vararg values: Number) = values.map { L10nPluralRules.select(locale, PluralOperands.of(it.toDouble())) }
@@ -22,7 +22,7 @@ class PluralRulesTest {
 
     @Test
     fun noPluralForms() {
-        for (id in listOf("ja-JP", "ko-KR", "zh-CN", "zh-TW", "id-ID", "ms-MY", "th-TH", "vi-VN")) {
+        for (id in listOf("ja-JP", "ko-KR", "zh-CN", "zh-TW", "id-ID", "ms-MY", "th-TH")) {
             assertEquals(listOf("other", "other", "other"), cats(id, 0, 1, 2.5), id)
         }
     }
@@ -34,7 +34,7 @@ class PluralRulesTest {
         // n = 1
         for (id in listOf("tr-TR", "az-AZ", "bg-BG", "el-GR", "hu-HU", "ku-TR", "uz-UZ")) assertEquals(listOf("other", "one", "other"), cats(id, 0, 1, 1.5), id)
         // i = 0 or n = 1
-        for (id in listOf("hi-IN", "bn-BD", "fa-IR")) assertEquals(listOf("one", "one", "one", "other"), cats(id, 0, 1, 0.5, 2), id)
+        for (id in listOf("hi-IN", "bn-BD", "fa-IR", "vi-VN")) assertEquals(listOf("one", "one", "one", "other"), cats(id, 0, 1, 0.5, 2), id)
         // da: n = 1 or t != 0 and i = 0,1
         assertEquals(listOf("other", "one", "one", "one", "other"), cats("da-DK", 0, 1, 0.5, 1.5, 2.5))
     }

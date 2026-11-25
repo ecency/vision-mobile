@@ -363,7 +363,7 @@ internal object Cards {
 
 /**
  * Ages for cards and comments in the app language: CLDR's narrow durations and "now" ("now", "5m", "3h", "2d",
- * "4w", "1y" in en-US; "5 Min.", "3 Std." in de-DE; "3 ч" in ru-RU).
+ * "4w", "1y" in en-US; "5 Min.", "3h" in de-DE; "3 ч" in ru-RU).
  */
 object TimeAgo {
     fun short(epochMillis: Long, nowMillis: Long): String {

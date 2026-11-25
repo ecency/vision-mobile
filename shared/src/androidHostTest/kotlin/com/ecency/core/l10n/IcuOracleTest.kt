@@ -3,14 +3,15 @@ package com.ecency.core.l10n
 import com.ibm.icu.impl.number.DecimalQuantity_DualStorageBCD
 import com.ibm.icu.text.MessageFormat
 import com.ibm.icu.text.PluralRules
+import com.ibm.icu.util.LocaleData
 import com.ibm.icu.util.ULocale
+import com.ibm.icu.util.VersionInfo
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
- * ICU4J 75.1 (CLDR 45) as an offline oracle, test classpath only: the generated plural rules agree with ICU4J's for
+ * ICU4J 79.1 (CLDR 49) as an offline oracle, test classpath only: the generated plural rules agree with ICU4J's for
  * every locale over integers and decimals, the vendored rules file is exactly what ICU4J prints, and the formatter
  * agrees with ICU4J's MessageFormat on the syntax the app uses (numbers below 1000, so ICU's grouping never shows).
  */
@@ -33,15 +34,17 @@ class IcuOracleTest {
 
     @Test
     fun vendoredRulesAreIcu4jsRules() {
-        val text = File("l10n/cldr-plural-rules.json").readText()
-        for (id in L10nData.LOCALES) {
+        val actual = File("l10n/cldr-plural-rules.json").readText()
+        val lines = L10nData.LOCALES.sorted().map { id ->
             val icu = PluralRules.forLocale(ULocale.forLanguageTag(id))
-            for (k in listOf("zero", "one", "two", "few", "many")) {
-                if (k !in icu.keywords) continue
-                val rule = icu.getRules(k).trim()
-                assertTrue("\"$k\": \"$rule\"" in text.lineSequence().first { "\"$id\"" in it }, "$id $k: $rule")
-            }
+            val rules = listOf("zero", "one", "two", "few", "many").filter { it in icu.keywords }.joinToString(", ") { "\"$it\": \"${icu.getRules(it).trim()}\"" }
+            "    \"$id\": {$rules}"
         }
+        val expected = "{\n  \"source\": \"ICU4J ${VersionInfo.ICU_VERSION.major}.${VersionInfo.ICU_VERSION.minor} (CLDR ${LocaleData.getCLDRVersion().major}): " +
+            "PluralRules.forLocale(ULocale.forLanguageTag(id)).getRules(keyword), samples dropped\",\n  \"rules\": {\n" +
+            lines.joinToString(",\n") + "\n  }\n}\n"
+        if (actual != expected) File("build/cldr-plural-rules.json").writeText(expected)
+        assertEquals(expected, actual, "shared/l10n/cldr-plural-rules.json differs from ICU4J; the fresh file is in shared/build/cldr-plural-rules.json")
     }
 
     @Test
