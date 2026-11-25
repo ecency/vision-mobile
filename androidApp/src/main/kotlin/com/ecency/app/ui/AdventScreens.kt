@@ -190,7 +190,7 @@ private fun Header(
                     Text(L.native.advent.snow, color = Color.White, fontSize = 13.sp, modifier = Modifier.padding(start = 6.dp))
                 }
             }
-            Spacer(Modifier.height(22.dp))
+            Spacer(Modifier.height(34.dp))
             Text(kicker.uppercase(), color = Festive.gold, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp, modifier = Modifier.padding(start = 12.dp))
             Text(headline, color = Color.White, fontSize = 34.sp, lineHeight = 40.sp, fontFamily = Festive.script, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp).semantics { heading() }.testTag("adventHeadline"))
             if (signedIn && phase == AdventPhase.SEASON) {
@@ -358,7 +358,11 @@ private fun DoorTile(tile: AdventTile, modifier: Modifier, onClick: () -> Unit) 
             Canvas(Modifier.align(Alignment.TopEnd).padding(4.dp).size(18.dp)) { star(Offset(size.width / 2, size.height / 2), size.width / 2, Festive.gold) }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(LocaleFormat.integer(tile.day.toLong()), color = ink, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
+            // on a wrapped door the number sits on a soft dark chip, readable over a white ribbon
+            Text(
+                LocaleFormat.integer(tile.day.toLong()), color = ink, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold,
+                modifier = if (wrapped) Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black.copy(alpha = 0.28f)).padding(horizontal = 6.dp) else Modifier,
+            )
             if (tile.tag.isNotEmpty()) {
                 val todayTag = tile.look == AdventDoorLook.TODAY
                 Text(

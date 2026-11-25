@@ -7,6 +7,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.graphics.asAndroidBitmap
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.intercept.Interceptor
@@ -176,5 +179,29 @@ class AdventFlowsTest {
         settle()
         assertTrue("no menu item", !exists("menu:advent"))
         assertTrue("no banner", !exists("adventBanner"))
+    }
+
+    /** `ADVENT_SHOT_DIR=<folder>` in the test's environment: the calendar, a door and a result as PNGs (design review). */
+    @Test
+    @Config(qualifiers = "w390dp-h844dp")
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    fun screenshotsForTheDesignReview() {
+        val dir = System.getenv("ADVENT_SHOT_DIR")?.takeIf { it.isNotEmpty() } ?: return
+        fun save(name: String) {
+            settle()
+            val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
+            java.io.File(dir, "advent-android-$name.png").outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+        }
+        signIn()
+        launch(NavState(tab = AppTab.FEED))
+        waitFor("adventBanner")
+        save("banner")
+        compose.onNodeWithTag("adventBannerOpen").performClick()
+        waitFor("adventDoor:9")
+        save("calendar")
+        compose.onNodeWithTag("adventDoor:9").performScrollTo().performClick()
+        waitFor("adventAnswer")
+        compose.onNodeWithTag("adventAnswer").performTextInput("Snow on the roofs and tea by the window.")
+        save("door")
     }
 }
