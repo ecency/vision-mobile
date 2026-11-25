@@ -127,7 +127,9 @@ val appVersionCode: Int = rnVersionCode(libs.versions.appVersion.get()).let { ba
 
 android {
     namespace = "com.ecency.app"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk {
+        version = release(libs.versions.compileSdk.get().toInt()) { minorApiLevel = libs.versions.compileSdkMinor.get().toInt() }
+    }
 
     defaultConfig {
         // The RN store app's id; Kotlin packages and the namespace stay com.ecency.*.
