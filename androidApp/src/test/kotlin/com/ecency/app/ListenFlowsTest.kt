@@ -430,7 +430,7 @@ class ListenFlowsTest {
         assertEquals(listOf(ListenPlaybackService.SKIP_BACK, ListenPlaybackService.SKIP_FORWARD), buttons.map { it.sessionCommand })
         val controller = Robolectric.buildService(ListenPlaybackService::class.java).create()
         val session = controller.get().onGetSession(androidx.media3.session.MediaSession.ControllerInfo.createTestOnlyControllerInfo(
-            ApplicationProvider.getApplicationContext<Context>().packageName, 0, 0, 0, 0, false, android.os.Bundle.EMPTY,
+            ApplicationProvider.getApplicationContext<Context>().packageName, 0, 0, 0, 0, false, android.os.Bundle.EMPTY, false,
         ))!!
         assertEquals(15_000L, session.player.seekBackIncrement)
         assertEquals(15_000L, session.player.seekForwardIncrement)
@@ -481,7 +481,7 @@ class ListenFlowsTest {
         val controller = Robolectric.buildService(ListenPlaybackService::class.java).create()
         val service = controller.get()
         assertNotNull(service.onGetSession(androidx.media3.session.MediaSession.ControllerInfo.createTestOnlyControllerInfo(
-            context.packageName, 0, 0, 0, 0, false, android.os.Bundle.EMPTY,
+            context.packageName, 0, 0, 0, 0, false, android.os.Bundle.EMPTY, false,
         )))
         controller.destroy()
     }

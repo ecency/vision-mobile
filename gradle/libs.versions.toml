@@ -19,7 +19,8 @@ kotlincrypto-hash = "0.8.0"
 serialization = "1.13.0"
 robolectric = "4.18.1"
 coil = "3.6.3"
-media3 = "1.4.1"
+# the player (video, Listen, its media session). CameraX 1.7 (camera-video) pulls media3 1.9, so the catalog names it
+media3 = "1.9.0"
 # home screen widgets (README "Widgets"); 1.1.1 is built with Kotlin 1.8
 glance = "1.1.1"
 # Glance 1.1.1 pulls WorkManager 2.7.1 (Room 2.2.5), whose WorkDatabase is found by a reflective name lookup that
