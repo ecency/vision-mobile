@@ -851,7 +851,7 @@ final class AppContainer: ObservableObject {
                     dispatchers: AppDispatchers.companion.platform(),
                     proxyBase: ImageProxy.companion.DEFAULT_BASE,
                     debugKeyImport: true,
-                    nowMillis: { KotlinLong(value: AppContainer.demoNowMillis()) },
+                    nowMillis: { KotlinLong(value: Int64(Date().timeIntervalSince1970 * 1000)) },
                     security: options.lockTimeoutSeconds.map {
                         SecurityConfig(pinIterations: PinLock.companion.DEFAULT_ITERATIONS, lockTimeoutMillis: Int64($0) * 1000,
                                        monotonicMillis: SecurityConfig.companion.DEFAULT.monotonicMillis)
@@ -892,32 +892,8 @@ final class AppContainer: ObservableObject {
 
     #if DEBUG
     /// The demo token endpoint and relay, with Ecency's REST answered offline too (FakeRestHttp).
-    /// The clock of a `-fakeData` run: `-fakeNow <epoch millis>` starts it there and lets it run on (Advent Calendar
-    /// screenshots and UI tests in December); otherwise the device's. Never used outside fake data.
-    static let demoClockOffset: Int64 = {
-        let target = Int64(UserDefaults.standard.string(forKey: "fakeNow") ?? "") ?? 0
-        return target > 0 ? target - Int64(Date().timeIntervalSince1970 * 1000) : 0
-    }()
-
-    static func demoNowMillis() -> Int64 { Int64(Date().timeIntervalSince1970 * 1000) + demoClockOffset }
-
-    /// A `-fakeData` run is out of the Advent season unless it sets the date with `-fakeNow`, so the banner and the
-    /// menu item do not change the feed and the menu for every other UI test from 25 Nov to 31 Dec.
-    static let demoOffSeason: Bool = demoClockOffset == 0
-    #endif
-
-    /// The time the Advent banner and menu item are drawn for: the app's clock (a `-fakeData` run without `-fakeNow`
-    /// is before the season).
-    func adventNowMillis() -> Int64 {
-        #if DEBUG
-        if options.fakeData && AppContainer.demoOffSeason { return 0 }
-        #endif
-        return env.nowMillis().int64Value
-    }
-    #if DEBUG
-
     private static func fakeAuth() -> AuthServices {
-        let demo = DemoAuthServices.shared.create(nowMillis: { KotlinLong(value: AppContainer.demoNowMillis()) }, waitMillis: 300_000)
+        let demo = DemoAuthServices.shared.create(nowMillis: { KotlinLong(value: Int64(Date().timeIntervalSince1970 * 1000)) }, waitMillis: 300_000)
         return AuthServices(http: FakeRestHttp(fallback: demo.http), sockets: demo.sockets, hiveSigner: demo.hiveSigner,
                             tokenHost: demo.tokenHost, hiveAuthHost: demo.hiveAuthHost)
     }

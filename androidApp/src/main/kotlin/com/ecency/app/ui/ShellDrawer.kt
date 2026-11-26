@@ -87,7 +87,6 @@ fun SideMenuDrawer(
     header: DrawerHeader?,
     avatarUrl: String,
     version: String,
-    now: Long,
     onItem: (SideMenuItem) -> Unit,
     onAccounts: () -> Unit,
     onClose: () -> Unit,
@@ -108,7 +107,7 @@ fun SideMenuDrawer(
         enter = if (slides) slideInHorizontally { -it } else fadeIn(motion.fade(MotionTokens.MEDIUM_MS)),
         exit = if (slides) slideOutHorizontally { -it } else fadeOut(motion.fade(MotionTokens.MEDIUM_MS)),
     ) {
-        SideMenuPanel(username, header, avatarUrl, version, now, onItem, onAccounts)
+        SideMenuPanel(username, header, avatarUrl, version, onItem, onAccounts)
     }
 }
 
@@ -118,7 +117,6 @@ private fun SideMenuPanel(
     header: DrawerHeader?,
     avatarUrl: String,
     version: String,
-    now: Long,
     onItem: (SideMenuItem) -> Unit,
     onAccounts: () -> Unit,
 ) {
@@ -170,7 +168,7 @@ private fun SideMenuPanel(
                 contents = listOf(
                     {
                         Column(Modifier.verticalScroll(rememberScrollState()).testTag("drawerMain")) {
-                            SideMenu.items(loggedIn, MenuGroup.MAIN, now).forEach { MenuRow(it, onItem, if (it == SideMenuItem.ADVENT) SideMenu.adventBadge(now) else null) }
+                            SideMenu.items(loggedIn, MenuGroup.MAIN).forEach { MenuRow(it, onItem) }
                         }
                     },
                     {
@@ -207,7 +205,7 @@ private fun SideMenuPanel(
 }
 
 @Composable
-private fun MenuRow(item: SideMenuItem, onItem: (SideMenuItem) -> Unit, badge: String? = null) {
+private fun MenuRow(item: SideMenuItem, onItem: (SideMenuItem) -> Unit) {
     val colors = LocalEcencyColors.current
     val main = item.group == MenuGroup.MAIN
     // as iOS: from 1.5x the icon gives its room to the word and RN's 55 dp indent shrinks (long words broke mid-word)
@@ -224,13 +222,5 @@ private fun MenuRow(item: SideMenuItem, onItem: (SideMenuItem) -> Unit, badge: S
             fontWeight = if (main) FontWeight.Bold else FontWeight.Medium,
             fontSize = if (main) 15.sp else 14.sp,
         )
-        // the Advent item's "Door 9" while a door is open today
-        badge?.let {
-            Text(
-                it, color = androidx.compose.ui.graphics.Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 10.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
-                    .background(colors.red).padding(horizontal = 8.dp, vertical = 2.dp).testTag("menuBadge:${item.id}"),
-            )
-        }
     }
 }

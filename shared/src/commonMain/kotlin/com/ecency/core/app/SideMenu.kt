@@ -10,8 +10,6 @@ enum class MenuGroup { MAIN, FOOTER }
  * (`side_menu.*`), icons and groups.
  */
 enum class SideMenuItem(val id: String, private val titleText: () -> String, val icon: AppIcon, val group: MenuGroup) {
-    /** Native and web: the Advent Calendar while its season shows (25 Nov to 31 Dec, [AdventSeason]). */
-    ADVENT("advent", { L.native.advent.title }, AppIcon.GIFT, MenuGroup.MAIN),
     PROFILE("profile", { L.sideMenu.profile }, AppIcon.PERSON, MenuGroup.MAIN),
     BOOKMARKS("bookmarks", { L.sideMenu.bookmarks }, AppIcon.BOOKMARK, MenuGroup.MAIN),
     DRAFTS("drafts", { L.sideMenu.drafts }, AppIcon.DRAFTS, MenuGroup.MAIN),
@@ -72,19 +70,6 @@ object SideMenu {
      */
     fun items(loggedIn: Boolean, group: MenuGroup): List<SideMenuItem> = items(loggedIn).filter { it.group == group }
 
-    /**
-     * As [items], at [nowMillis]: while the Advent Calendar shows ([AdventSeason.isVisible]) its item leads the main
-     * group, signed in or out; before and after the season it is not there.
-     */
-    fun items(loggedIn: Boolean, group: MenuGroup, nowMillis: Long): List<SideMenuItem> {
-        val base = items(loggedIn, group)
-        return if (group == MenuGroup.MAIN && AdventSeason.isVisible(nowMillis)) listOf(SideMenuItem.ADVENT) + base else base
-    }
-
-    /** The menu item's badge while a door is open today ("Door 9"); null otherwise. */
-    fun adventBadge(nowMillis: Long): String? =
-        AdventSeason.todayDoor(nowMillis).takeIf { it > 0 }?.let { L.native.advent.doorLabel(day = com.ecency.core.l10n.LocaleFormat.integer(it.toLong())) }
-
     /** The space between the two groups (dp / pt). */
     const val GROUP_GAP_DP = 16
 
@@ -112,7 +97,6 @@ object SideMenu {
         SideMenuItem.ADD_ACCOUNT -> if (hasOtherAccounts) MenuAction.AccountsSheet else MenuAction.Open(AppScreen.Login)
         SideMenuItem.QR -> MenuAction.Open(AppScreen.of(RouteName.QR_SCAN))
         SideMenuItem.REFER -> MenuAction.Open(AppScreen.of(RouteName.REFER))
-        SideMenuItem.ADVENT -> MenuAction.Open(AppScreen.Advent)
         SideMenuItem.DOCS -> MenuAction.Browser(DOCS_URL)
         SideMenuItem.ASK_ESIE -> if (username != null) MenuAction.DirectMessage(OfficialAccounts.ESIE_USERNAME) else MenuAction.Open(AppScreen.Login)
         SideMenuItem.SETTINGS -> MenuAction.Open(AppScreen.Settings)

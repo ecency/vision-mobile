@@ -57,9 +57,6 @@ sealed interface AppEvent {
     /** The signed-in account changed (sign-in, sign-out). */
     data class SessionChanged(val username: String?) : AppEvent
 
-    /** The Advent banner was closed or today's door answered: the feed hides it for the rest of the UTC day. */
-    data object AdventBannerChanged : AppEvent
-
     /**
      * Every account, key and credential was removed from the device (third wrong PIN, or "forgot PIN").
      * A [SessionChanged] with null follows; UIs drop their screens and show the signed-out app.
@@ -630,8 +627,6 @@ class AppEnvironment(
         guardedStep { if (drafts == null) api.broadcaster.clear() else drafts.forEach { api.broadcaster.forgetAccount(it) } }
         // a chat token never outlives its account (RN setChatApiToken(null) + clearMattermostBootstrapCache on logout)
         guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { chat.forget(drafts) } }
-        // a game session (Advent Calendar) never outlives its account, nor does a Wave still to post for it
-        guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { advent.forget(drafts) } }
         // no Listen audio, lock screen card, media notification or dictation outlives the account that was current
         // (README "Background media"); another account leaving leaves the current one's audio alone
         if (forget) guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { dictationSessions.stopAll(); backgroundSessions.stopAll() } }
@@ -674,11 +669,6 @@ class AppEnvironment(
 
     /** Waves API, the waves published here, the wave composer. One per app. */
     val waves: WavesService by lazy { WavesService(this) }
-
-    /** The Advent Calendar's sessions, banner and pending Waves (Advent.kt). */
-    val advent: AdventService by lazy { AdventService(this) }
-
-    fun adventModel(): AdventModel = AdventModel(this)
 
     /** The Waves tab's tabs and their lists. */
     fun wavesTabsModel(): WavesTabsModel = WavesTabsModel(this)
