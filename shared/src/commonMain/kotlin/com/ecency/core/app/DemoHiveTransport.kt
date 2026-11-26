@@ -217,14 +217,14 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
 
     /**
      * A demo comment and its replies: [author]'s comment `re-<parentAuthor>-fake-post-<i>` on [parentAuthor]'s
-     * fake-post-<i>, with i - 1 replies. The profile tabs list it, and opening it (get_post, get_discussion) reads the same one.
+     * fake-post-<i>, with i - 1 replies; the third is gray (muted rows). The profile tabs list it, and opening it (get_post, get_discussion) reads the same one.
      */
     private fun commentThread(author: String, parentAuthor: String, i: Int): List<JsonObject> {
         val permlink = "re-$parentAuthor-fake-post-$i"
         val replies = (1 until i).map { j ->
             entry(AUTHORS.filter { it != author }[j - 1], "re-$author-$permlink", parent = author to permlink, depth = 2, body = "A reply to this comment.")
         }
-        return listOf(entry(author, permlink, parent = parentAuthor to "fake-post-$i", depth = 1, body = COMMENT_BODIES[i - 1], votes = i * 2, replies = replies.map(::keyOf))) + replies
+        return listOf(entry(author, permlink, parent = parentAuthor to "fake-post-$i", depth = 1, body = COMMENT_BODIES[i - 1], votes = i * 2, replies = replies.map(::keyOf), gray = i == 3)) + replies
     }
 
     /** The comment thread a listed demo comment's key names, or null for any other key. */
@@ -257,7 +257,7 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
 
     private fun entry(
         author: String, permlink: String, title: String = "", parent: Pair<String, String>? = null, depth: Int = 0,
-        body: String = BODY, children: Int? = null, votes: Int = 0, replies: List<String> = emptyList(),
+        body: String = BODY, children: Int? = null, votes: Int = 0, replies: List<String> = emptyList(), gray: Boolean = false,
     ) = buildJsonObject {
         put("author", author); put("permlink", permlink); put("category", COMMUNITY); put("title", title); put("body", body)
         putJsonObject("json_metadata") {
@@ -272,7 +272,7 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         putJsonArray("replies") { replies.forEach { add(it) } }
         putJsonArray("active_votes") { repeat(votes) { add(buildJsonObject { put("voter", "spike-voter$it"); put("rshares", 100) }) } }
         put("community", COMMUNITY); put("community_title", "Spike Community"); put("author_role", "guest"); put("author_title", "")
-        putJsonObject("stats") { put("hide", false); put("gray", false); put("total_votes", votes); put("flag_weight", 0.0) }
+        putJsonObject("stats") { put("hide", false); put("gray", gray); put("total_votes", votes); put("flag_weight", 0.0) }
         put("reblogs", 0); putJsonArray("beneficiaries") {}; putJsonArray("blacklists") {}; put("url", "/$COMMUNITY/@$author/$permlink")
         if (parent != null) {
             put("parent_author", parent.first); put("parent_permlink", parent.second)

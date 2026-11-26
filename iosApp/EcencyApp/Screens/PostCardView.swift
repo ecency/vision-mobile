@@ -15,13 +15,26 @@ struct PostCardView: View {
     @EnvironmentObject private var session: Observed<SessionState>
     @Environment(\.appTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
-    @ScaledMetric(relativeTo: .footnote) private var mutedBadge: CGFloat = 18
     /// RN useMutedReveal: revealed this session.
     @State private var revealed = false
     /// This card's zoom source (unique per card on screen, so the same post in two lists never shares one).
     @State private var heroID = UUID().uuidString
 
     private var dimmed: Bool { card.isMuted && !revealed && !app.env.mutedReveals.isRevealed(key: card.key) }
+
+    private func perform(_ action: CardAccessibilityAction) {
+        switch action {
+        case .reveal:
+            app.env.mutedReveals.reveal(key: card.key)
+            revealed = true
+        case .comments: app.openPost(card.key, fromList: !isInPane)
+        case .voters: app.push(AppScreenVoters(author: card.key.author, permlink: card.key.permlink))
+        case .reblogs: app.push(AppScreenReblogs(author: card.key.author, permlink: card.key.permlink))
+        case .profile: app.openQuickProfile(card.author)
+        case .tip: app.sheet = session.state.isLoggedIn ? .tip(card.key) : .login
+        case .options: app.openMenu(key: card.key)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -55,24 +68,7 @@ struct PostCardView: View {
             } label: {
                 VStack(alignment: .leading, spacing: 0) {
                     if dimmed {
-                        // RN muted hint: "!" badge, the reason, "Tap to reveal"
-                        Button {
-                            app.env.mutedReveals.reveal(key: card.key)
-                            revealed = true
-                        } label: {
-                            HStack(spacing: 6) {
-                                // the badge grows with the text (a fixed 18 pt circle clipped its "!"); the reason says it all
-                                Text("!").scaledFont(12, weight: .bold).foregroundStyle(.white)
-                                    .frame(width: mutedBadge, height: mutedBadge).background(theme.danger, in: Circle())
-                                    .accessibilityHidden(true)
-                                Text("\(card.mutedText ?? "") \(MutedReveals.companion.REVEAL)")
-                                    .scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.secondary)
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.bottom, 8)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("muted-reveal")
+                        MutedHintButton(card: card, padding: EdgeInsets(top: 0, leading: 8, bottom: 8, trailing: 8)) { revealed = true }
                     }
                     Group {
                         // the post zooms out of the card image (iOS 18; Motion.swift)
@@ -118,12 +114,11 @@ struct PostCardView: View {
             .accessibilityAddTraits(.isButton)
             // the card's other controls as actions on the one stop (the vote button stays its own stop: it opens
             // the weight sheet it owns)
-            .accessibilityAction(named: L.Post.a11yCommentsHint) { app.openPost(card.key, fromList: !isInPane) }
-            .accessibilityAction(named: L.Post.a11yVotersHint) { app.push(AppScreenVoters(author: card.key.author, permlink: card.key.permlink)) }
-            .accessibilityAction(named: L.Post.a11yReblogsHint) { app.push(AppScreenReblogs(author: card.key.author, permlink: card.key.permlink)) }
-            .accessibilityAction(named: UiCopy.shared.profileOf(username: card.author)) { app.openQuickProfile(card.author) }
-            .accessibilityAction(named: L.Post.a11yTip) { app.sheet = session.state.isLoggedIn ? .tip(card.key) : .login }
-            .accessibilityAction(named: L.Post.a11yPostOptions) { app.openMenu(key: card.key) }
+            .accessibilityActions {
+                ForEach(CardAccessibilityAction.named(dimmed: dimmed), id: \.self) { action in
+                    Button(action.name(card)) { perform(action) }
+                }
+            }
             .accessibilityIdentifier("post-card")
             .onAppear(perform: onAppearWithContent)
 
@@ -309,6 +304,60 @@ struct FooterRow: Layout {
             let size = view.sizeThatFits(.unspecified)
             view.place(at: CGPoint(x: x, y: bounds.midY), anchor: .leading, proposal: ProposedViewSize(size))
             x += size.width + spacing
+        }
+    }
+}
+
+/// RN useMutedReveal's hint on a muted card or comment row: "!" badge, the reason, "Tap to reveal". A tap reveals it for
+/// the session (`env.mutedReveals`, shared by the cards and the profile's comment rows), then calls `onReveal`.
+struct MutedHintButton: View {
+    let card: PostCard
+    /// Inside the button's label (the card's spacing, as before the hint was shared).
+    var padding = EdgeInsets()
+    let onReveal: () -> Void
+    @EnvironmentObject private var app: AppContainer
+    @Environment(\.appTheme) private var theme
+    @ScaledMetric(relativeTo: .footnote) private var mutedBadge: CGFloat = 18
+
+    var body: some View {
+        Button {
+            app.env.mutedReveals.reveal(key: card.key)
+            onReveal()
+        } label: {
+            HStack(spacing: 6) {
+                // the badge grows with the text (a fixed 18 pt circle clipped its "!"); the reason says it all
+                Text("!").scaledFont(12, weight: .bold).foregroundStyle(.white)
+                    .frame(width: mutedBadge, height: mutedBadge).background(theme.danger, in: Circle())
+                    .accessibilityHidden(true)
+                Text("\(card.mutedText ?? "") \(MutedReveals.companion.REVEAL)")
+                    .scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.secondary)
+            }
+            .padding(padding)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("muted-reveal")
+    }
+}
+
+/// The named VoiceOver actions on a feed card's one stop, in order: the card's other controls (the vote button stays
+/// its own stop), and while it is dimmed the muted hint's "Tap to reveal" first, which the ignored children hide (#3747,
+/// Android's card custom action).
+enum CardAccessibilityAction: Hashable {
+    case reveal, comments, voters, reblogs, profile, tip, options
+
+    static func named(dimmed: Bool) -> [CardAccessibilityAction] {
+        (dimmed ? [.reveal] : []) + [.comments, .voters, .reblogs, .profile, .tip, .options]
+    }
+
+    func name(_ card: PostCard) -> String {
+        switch self {
+        case .reveal: MutedReveals.companion.REVEAL
+        case .comments: L.Post.a11yCommentsHint
+        case .voters: L.Post.a11yVotersHint
+        case .reblogs: L.Post.a11yReblogsHint
+        case .profile: UiCopy.shared.profileOf(username: card.author)
+        case .tip: L.Post.a11yTip
+        case .options: L.Post.a11yPostOptions
         }
     }
 }

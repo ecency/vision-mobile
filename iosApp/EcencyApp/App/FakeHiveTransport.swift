@@ -243,7 +243,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
     }
 
     /// A demo comment and its replies: `author`'s comment `re-<parentAuthor>-fake-post-<i>` on `parentAuthor`'s
-    /// fake-post-<i>, with i - 1 replies. The profile tabs list it, and opening it (get_post, get_discussion) reads the same one.
+    /// fake-post-<i>, with i - 1 replies; the third is gray (muted rows). The profile tabs list it, and opening it (get_post, get_discussion) reads the same one.
     static func commentThread(author: String, parentAuthor: String, i: Int) -> [[String: Any]] {
         let permlink = "re-\(parentAuthor)-fake-post-\(i)"
         let repliers = authors.filter { $0 != author }
@@ -251,7 +251,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
             entry(author: repliers[j - 1], permlink: "re-\(author)-\(permlink)", parent: (author, permlink), depth: 2, body: "A reply to this comment.")
         }
         let comment = entry(author: author, permlink: permlink, parent: (parentAuthor, "fake-post-\(i)"), depth: 1,
-                            body: commentBodies[i - 1], votes: i * 2, replies: replies.map(key(of:)))
+                            body: commentBodies[i - 1], votes: i * 2, replies: replies.map(key(of:)), gray: i == 3)
         return [comment] + replies
     }
 
@@ -298,7 +298,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
 
     static func entry(
         author: String, permlink: String, title: String = "", parent: (String, String)? = nil, depth: Int = 0,
-        body: String = FakeHiveTransport.body, children: Int? = nil, votes: Int = 0, replies: [String] = []
+        body: String = FakeHiveTransport.body, children: Int? = nil, votes: Int = 0, replies: [String] = [], gray: Bool = false
     ) -> [String: Any] {
         var e: [String: Any] = [
             "author": author, "permlink": permlink, "category": "hive-100001", "title": title, "body": body,
@@ -310,7 +310,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
             "max_accepted_payout": "1000000.000 HBD", "percent_hbd": 10000, "replies": replies,
             "active_votes": (0..<votes).map { ["voter": "spike-voter\($0)", "rshares": 100] },
             "community": "hive-100001", "community_title": "Spike Community", "author_role": "guest", "author_title": "",
-            "stats": ["hide": false, "gray": false, "total_votes": votes, "flag_weight": 0.0],
+            "stats": ["hide": false, "gray": gray, "total_votes": votes, "flag_weight": 0.0],
             "reblogs": 0, "beneficiaries": [], "blacklists": [], "url": "/hive-100001/@\(author)/\(permlink)",
         ]
         if let parent {

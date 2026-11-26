@@ -176,6 +176,23 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(app.buttons["vote-submit"].waitForExistence(timeout: 5), app.debugDescription)
     }
 
+    /// RN CommentView hideContent: a muted comment row shows the cards' hint (the reason, "Tap to reveal") and not its
+    /// text, until the hint is tapped (the fake's third comment is gray).
+    func testAMutedCommentRowHidesItsTextUntilRevealed() {
+        let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
+        XCTAssertTrue(app.buttons["tab-comments"].waitForExistence(timeout: 20))
+        app.buttons["tab-comments"].tap()
+        XCTAssertTrue(app.buttons["comment-spike-bob/re-spike-alice-fake-post-1"].waitForExistence(timeout: 15), app.debugDescription)
+        let hint = app.buttons["muted-reveal"]
+        for _ in 0..<4 where !hint.exists { app.swipeUp() }
+        XCTAssertTrue(hint.waitForExistence(timeout: 5), app.debugDescription)
+        let text = app.buttons["comment-spike-bob/re-spike-dave-fake-post-3"]
+        XCTAssertFalse(text.exists, "the muted comment's text is hidden")
+        hint.tap()
+        XCTAssertTrue(text.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(hint.exists)
+    }
+
     /// The own Replies tab draws the same rows (RN commentsTabContent, type "replies").
     func testARowOfTheOwnRepliesTabHasTheVoteAndTheCardActions() {
         let app = launch(["-openLink", "https://ecency.com/@spike-alice"])

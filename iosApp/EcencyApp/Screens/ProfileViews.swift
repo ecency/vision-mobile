@@ -372,6 +372,10 @@ private struct ProfileCommentRow: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     /// A wide window: the comment opens in the pane beside the list, as a card's post does.
     @Environment(\.isInPane) private var isInPane
+    /// RN CommentView hideContent: a muted comment's text stays behind the cards' hint until revealed (this session).
+    @State private var revealed = false
+
+    private var hidden: Bool { card.isMuted && !revealed && !app.env.mutedReveals.isRevealed(key: card.key) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -382,18 +386,22 @@ private struct ProfileCommentRow: View {
                 Spacer(minLength: 0)
                 MenuButton { app.openMenu(key: card.key) }
             }
-            Button { app.openPost(card.key, fromList: !isInPane) } label: {
-                VStack(alignment: .leading, spacing: 4) {
-                    if !card.title.isEmpty {
-                        Text(card.title).scaledFont(13).foregroundStyle(theme.secondary).lineLimit(1)
+            if hidden {
+                MutedHintButton(card: card) { revealed = true }
+            } else {
+                Button { app.openPost(card.key, fromList: !isInPane) } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if !card.title.isEmpty {
+                            Text(card.title).scaledFont(13).foregroundStyle(theme.secondary).lineLimit(1)
+                        }
+                        Text(card.summary).scaledFont(15).foregroundStyle(theme.text).lineLimit(4).multilineTextAlignment(.leading)
                     }
-                    Text(card.summary).scaledFont(15).foregroundStyle(theme.text).lineLimit(4).multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("comment-\(card.key.author)/\(card.key.permlink)")
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("comment-\(card.key.author)/\(card.key.permlink)")
             FooterRow(spacing: 16, wraps: AccessibleFooter.wraps(typeSize, width: width)) {
                 VoteButton(key: card.key, votedByMe: card.votedByMe, downvotedByMe: card.downvotedByMe,
                            payoutText: card.payoutText, payoutDeclined: card.isPayoutDeclined, iconSize: 18, payoutPost: payoutPost)

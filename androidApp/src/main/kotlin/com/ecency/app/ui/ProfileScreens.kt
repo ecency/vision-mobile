@@ -641,6 +641,9 @@ private fun PlaceholderTab(title: String, text: String, action: String?, onActio
 @Composable
 private fun CommentRow(card: PostCard, nowMillis: Long, voteInFlight: Boolean, actions: FeedActions) {
     val colors = LocalEcencyColors.current
+    // RN CommentView hideContent: a muted comment's text stays hidden behind the cards' hint until revealed (this session)
+    val reveals = LocalFeedx.current?.env?.mutedReveals
+    var revealed by androidx.compose.runtime.remember(card.key) { androidx.compose.runtime.mutableStateOf(reveals?.isRevealed(card.key) == true) }
     Column(Modifier.fillMaxWidth().testTag("comment:${card.key}")) {
         Row(Modifier.padding(start = 16.dp, end = 6.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Avatar(card.avatarUrl, 24.dp)
@@ -651,7 +654,8 @@ private fun CommentRow(card: PostCard, nowMillis: Long, voteInFlight: Boolean, a
             }
             actions.onMenu?.let { onMenu -> OptionsButton { onMenu(card) } }
         }
-        Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { actions.onOpen(card) }.padding(horizontal = 16.dp).testTag("open:${card.key}")) {
+        if (card.isMuted && !revealed) MutedHint(card, Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) { reveals?.reveal(card.key); revealed = true }
+        else Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { actions.onOpen(card) }.padding(horizontal = 16.dp).testTag("open:${card.key}")) {
             if (card.title.isNotEmpty()) Text(card.title, fontSize = 13.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(card.summary, fontSize = 15.sp, lineHeight = 21.sp, color = colors.text, maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
         }
