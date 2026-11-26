@@ -333,3 +333,16 @@ final class FakeDataModelTests: XCTestCase {
         return p.inlines.compactMap { ($0 as? InlineLink)?.target }
     }
 }
+
+/// README "Privacy manifest": the app bundle carries `PrivacyInfo.xcprivacy` (App Review refuses a build without one
+/// for the required reason APIs it uses). build-logic `PrivacyManifestTest` checks its declarations against the code;
+/// this checks that the build puts it in the bundle, where App Store Connect reads it.
+final class PrivacyManifestBundleTests: XCTestCase {
+    func testTheAppBundleCarriesItsPrivacyManifest() throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy"), "PrivacyInfo.xcprivacy in \(Bundle.main.bundlePath)")
+        let plist = try XCTUnwrap(PropertyListSerialization.propertyList(from: Data(contentsOf: url), format: nil) as? [String: Any])
+        XCTAssertEqual(plist["NSPrivacyTracking"] as? Bool, false)
+        let types = (plist["NSPrivacyAccessedAPITypes"] as? [[String: Any]] ?? []).compactMap { $0["NSPrivacyAccessedAPIType"] as? String }
+        XCTAssertTrue(types.contains("NSPrivacyAccessedAPICategoryUserDefaults"), "\(types)")
+    }
+}
