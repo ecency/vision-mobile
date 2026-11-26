@@ -66,9 +66,13 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
             "bridge.get_post" -> {
                 val author = text("author").orEmpty()
                 val permlink = text("permlink").orEmpty()
-                discussion(author, permlink)["$author/$permlink"] ?: entry(author, permlink)
+                commentThread(author, permlink)?.first() ?: discussion(author, permlink)["$author/$permlink"] ?: entry(author, permlink)
             }
-            "bridge.get_discussion" -> JsonObject(discussion(text("author").orEmpty(), text("permlink").orEmpty()))
+            "bridge.get_discussion" -> {
+                val author = text("author").orEmpty()
+                val permlink = text("permlink").orEmpty()
+                JsonObject(commentThread(author, permlink)?.associateBy(::keyOf) ?: discussion(author, permlink))
+            }
             "condenser_api.get_accounts" -> JsonArray(
                 (listed?.firstOrNull() as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.content }.filter { it in AUTHORS }.map(::account),
             )
@@ -207,10 +211,31 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         val others = AUTHORS.filter { it != account }
         return JsonArray((1..3).map { i ->
             val other = others[(i - 1) % others.size]
-            if (replies) entry(other, "re-$account-fake-post-$i", parent = account to "fake-post-$i", depth = 1, body = COMMENT_BODIES[i - 1], children = i - 1, votes = i * 2)
-            else entry(account, "re-$other-fake-post-$i", parent = other to "fake-post-$i", depth = 1, body = COMMENT_BODIES[i - 1], children = i - 1, votes = i * 2)
+            if (replies) commentThread(other, account, i).first() else commentThread(account, other, i).first()
         })
     }
+
+    /**
+     * A demo comment and its replies: [author]'s comment `re-<parentAuthor>-fake-post-<i>` on [parentAuthor]'s
+     * fake-post-<i>, with i - 1 replies. The profile tabs list it, and opening it (get_post, get_discussion) reads the same one.
+     */
+    private fun commentThread(author: String, parentAuthor: String, i: Int): List<JsonObject> {
+        val permlink = "re-$parentAuthor-fake-post-$i"
+        val replies = (1 until i).map { j ->
+            entry(AUTHORS.filter { it != author }[j - 1], "re-$author-$permlink", parent = author to permlink, depth = 2, body = "A reply to this comment.")
+        }
+        return listOf(entry(author, permlink, parent = parentAuthor to "fake-post-$i", depth = 1, body = COMMENT_BODIES[i - 1], votes = i * 2, replies = replies.map(::keyOf))) + replies
+    }
+
+    /** The comment thread a listed demo comment's key names, or null for any other key. */
+    private fun commentThread(author: String, permlink: String): List<JsonObject>? {
+        val match = COMMENT_PERMLINK.matchEntire(permlink) ?: return null
+        val parentAuthor = match.groupValues[1]
+        if (author !in AUTHORS || parentAuthor !in AUTHORS || parentAuthor == author) return null
+        return commentThread(author, parentAuthor, match.groupValues[2].toInt())
+    }
+
+    private fun keyOf(e: JsonObject) = "${(e["author"] as JsonPrimitive).content}/${(e["permlink"] as JsonPrimitive).content}"
 
     /** Root plus comments: two top-level threads, one nested past level 3 (shows "more replies"). */
     private fun discussion(rootAuthor: String, rootPermlink: String): Map<String, JsonObject> {
@@ -227,7 +252,7 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
             entry("spike-carol", "re-c2", parent = root, depth = 1, body = "Second fixture comment.", votes = 2),
         )
         if (rootAuthor == "spike-bob" && rootPermlink == "re-c1") all.removeAt(0)
-        return all.associateBy { "${(it["author"] as JsonPrimitive).content}/${(it["permlink"] as JsonPrimitive).content}" }
+        return all.associateBy(::keyOf)
     }
 
     private fun entry(
@@ -265,6 +290,7 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         const val COMMUNITY = "hive-100001"
 
         /** The demo comments of the profile's Comments and Replies tabs. */
+        private val COMMENT_PERMLINK = Regex("re-([a-z0-9.-]+)-fake-post-([1-3])")
         private val COMMENT_BODIES = listOf(
             "Thanks for sharing this, the **second part** was the most useful for me.",
             "Good point about the fixtures. I tried the same steps and it worked.",

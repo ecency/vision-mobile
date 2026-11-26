@@ -76,10 +76,15 @@ final class FakeHiveTransport: NSObject, RpcTransport {
         case "bridge.get_post":
             let author = params["author"] as? String ?? ""
             let permlink = params["permlink"] as? String ?? ""
-            result = discussion(rootAuthor: author, rootPermlink: permlink)["\(author)/\(permlink)"]
+            result = commentThread(author: author, permlink: permlink)?.first
+                ?? discussion(rootAuthor: author, rootPermlink: permlink)["\(author)/\(permlink)"]
                 ?? entry(author: author, permlink: permlink)
         case "bridge.get_discussion":
-            result = discussion(rootAuthor: params["author"] as? String ?? "", rootPermlink: params["permlink"] as? String ?? "")
+            let author = params["author"] as? String ?? ""
+            let permlink = params["permlink"] as? String ?? ""
+            result = commentThread(author: author, permlink: permlink).map { thread in
+                Dictionary(uniqueKeysWithValues: thread.map { (key(of: $0), $0) })
+            } ?? discussion(rootAuthor: author, rootPermlink: permlink)
         case "condenser_api.get_accounts":
             // the fake accounts for the login flows: every role derives from a public throwaway password
             let names = ((request["params"] as? [Any])?.first as? [String]) ?? []
@@ -233,13 +238,35 @@ final class FakeHiveTransport: NSObject, RpcTransport {
         let others = authors.filter { $0 != account }
         return (1...3).map { i in
             let other = others[(i - 1) % others.count]
-            return replies
-                ? entry(author: other, permlink: "re-\(account)-fake-post-\(i)", parent: (account, "fake-post-\(i)"), depth: 1,
-                        body: commentBodies[i - 1], children: i - 1, votes: i * 2)
-                : entry(author: account, permlink: "re-\(other)-fake-post-\(i)", parent: (other, "fake-post-\(i)"), depth: 1,
-                        body: commentBodies[i - 1], children: i - 1, votes: i * 2)
+            return replies ? commentThread(author: other, parentAuthor: account, i: i)[0] : commentThread(author: account, parentAuthor: other, i: i)[0]
         }
     }
+
+    /// A demo comment and its replies: `author`'s comment `re-<parentAuthor>-fake-post-<i>` on `parentAuthor`'s
+    /// fake-post-<i>, with i - 1 replies. The profile tabs list it, and opening it (get_post, get_discussion) reads the same one.
+    static func commentThread(author: String, parentAuthor: String, i: Int) -> [[String: Any]] {
+        let permlink = "re-\(parentAuthor)-fake-post-\(i)"
+        let repliers = authors.filter { $0 != author }
+        let replies = (1..<i).map { j in
+            entry(author: repliers[j - 1], permlink: "re-\(author)-\(permlink)", parent: (author, permlink), depth: 2, body: "A reply to this comment.")
+        }
+        let comment = entry(author: author, permlink: permlink, parent: (parentAuthor, "fake-post-\(i)"), depth: 1,
+                            body: commentBodies[i - 1], votes: i * 2, replies: replies.map(key(of:)))
+        return [comment] + replies
+    }
+
+    /// The comment thread a listed demo comment's key names, or nil for any other key (as DemoHiveTransport).
+    static func commentThread(author: String, permlink: String) -> [[String: Any]]? {
+        // DemoHiveTransport's `re-([a-z0-9.-]+)-fake-post-([1-3])`: a non-empty parent name and one digit 1 to 3
+        guard permlink.hasPrefix("re-"), let tail = permlink.range(of: "-fake-post-", options: .backwards),
+              tail.lowerBound > permlink.index(permlink.startIndex, offsetBy: 3),
+              ["1", "2", "3"].contains(permlink[tail.upperBound...]), let i = Int(permlink[tail.upperBound...]) else { return nil }
+        let parentAuthor = String(permlink[permlink.index(permlink.startIndex, offsetBy: 3)..<tail.lowerBound])
+        guard authors.contains(author), authors.contains(parentAuthor), parentAuthor != author else { return nil }
+        return commentThread(author: author, parentAuthor: parentAuthor, i: i)
+    }
+
+    static func key(of e: [String: Any]) -> String { "\(e["author"]!)/\(e["permlink"]!)" }
 
     static let commentBodies = [
         "Thanks for sharing this, the **second part** was the most useful for me.",
@@ -265,7 +292,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
         ]
         if rootAuthor == "spike-bob" && rootPermlink == "re-c1" { all.removeFirst() }
         var map: [String: [String: Any]] = [:]
-        for e in all { map["\(e["author"]!)/\(e["permlink"]!)"] = e }
+        for e in all { map[key(of: e)] = e }
         return map
     }
 

@@ -644,10 +644,11 @@ private fun CommentRow(card: PostCard, nowMillis: Long, voteInFlight: Boolean, a
     Column(Modifier.fillMaxWidth().testTag("comment:${card.key}")) {
         Row(Modifier.padding(start = 16.dp, end = 6.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Avatar(card.avatarUrl, 24.dp)
-            // the name gives way at large text sizes, never the options button
-            Text(card.author, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 8.dp).weight(1f, fill = false))
-            Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 12.sp, color = colors.darkGray, maxLines = 1)
-            Spacer(Modifier.weight(1f))
+            // name and age take the free width (as PostHeader); the name gives way at large text sizes, never the options button
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                Text(card.author, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 8.dp).weight(1f, fill = false).testTag("commentAuthor"))
+                Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 12.sp, color = colors.darkGray, maxLines = 1, modifier = Modifier.testTag("commentAge"))
+            }
             actions.onMenu?.let { onMenu -> OptionsButton { onMenu(card) } }
         }
         Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { actions.onOpen(card) }.padding(horizontal = 16.dp).testTag("open:${card.key}")) {

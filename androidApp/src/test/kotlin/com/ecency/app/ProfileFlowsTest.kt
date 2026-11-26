@@ -653,6 +653,29 @@ class ProfileFlowsTest {
         }
     }
 
+    /**
+     * Review fix: the commenter's name may grow into all the free width of the header before it ellipsizes (as
+     * PostHeader), up to the age and the options button; a weighted spacer beside it took half of that width.
+     * Robolectric's fonts are a pixel or so per character, so this checks the width offered to the name, not the cut.
+     */
+    @Test
+    fun theCommenterNameMayUseAllTheFreeWidthOfTheHeader() {
+        node.signIn()
+        launch(AppScreen.Profile("alice"))
+        waitBelowSummary("tab:comments")
+        compose.onNodeWithTag("tab:comments").performClick()
+        compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
+        waitFor("comment:alice/re-one")
+        val inRow = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:alice/re-one"))
+        val name = compose.onNode(hasTestTag("commentAuthor") and inRow, useUnmergedTree = true).fetchSemanticsNode()
+        val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        name.config[androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult].action?.invoke(layouts)
+        val offered = layouts.single().layoutInput.constraints.maxWidth
+        val age = compose.onNode(hasTestTag("commentAge") and inRow, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val options = compose.onNode(hasTestTag("options") and inRow, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        assertEquals("the name may reach the age beside the options button", options.left, name.boundsInRoot.left + offered + age.width, 1f)
+    }
+
     /** The own Replies tab draws the same full comment rows (RN commentsTabContent, type "replies"). */
     @Test
     fun aRowOfTheOwnRepliesTabHasTheCardActions() {

@@ -45,6 +45,42 @@ final class ProfileTests: XCTestCase {
         XCTAssertFalse(followers.body.contains("\"follower\":\"spike-alice\""))
     }
 
+    /// Opening a listed comment reads it again (get_post, get_discussion): the same comment and its replies, not a made-up root post.
+    func testFakeTransportOpensAListedCommentAsTheSameComment() throws {
+        func call(_ method: String, _ params: [String: String]) throws -> Any {
+            let request = try JSONSerialization.data(withJSONObject: ["jsonrpc": "2.0", "id": 1, "method": method, "params": params])
+            let reply = FakeHiveTransport.answer(String(data: request, encoding: .utf8)!)
+            let json = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(reply.body.utf8)) as? [String: Any])
+            return try XCTUnwrap(json["result"], reply.body)
+        }
+        func fields(_ e: [String: Any]) -> [String] {
+            ["body", "parent_author", "parent_permlink", "depth", "children"].map { "\(e[$0] ?? "nil")" }
+        }
+        var listed: [[String: Any]] = []
+        for (account, sort) in [("spike-bob", "comments"), ("spike-alice", "replies")] {
+            listed += try XCTUnwrap(call("bridge.get_account_posts", ["account": account, "sort": sort]) as? [[String: Any]])
+        }
+        XCTAssertEqual(listed.count, 6)
+        for c in listed {
+            let author = c["author"] as! String, permlink = c["permlink"] as! String, key = "\(author)/\(permlink)"
+            let post = try XCTUnwrap(call("bridge.get_post", ["author": author, "permlink": permlink]) as? [String: Any])
+            XCTAssertEqual(fields(post), fields(c), key)
+            let thread = try XCTUnwrap(call("bridge.get_discussion", ["author": author, "permlink": permlink]) as? [String: [String: Any]])
+            XCTAssertEqual(fields(try XCTUnwrap(thread[key], key)), fields(c), key)
+            let below = thread.filter { $0.key != key }.values
+            XCTAssertEqual(below.count, c["children"] as? Int, "\(key): its replies, and only them")
+            XCTAssertTrue(below.allSatisfy { $0["parent_author"] as? String == author && $0["parent_permlink"] as? String == permlink && $0["depth"] as? Int == 2 }, key)
+        }
+    }
+
+    /// Review fix: keys that only look like a demo comment's are not one (no parent name, a signed number), and never trap.
+    func testFakeTransportTakesOnlyDemoCommentKeys() {
+        for permlink in ["re-fake-post-1", "re-spike-alice-fake-post-+1", "re-spike-alice-fake-post-4", "re-spike-bob-fake-post-1"] {
+            XCTAssertNil(FakeHiveTransport.commentThread(author: "spike-bob", permlink: permlink), permlink)
+        }
+        XCTAssertNotNil(FakeHiveTransport.commentThread(author: "spike-bob", permlink: "re-spike-alice-fake-post-1"))
+    }
+
     func testProfileFormatHelpers() {
         XCTAssertEqual(ProfileFormat.shared.count(value: 1234), "1.2K")
         XCTAssertEqual(ProfileFormat.shared.websiteUrl(website: "ecency.com"), "https://ecency.com")
