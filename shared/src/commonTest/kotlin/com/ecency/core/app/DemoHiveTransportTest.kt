@@ -74,6 +74,13 @@ class DemoHiveTransportTest {
             val below = thread.filter { it !== head }
             assertEquals(c.children, below.size, "$key: its replies, and only them")
             assertTrue(below.all { it.parentAuthor == c.author && it.parentPermlink == c.permlink && it.depth == c.depth + 1 }, "$key: $below")
+            // a reply opens as itself too
+            for (r in below) {
+                val rkey = "${r.author}/${r.permlink}"
+                val opened = assertNotNull(api.hive.post(r.author, r.permlink, "spike-alice"), rkey)
+                assertEquals(listOf(r.body, r.parentAuthor, r.parentPermlink, r.depth), listOf(opened.body, opened.parentAuthor, opened.parentPermlink, opened.depth), rkey)
+                assertEquals(listOf(rkey), assertNotNull(api.hive.discussion(r.author, r.permlink, "spike-alice"), rkey).map { "${it.author}/${it.permlink}" })
+            }
         }
     }
 

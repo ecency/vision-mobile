@@ -66,12 +66,12 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
             "bridge.get_post" -> {
                 val author = text("author").orEmpty()
                 val permlink = text("permlink").orEmpty()
-                commentThread(author, permlink)?.first() ?: discussion(author, permlink)["$author/$permlink"] ?: entry(author, permlink)
+                demoThread(author, permlink)?.first() ?: discussion(author, permlink)["$author/$permlink"] ?: entry(author, permlink)
             }
             "bridge.get_discussion" -> {
                 val author = text("author").orEmpty()
                 val permlink = text("permlink").orEmpty()
-                JsonObject(commentThread(author, permlink)?.associateBy(::keyOf) ?: discussion(author, permlink))
+                JsonObject(demoThread(author, permlink)?.associateBy(::keyOf) ?: discussion(author, permlink))
             }
             "condenser_api.get_accounts" -> JsonArray(
                 (listed?.firstOrNull() as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.content }.filter { it in AUTHORS }.map(::account),
@@ -233,6 +233,15 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         val parentAuthor = match.groupValues[1]
         if (author !in AUTHORS || parentAuthor !in AUTHORS || parentAuthor == author) return null
         return commentThread(author, parentAuthor, match.groupValues[2].toInt())
+    }
+
+    /** A listed demo comment with its replies, or one of those replies alone; null for any other key. */
+    private fun demoThread(author: String, permlink: String): List<JsonObject>? {
+        commentThread(author, permlink)?.let { return it }
+        // a reply: re-<commenter>-<the comment's permlink>
+        val commenter = AUTHORS.firstOrNull { permlink.startsWith("re-$it-re-") } ?: return null
+        val reply = commentThread(commenter, permlink.removePrefix("re-$commenter-"))?.drop(1)?.firstOrNull { keyOf(it) == "$author/$permlink" }
+        return reply?.let(::listOf)
     }
 
     private fun keyOf(e: JsonObject) = "${(e["author"] as JsonPrimitive).content}/${(e["permlink"] as JsonPrimitive).content}"

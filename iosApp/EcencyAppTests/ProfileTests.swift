@@ -70,6 +70,14 @@ final class ProfileTests: XCTestCase {
             let below = thread.filter { $0.key != key }.values
             XCTAssertEqual(below.count, c["children"] as? Int, "\(key): its replies, and only them")
             XCTAssertTrue(below.allSatisfy { $0["parent_author"] as? String == author && $0["parent_permlink"] as? String == permlink && $0["depth"] as? Int == 2 }, key)
+            // a reply opens as itself too
+            for r in below {
+                let ra = r["author"] as! String, rp = r["permlink"] as! String
+                let opened = try XCTUnwrap(call("bridge.get_post", ["author": ra, "permlink": rp]) as? [String: Any])
+                XCTAssertEqual(fields(opened), fields(r), "\(ra)/\(rp)")
+                let rthread = try XCTUnwrap(call("bridge.get_discussion", ["author": ra, "permlink": rp]) as? [String: [String: Any]])
+                XCTAssertEqual(Array(rthread.keys), ["\(ra)/\(rp)"])
+            }
         }
     }
 

@@ -76,13 +76,13 @@ final class FakeHiveTransport: NSObject, RpcTransport {
         case "bridge.get_post":
             let author = params["author"] as? String ?? ""
             let permlink = params["permlink"] as? String ?? ""
-            result = commentThread(author: author, permlink: permlink)?.first
+            result = demoThread(author: author, permlink: permlink)?.first
                 ?? discussion(rootAuthor: author, rootPermlink: permlink)["\(author)/\(permlink)"]
                 ?? entry(author: author, permlink: permlink)
         case "bridge.get_discussion":
             let author = params["author"] as? String ?? ""
             let permlink = params["permlink"] as? String ?? ""
-            result = commentThread(author: author, permlink: permlink).map { thread in
+            result = demoThread(author: author, permlink: permlink).map { thread in
                 Dictionary(uniqueKeysWithValues: thread.map { (key(of: $0), $0) })
             } ?? discussion(rootAuthor: author, rootPermlink: permlink)
         case "condenser_api.get_accounts":
@@ -264,6 +264,16 @@ final class FakeHiveTransport: NSObject, RpcTransport {
         let parentAuthor = String(permlink[permlink.index(permlink.startIndex, offsetBy: 3)..<tail.lowerBound])
         guard authors.contains(author), authors.contains(parentAuthor), parentAuthor != author else { return nil }
         return commentThread(author: author, parentAuthor: parentAuthor, i: i)
+    }
+
+    /// A listed demo comment with its replies, or one of those replies alone; nil for any other key (as DemoHiveTransport).
+    static func demoThread(author: String, permlink: String) -> [[String: Any]]? {
+        if let thread = commentThread(author: author, permlink: permlink) { return thread }
+        // a reply: re-<commenter>-<the comment's permlink>
+        guard let commenter = authors.first(where: { permlink.hasPrefix("re-\($0)-re-") }),
+              let thread = commentThread(author: commenter, permlink: String(permlink.dropFirst("re-\(commenter)-".count))),
+              let reply = thread.dropFirst().first(where: { key(of: $0) == "\(author)/\(permlink)" }) else { return nil }
+        return [reply]
     }
 
     static func key(of e: [String: Any]) -> String { "\(e["author"]!)/\(e["permlink"]!)" }
