@@ -58,13 +58,21 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         val v2 = method.startsWith("bridge.") && method.endsWith("_v2")
         val result: JsonElement = when (method.removeSuffix("_v2").takeIf { v2 } ?: method) {
             "bridge.get_ranked_posts" -> if (firstPage()) feed(null) else JsonArray(emptyList())
-            "bridge.get_account_posts" -> if (firstPage()) feed(text("account") ?: AUTHORS[0]) else JsonArray(emptyList())
+            "bridge.get_account_posts" -> when {
+                !firstPage() -> JsonArray(emptyList())
+                text("sort") == "comments" || text("sort") == "replies" -> comments(text("account") ?: AUTHORS[0], replies = text("sort") == "replies")
+                else -> feed(text("account") ?: AUTHORS[0])
+            }
             "bridge.get_post" -> {
                 val author = text("author").orEmpty()
                 val permlink = text("permlink").orEmpty()
-                discussion(author, permlink)["$author/$permlink"] ?: entry(author, permlink)
+                demoThread(author, permlink)?.first() ?: discussion(author, permlink)["$author/$permlink"] ?: entry(author, permlink)
             }
-            "bridge.get_discussion" -> JsonObject(discussion(text("author").orEmpty(), text("permlink").orEmpty()))
+            "bridge.get_discussion" -> {
+                val author = text("author").orEmpty()
+                val permlink = text("permlink").orEmpty()
+                JsonObject(demoThread(author, permlink)?.associateBy(::keyOf) ?: discussion(author, permlink))
+            }
             "condenser_api.get_accounts" -> JsonArray(
                 (listed?.firstOrNull() as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.content }.filter { it in AUTHORS }.map(::account),
             )
@@ -198,6 +206,46 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         entry(author ?: AUTHORS[(i - 1) % AUTHORS.size], "fake-post-$i", title = "Fixture post number $i", children = 4, votes = i * 3)
     })
 
+    /** A profile's Comments tab (the account's comments on others' posts) or Replies tab (others' replies to its posts). */
+    private fun comments(account: String, replies: Boolean): JsonArray {
+        val others = AUTHORS.filter { it != account }
+        return JsonArray((1..3).map { i ->
+            val other = others[(i - 1) % others.size]
+            if (replies) commentThread(other, account, i).first() else commentThread(account, other, i).first()
+        })
+    }
+
+    /**
+     * A demo comment and its replies: [author]'s comment `re-<parentAuthor>-fake-post-<i>` on [parentAuthor]'s
+     * fake-post-<i>, with i - 1 replies; the third is gray (muted rows). The profile tabs list it, and opening it (get_post, get_discussion) reads the same one.
+     */
+    private fun commentThread(author: String, parentAuthor: String, i: Int): List<JsonObject> {
+        val permlink = "re-$parentAuthor-fake-post-$i"
+        val replies = (1 until i).map { j ->
+            entry(AUTHORS.filter { it != author }[j - 1], "re-$author-$permlink", parent = author to permlink, depth = 2, body = "A reply to this comment.")
+        }
+        return listOf(entry(author, permlink, parent = parentAuthor to "fake-post-$i", depth = 1, body = COMMENT_BODIES[i - 1], votes = i * 2, replies = replies.map(::keyOf), gray = i == 3)) + replies
+    }
+
+    /** The comment thread a listed demo comment's key names, or null for any other key. */
+    private fun commentThread(author: String, permlink: String): List<JsonObject>? {
+        val match = COMMENT_PERMLINK.matchEntire(permlink) ?: return null
+        val parentAuthor = match.groupValues[1]
+        if (author !in AUTHORS || parentAuthor !in AUTHORS || parentAuthor == author) return null
+        return commentThread(author, parentAuthor, match.groupValues[2].toInt())
+    }
+
+    /** A listed demo comment with its replies, or one of those replies alone; null for any other key. */
+    private fun demoThread(author: String, permlink: String): List<JsonObject>? {
+        commentThread(author, permlink)?.let { return it }
+        // a reply: re-<commenter>-<the comment's permlink>
+        val commenter = AUTHORS.firstOrNull { permlink.startsWith("re-$it-re-") } ?: return null
+        val reply = commentThread(commenter, permlink.removePrefix("re-$commenter-"))?.drop(1)?.firstOrNull { keyOf(it) == "$author/$permlink" }
+        return reply?.let(::listOf)
+    }
+
+    private fun keyOf(e: JsonObject) = "${(e["author"] as JsonPrimitive).content}/${(e["permlink"] as JsonPrimitive).content}"
+
     /** Root plus comments: two top-level threads, one nested past level 3 (shows "more replies"). */
     private fun discussion(rootAuthor: String, rootPermlink: String): Map<String, JsonObject> {
         val root = rootAuthor to rootPermlink
@@ -213,12 +261,12 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
             entry("spike-carol", "re-c2", parent = root, depth = 1, body = "Second fixture comment.", votes = 2),
         )
         if (rootAuthor == "spike-bob" && rootPermlink == "re-c1") all.removeAt(0)
-        return all.associateBy { "${(it["author"] as JsonPrimitive).content}/${(it["permlink"] as JsonPrimitive).content}" }
+        return all.associateBy(::keyOf)
     }
 
     private fun entry(
         author: String, permlink: String, title: String = "", parent: Pair<String, String>? = null, depth: Int = 0,
-        body: String = BODY, children: Int? = null, votes: Int = 0, replies: List<String> = emptyList(),
+        body: String = BODY, children: Int? = null, votes: Int = 0, replies: List<String> = emptyList(), gray: Boolean = false,
     ) = buildJsonObject {
         put("author", author); put("permlink", permlink); put("category", COMMUNITY); put("title", title); put("body", body)
         putJsonObject("json_metadata") {
@@ -233,7 +281,7 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         putJsonArray("replies") { replies.forEach { add(it) } }
         putJsonArray("active_votes") { repeat(votes) { add(buildJsonObject { put("voter", "spike-voter$it"); put("rshares", 100) }) } }
         put("community", COMMUNITY); put("community_title", "Spike Community"); put("author_role", "guest"); put("author_title", "")
-        putJsonObject("stats") { put("hide", false); put("gray", false); put("total_votes", votes); put("flag_weight", 0.0) }
+        putJsonObject("stats") { put("hide", false); put("gray", gray); put("total_votes", votes); put("flag_weight", 0.0) }
         put("reblogs", 0); putJsonArray("beneficiaries") {}; putJsonArray("blacklists") {}; put("url", "/$COMMUNITY/@$author/$permlink")
         if (parent != null) {
             put("parent_author", parent.first); put("parent_permlink", parent.second)
@@ -249,6 +297,14 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
 
         val AUTHORS = listOf("spike-alice", "spike-bob", "spike-carol", "spike-dave", "spike-erin", "spike-frank")
         const val COMMUNITY = "hive-100001"
+
+        /** The demo comments of the profile's Comments and Replies tabs. */
+        private val COMMENT_PERMLINK = Regex("re-([a-z0-9.-]+)-fake-post-([1-3])")
+        private val COMMENT_BODIES = listOf(
+            "Thanks for sharing this, the **second part** was the most useful for me.",
+            "Good point about the fixtures. I tried the same steps and it worked.",
+            "Following for the next post in the series.",
+        )
 
         /** The throwaway master password every demo account's keys derive from (public, controls nothing). */
         const val PASSWORD = "P5UiTestThrowawayPasswordNotReal"

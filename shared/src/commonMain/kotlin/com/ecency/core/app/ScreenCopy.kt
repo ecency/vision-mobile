@@ -335,9 +335,6 @@ object ProfileUiCopy {
     val WALLET: String get() = L.profile.wallet
     val YOUR_WALLET_IS_ON: String get() = L.native.ui.profile.yourWalletIsOnTheWallet
     fun userHasNoComments(username: String): String = L.native.ui.profile.userHasNoComments(username = username)
-    /** A post card's line under the title: payout, votes and replies, counts in the app language. */
-    fun cardStats(payout: String, votes: Int, replies: Int): String =
-        listOf(payout, L.native.ui.profile.votesCount(count = votes), L.native.ui.profile.repliesCount(count = replies)).joinToString("  •  ")
 }
 
 /** Wallet, transfer and store screens. */

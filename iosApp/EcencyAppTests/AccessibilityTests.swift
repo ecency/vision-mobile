@@ -28,6 +28,15 @@ final class AccessibilityTests: XCTestCase {
         XCTAssertGreaterThan(size(blocks("- a\n- b"), .large).height, size(body, .large).height * 1.8)
     }
 
+    /// #3747: a card is one VoiceOver stop whose children are ignored, so a muted card's "Tap to reveal" hint is reached
+    /// only as a named action on that stop (Android's card custom action), first, and only while it is dimmed.
+    func testAMutedCardOffersTheRevealAsAVoiceOverAction() {
+        XCTAssertEqual(CardAccessibilityAction.named(dimmed: true).first, .reveal)
+        XCTAssertFalse(CardAccessibilityAction.named(dimmed: false).contains(.reveal))
+        XCTAssertEqual(CardAccessibilityAction.named(dimmed: false), [.comments, .voters, .reblogs, .profile, .tip, .options],
+                       "the card's other actions, in their order")
+    }
+
     func testScaledFontGrowsWithDynamicType() {
         let text = Text(verbatim: "Ag").scaledFont(16)
         let base = size(text, .large), big = size(text, .accessibility5)

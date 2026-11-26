@@ -89,13 +89,13 @@ class ProfileNode {
         "tester" to """{"profile":{"name":"Tester","about":"Old about"}}""",
     )
 
-    private fun post(author: String, permlink: String, parent: String? = null) = """{"author":"$author","permlink":"$permlink",""" +
+    private fun post(author: String, permlink: String, parent: String? = null, gray: Boolean = false) = """{"author":"$author","permlink":"$permlink",""" +
         (parent?.let { """"parent_author":"$it","parent_permlink":"p",""" } ?: "") +
         """"category":"hive-1","title":"Title $permlink","body":"Body of $permlink","json_metadata":{"tags":["t"]},"created":"2026-10-06T10:00:00",""" +
         """"updated":"2026-10-06T10:00:00","depth":${if (parent == null) 0 else 1},"children":0,"net_rshares":0,"author_reputation":60,"payout":1.0,""" +
         """"is_paidout":false,"payout_at":"2026-10-13T10:00:00","pending_payout_value":"1.000 HBD","author_payout_value":"0.000 HBD",""" +
         """"curator_payout_value":"0.000 HBD","promoted":"0.000 HBD","max_accepted_payout":"1000000.000 HBD","percent_hbd":10000,"replies":[],""" +
-        """"active_votes":[],"stats":{"hide":false,"gray":false,"total_votes":0,"flag_weight":0},"reblogs":0,"beneficiaries":[],"blacklists":[],"url":"/x"}"""
+        """"active_votes":[],"stats":{"hide":false,"gray":$gray,"total_votes":0,"flag_weight":0},"reblogs":0,"beneficiaries":[],"blacklists":[],"url":"/x"}"""
 
     val transport = RpcTransport { _, body ->
         sent += body
@@ -126,7 +126,7 @@ class ProfileNode {
                 val sort = params!!.jsonObject["sort"]!!.jsonPrimitive.content
                 val account = params.jsonObject["account"]!!.jsonPrimitive.content
                 if (params.jsonObject["start_author"] != null) ok("[]")
-                else if (sort == "comments") ok("[${post(account, "re-one", parent = "bob")}]")
+                else if (sort == "comments") ok("[${post(account, "re-one", parent = "bob")},${post(account, "re-gray", parent = "bob", gray = true)}]")
                 else ok((1..postCount).joinToString(",", "[", "]") { post(account, if (it == 1) "$sort-one" else "$sort-$it") })
             }
             "condenser_api.get_dynamic_global_properties" -> ok(
@@ -621,9 +621,102 @@ class ProfileFlowsTest {
         compose.onNodeWithTag("tab:comments").performClick()
         compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
         waitFor("comment:alice/re-one")
-        compose.await("tip button in the row") { idleMain(); exists("commentTip:alice/re-one") }
-        compose.onNodeWithTag("commentTip:alice/re-one", useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        val tip = hasTestTag("tip") and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:alice/re-one"))
+        compose.await("tip button in the row") { idleMain(); compose.onAllNodes(tip, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(tip, useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         waitFor("tipSheet")
+    }
+
+    /**
+     * RN commentsTabContent draws the Comments and Replies tabs with the post screen's Comment (RN CommentView): the
+     * vote button with the payout, the voters, the replies, the options and the gift on every row. The vote goes
+     * through the app's one vote path (the weight sheet, then the broadcast).
+     */
+    @Test
+    fun aCommentRowOfTheCommentsTabVotesLikeAnyCard() {
+        node.signIn()
+        launch(AppScreen.Profile("alice"))
+        waitBelowSummary("tab:comments")
+        compose.onNodeWithTag("tab:comments").performClick()
+        compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
+        waitFor("comment:alice/re-one")
+        val inRow = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:alice/re-one"))
+        for (tag in listOf("vote", "payout", "voters", "postComments", "options")) {
+            assertTrue("the comment row has $tag", compose.onAllNodes(hasTestTag(tag) and inRow, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        }
+        compose.onAllNodes(hasTestTag("vote") and inRow, useUnmergedTree = true)[0].performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        waitFor("voteSheet")
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        compose.await("the vote on the comment is broadcast") {
+            idleMain()
+            node.broadcasts().any { it.contains("\"vote\"") && it.contains("re-one") }
+        }
+    }
+
+    /**
+     * Review fix: the commenter's name may grow into all the free width of the header before it ellipsizes (as
+     * PostHeader), up to the age and the options button; a weighted spacer beside it took half of that width.
+     * Robolectric's fonts are a pixel or so per character, so this checks the width offered to the name, not the cut.
+     */
+    @Test
+    fun theCommenterNameMayUseAllTheFreeWidthOfTheHeader() {
+        node.signIn()
+        launch(AppScreen.Profile("alice"))
+        waitBelowSummary("tab:comments")
+        compose.onNodeWithTag("tab:comments").performClick()
+        compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
+        waitFor("comment:alice/re-one")
+        val inRow = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:alice/re-one"))
+        val name = compose.onNode(hasTestTag("commentAuthor") and inRow, useUnmergedTree = true).fetchSemanticsNode()
+        val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        name.config[androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult].action?.invoke(layouts)
+        val offered = layouts.single().layoutInput.constraints.maxWidth
+        val age = compose.onNode(hasTestTag("commentAge") and inRow, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val options = compose.onNode(hasTestTag("options") and inRow, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        assertEquals("the name may reach the age beside the options button", options.left, name.boundsInRoot.left + offered + age.width, 1f)
+    }
+
+    /**
+     * RN CommentView hides a muted comment's body until revealed (hideContent); the row shows the cards' muted hint
+     * (the reason and "Tap to reveal"), and the reveal is the cards' one (`env.mutedReveals`, this session).
+     */
+    @Test
+    fun aMutedCommentRowHidesItsTextUntilRevealed() {
+        node.signIn()
+        launch(AppScreen.Profile("alice"))
+        waitBelowSummary("tab:comments")
+        compose.onNodeWithTag("tab:comments").performClick()
+        compose.await("scroll to the muted comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-gray") }.isSuccess }
+        waitFor("comment:alice/re-gray")
+        val muted = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:alice/re-gray"))
+        val plain = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:alice/re-one"))
+        fun inRow(m: androidx.compose.ui.test.SemanticsMatcher, row: androidx.compose.ui.test.SemanticsMatcher) = compose.onAllNodes(m and row, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+        assertTrue("the muted row shows the hint", inRow(hasTestTag("mutedHint"), muted))
+        assertTrue("with Tap to reveal", inRow(androidx.compose.ui.test.hasText(com.ecency.core.app.MutedReveals.REVEAL, substring = true), muted))
+        assertFalse("and not the comment's text", inRow(androidx.compose.ui.test.hasText("Body of re-gray", substring = true), muted))
+        assertFalse("a comment that is not muted has no hint", inRow(hasTestTag("mutedHint"), plain))
+        val spoken = compose.onNode(hasTestTag("mutedHint") and muted).fetchSemanticsNode().config
+            .getOrElse(androidx.compose.ui.semantics.SemanticsProperties.Text) { emptyList() }.map { it.text }
+        assertTrue("TalkBack reads the reason, not the \"!\" badge: $spoken", spoken.isNotEmpty() && spoken.none { it == "!" })
+        compose.onNode(hasTestTag("mutedHint") and muted, useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        compose.await("the text shows once revealed") { idleMain(); inRow(androidx.compose.ui.test.hasText("Body of re-gray", substring = true), muted) }
+        assertFalse(inRow(hasTestTag("mutedHint"), muted))
+        assertTrue("the cards' reveal", env.mutedReveals.isRevealed(com.ecency.core.api.model.PostKey("alice", "re-gray")))
+    }
+
+    /** The own Replies tab draws the same full comment rows (RN commentsTabContent, type "replies"). */
+    @Test
+    fun aRowOfTheOwnRepliesTabHasTheCardActions() {
+        node.signIn()
+        launch(AppScreen.Profile("tester"))
+        waitBelowSummary("tab:replies")
+        compose.onNodeWithTag("tab:replies").performClick()
+        compose.await("scroll to the reply") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("replies:tester/replies-one") }.isSuccess }
+        waitFor("comment:tester/replies-one")
+        val inRow = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:tester/replies-one"))
+        for (tag in listOf("vote", "payout", "voters", "postComments", "options")) {
+            assertTrue("the reply row has $tag", compose.onAllNodes(hasTestTag(tag) and inRow, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        }
     }
 
     @Test

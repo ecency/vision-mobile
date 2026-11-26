@@ -10,6 +10,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.contentDescription
 
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
 
 import androidx.compose.ui.semantics.Role
 
@@ -294,6 +295,24 @@ fun FeedList(
 
 private val Color_White = androidx.compose.ui.graphics.Color.White
 
+/** RN useMutedReveal's hint on a muted card or comment row: the reason and "Tap to reveal"; a tap reveals it. */
+@Composable
+fun MutedHint(card: PostCard, modifier: Modifier = Modifier, hiddenFromA11y: Boolean = false, onReveal: () -> Unit) {
+    val colors = LocalEcencyColors.current
+    Row(
+        Modifier.fillMaxWidth().then(modifier).clip(RoundedCornerShape(8.dp)).background(colors.lightBackground)
+            .clickable(role = Role.Button, onClick = onReveal).then(if (hiddenFromA11y) HiddenFromA11y else Modifier).padding(10.dp).testTag("mutedHint"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // the badge is decoration (the reason says it all), as iOS hides it from VoiceOver
+        Text("!", fontWeight = FontWeight.Bold, color = Color_White, modifier = Modifier.clip(RoundedCornerShape(50)).background(colors.darkGray).padding(horizontal = 7.dp).clearAndSetSemantics {})
+        Text(
+            "${card.mutedText ?: ""} ${com.ecency.core.app.MutedReveals.REVEAL}", fontSize = 13.sp, color = colors.darkGray,
+            modifier = Modifier.padding(start = 8.dp),
+        )
+    }
+}
+
 /** The RN post card: header, image, title, summary, actions. */
 @Composable
 fun PostCardView(card: PostCard, nowMillis: Long, voteInFlight: Boolean, actions: FeedActions, modifier: Modifier = Modifier) {
@@ -357,19 +376,8 @@ fun PostCardView(card: PostCard, nowMillis: Long, voteInFlight: Boolean, actions
             if (card.hasPoll) Glyph(AppIcon.CHART_BAR, colors.darkGray, 16.dp, Modifier.padding(end = 4.dp))
             actions.onMenu?.let { onMenu -> OptionsButton(Modifier.padding(end = 6.dp)) { onMenu(card) } }
         }
-        if (dimmed) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(8.dp)).background(colors.lightBackground)
-                    .clickable(role = Role.Button) { reveals?.reveal(card.key); revealed = true }.then(HiddenFromA11y).padding(10.dp).testTag("mutedHint"),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("!", fontWeight = FontWeight.Bold, color = Color_White, modifier = Modifier.clip(RoundedCornerShape(50)).background(colors.darkGray).padding(horizontal = 7.dp))
-                Text(
-                    "${card.mutedText ?: ""} ${com.ecency.core.app.MutedReveals.REVEAL}", fontSize = 13.sp, color = colors.darkGray,
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-        }
+        // the card's merged summary carries the reveal as a custom action, so its hint is hidden from TalkBack
+        if (dimmed) MutedHint(card, Modifier.padding(horizontal = 12.dp), hiddenFromA11y = true) { reveals?.reveal(card.key); revealed = true }
         Column(Modifier.alpha(if (dimmed) 0.3f else 1f).clickable(role = Role.Button) { actions.onOpen(card) }.then(HiddenFromA11y).testTag("open:${card.key}")) {
             card.featuredText?.let {
                 Text(it, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = colors.darkGray, modifier = Modifier.padding(start = 17.dp, bottom = 6.dp).testTag("featured"))

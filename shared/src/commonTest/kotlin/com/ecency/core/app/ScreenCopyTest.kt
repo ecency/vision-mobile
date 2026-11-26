@@ -462,7 +462,6 @@ class ScreenCopyTest {
         "ReadingUiCopy.tabSelected" to { ReadingUiCopy.tabSelected("7") },
         "ReadingUiCopy.feedPinned" to { ReadingUiCopy.feedPinned("7") },
         "ReadingUiCopy.inTopic" to { ReadingUiCopy.inTopic("7") },
-        "ProfileUiCopy.cardStats" to { ProfileUiCopy.cardStats("7", 1, 7) },
         "ChatUiCopy.reactionLabel" to { ChatUiCopy.reactionLabel("7", 7) },
         "StakeCopy.alreadyDelegatedTo" to { StakeCopy.alreadyDelegatedTo("7", "7") },
         "WelcomeCopy.LINES" to { WelcomeCopy.LINES.joinToString { it.first + it.second } },

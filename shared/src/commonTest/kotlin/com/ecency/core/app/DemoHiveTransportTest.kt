@@ -48,6 +48,51 @@ class DemoHiveTransportTest {
         assertNull(api.accounts.getAccount("someone-real"), "only the made-up accounts exist")
     }
 
+    /** The profile's Comments and Replies tabs list comments (replies to posts), not the account's posts. */
+    @Test
+    fun theProfilesCommentsAndRepliesTabsListComments() = runTest {
+        val comments = api.feeds.page(FeedSource.Account("spike-bob", AccountPostsSort.COMMENTS), null, "spike-alice").posts
+        assertTrue(comments.isNotEmpty(), "the Comments tab has demo comments")
+        assertTrue(comments.all { it.author == "spike-bob" && !it.parentAuthor.isNullOrEmpty() && it.parentAuthor != "spike-bob" }, "comments of spike-bob on others' posts")
+        assertEquals(listOf(false, false, true), comments.map { it.isMuted }, "the third is gray, for the muted row")
+        val replies = api.feeds.page(FeedSource.Account("spike-alice", AccountPostsSort.REPLIES), null, "spike-alice").posts
+        assertTrue(replies.isNotEmpty() && replies.all { it.author != "spike-alice" && it.parentAuthor == "spike-alice" }, "replies of others to spike-alice")
+    }
+
+    /** Opening a listed comment reads it again (get_post, get_discussion): the same comment, not a made-up root post. */
+    @Test
+    fun aListedCommentOpensAsTheSameComment() = runTest {
+        val listed = api.feeds.page(FeedSource.Account("spike-bob", AccountPostsSort.COMMENTS), null, "spike-alice").posts +
+            api.feeds.page(FeedSource.Account("spike-alice", AccountPostsSort.REPLIES), null, "spike-alice").posts
+        for (c in listed) {
+            val key = "${c.author}/${c.permlink}"
+            val post = assertNotNull(api.hive.post(c.author, c.permlink, "spike-alice"), key)
+            assertEquals(listOf(c.body, c.parentAuthor, c.parentPermlink, c.depth, c.children), listOf(post.body, post.parentAuthor, post.parentPermlink, post.depth, post.children), key)
+            val thread = assertNotNull(api.hive.discussion(c.author, c.permlink, "spike-alice"), key)
+            val head = assertNotNull(thread.firstOrNull { it.author == c.author && it.permlink == c.permlink }, key)
+            assertEquals(listOf(c.body, c.parentAuthor, c.depth), listOf(head.body, head.parentAuthor, head.depth), key)
+            val below = thread.filter { it !== head }
+            assertEquals(c.children, below.size, "$key: its replies, and only them")
+            assertTrue(below.all { it.parentAuthor == c.author && it.parentPermlink == c.permlink && it.depth == c.depth + 1 }, "$key: $below")
+            // a reply opens as itself too
+            for (r in below) {
+                val rkey = "${r.author}/${r.permlink}"
+                val opened = assertNotNull(api.hive.post(r.author, r.permlink, "spike-alice"), rkey)
+                assertEquals(listOf(r.body, r.parentAuthor, r.parentPermlink, r.depth), listOf(opened.body, opened.parentAuthor, opened.parentPermlink, opened.depth), rkey)
+                assertEquals(listOf(rkey), assertNotNull(api.hive.discussion(r.author, r.permlink, "spike-alice"), rkey).map { "${it.author}/${it.permlink}" })
+            }
+        }
+    }
+
+    /** Keys that only look like a demo comment's (no parent name, a signed number) open the generic post, as on iOS. */
+    @Test
+    fun onlyDemoCommentKeysOpenAsComments() = runTest {
+        for (permlink in listOf("re-fake-post-1", "re-spike-alice-fake-post-+1", "re-spike-alice-fake-post-4", "re-spike-bob-fake-post-1")) {
+            assertNull(assertNotNull(api.hive.post("spike-bob", permlink, "spike-alice"), permlink).parentAuthor, permlink)
+        }
+        assertEquals("spike-alice", api.hive.post("spike-bob", "re-spike-alice-fake-post-1", "spike-alice")?.parentAuthor)
+    }
+
     @Test
     fun theDemoTransactionIsInABlockWithTheDemoTransfer() = runTest {
         // what a HiveAuth send looks up once the wallet answered: where the transaction is, then its operations

@@ -341,7 +341,7 @@ fun ProfileScreen(
                         }
                         items(feedState.items, key = { "${tab.key}:${it.key}" }, contentType = { if (tab.isComments) "comment" else "card" }) { card ->
                             if (tab.isComments) {
-                                CommentRow(card, nowMillis, feedActions)
+                                CommentRow(card, nowMillis, voteInFlight(votes, card.key), rememberCardActions(feedActions, feed))
                             } else {
                                 // the options menu and the payout breakdown, as in a feed (user report: no breakdown on a profile)
                                 PostCardView(card, nowMillis, voteInFlight(votes, card.key), rememberCardActions(feedActions, feed))
@@ -633,32 +633,44 @@ private fun PlaceholderTab(title: String, text: String, action: String?, onActio
 }
 
 /**
- * A comment of the comments / replies tab: author, age, text and votes; a tap opens it. Under it, RN's gift
- * (CommentView `_handleOnTipPress`, the tipping dialog for the comment; signed out, the login as on the other cards).
+ * A comment of the comments / replies tab (RN commentsTabContent draws the post screen's Comment, RN CommentView):
+ * author, age and the options, the comment's text (a tap opens it), then the card's actions: the vote with the payout,
+ * the voters, the replies (open the comment) and RN's gift (`_handleOnTipPress`; signed out, the login as on the
+ * other cards).
  */
 @Composable
-private fun CommentRow(card: PostCard, nowMillis: Long, actions: FeedActions) {
+private fun CommentRow(card: PostCard, nowMillis: Long, voteInFlight: Boolean, actions: FeedActions) {
     val colors = LocalEcencyColors.current
-    Column(Modifier.fillMaxWidth()) {
-        Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { actions.onOpen(card) }.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (actions.onTip != null) 0.dp else 12.dp).testTag("comment:${card.key}")) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Avatar(card.avatarUrl, 24.dp)
-                Text(card.author, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.text, modifier = Modifier.padding(start = 8.dp))
-                Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 12.sp, color = colors.darkGray)
+    // RN CommentView hideContent: a muted comment's text stays hidden behind the cards' hint until revealed (this session)
+    val reveals = LocalFeedx.current?.env?.mutedReveals
+    var revealed by androidx.compose.runtime.remember(card.key) { androidx.compose.runtime.mutableStateOf(reveals?.isRevealed(card.key) == true) }
+    Column(Modifier.fillMaxWidth().testTag("comment:${card.key}")) {
+        Row(Modifier.padding(start = 16.dp, end = 6.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Avatar(card.avatarUrl, 24.dp)
+            // name and age take the free width (as PostHeader); the name gives way at large text sizes, never the options button
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                Text(card.author, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 8.dp).weight(1f, fill = false).testTag("commentAuthor"))
+                Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 12.sp, color = colors.darkGray, maxLines = 1, modifier = Modifier.testTag("commentAge"))
             }
-            if (card.title.isNotEmpty()) Text(card.title, fontSize = 13.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
+            actions.onMenu?.let { onMenu -> OptionsButton { onMenu(card) } }
+        }
+        if (card.isMuted && !revealed) MutedHint(card, Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) { reveals?.reveal(card.key); revealed = true }
+        else Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { actions.onOpen(card) }.padding(horizontal = 16.dp).testTag("open:${card.key}")) {
+            if (card.title.isNotEmpty()) Text(card.title, fontSize = 13.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(card.summary, fontSize = 15.sp, lineHeight = 21.sp, color = colors.text, maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
-            Text(ProfileUiCopy.cardStats(card.payoutText, card.votes, card.comments), fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.padding(top = 6.dp))
         }
-        actions.onTip?.let { onTip ->
-            Box(
-                Modifier.padding(start = 10.dp, bottom = 4.dp).size(48.dp).clip(CircleShape)
-                    .clickable(role = Role.Button) { onTip(card) }
-                    .semantics { contentDescription = UiCopy.SEND_TIP }
-                    .testTag("commentTip:${card.key}"),
-                contentAlignment = Alignment.Center,
-            ) { Glyph(AppIcon.GIFT, colors.icon, 22.dp) }
-        }
+        ActionsRow(
+            card = card,
+            voteInFlight = voteInFlight,
+            onVote = { actions.onVote(card) },
+            onComments = { actions.onOpen(card) },
+            modifier = Modifier.padding(start = 8.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+            extras = RowExtras(
+                onVoters = actions.onVoters?.let { { it(card) } },
+                onTip = actions.onTip?.let { { it(card) } },
+                payoutPost = actions.payoutPost?.let { { it(card) } },
+            ),
+        )
     }
     Box(Modifier.fillMaxWidth().height(1.dp).background(colors.lightBackground))
 }

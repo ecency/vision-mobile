@@ -2047,7 +2047,6 @@
         "logout_user": "Logout @{username}"
       },
       "profile": {
-        "comment_stats": "{payout}  \u2022  {votes, plural, one {# vote} other {# votes}}  \u2022  {replies, plural, one {# reply} other {# replies}}",
         "voting_power": "Voting power {percent}",
         "remove_favourite": "Remove from favourites",
         "add_favourite": "Add to favourites"
@@ -2254,8 +2253,6 @@
         "open_wallet": "Open Wallet",
         "your_wallet_is_on_the_wallet": "Your wallet is on the Wallet tab.",
         "user_has_no_comments": "@{username} haven't commented anything yet",
-        "votes_count": "{count, plural, one {# vote} other {# votes}}",
-        "replies_count": "{count, plural, one {# reply} other {# replies}}",
         "menu": "More",
         "users": "Users"
       },
