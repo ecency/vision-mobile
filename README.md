@@ -71,6 +71,18 @@ The GitHub Actions build the apps with the RN app's secrets, signing and store t
 
 Release setup: the builds read `NATIVE_PIN_KEY_SHA256` and `NATIVE_DEFAULT_PIN_SHA256` (and optionally `NATIVE_SENTRY_DSN`) as repository secrets, besides the RN secrets they reuse (upload keystore and alias, `GOOGLE_JSON`, `GOOGLE_PLIST`, RN's three iOS profiles) and one new iOS profile, `WIDGET_PROVISIONING_PROFILE`, for the widget extension `app.esteem.mobile.ios.widgets` (required: the iOS build fails without it; its App ID and profile are the only new ones, see docs/release-builds.md "Widget extension"). Otherwise native needs no new store records, App IDs, profiles, IAP products, ePoints package verification or Firebase apps. No RN build is uploaded after the first native one.
 
+### Privacy manifest
+
+App Review refuses an iOS build whose code calls one of Apple's "required reason" APIs without declaring it in the bundle's `PrivacyInfo.xcprivacy`. The app's manifest is `iosApp/EcencyApp/PrivacyInfo.xcprivacy` (RN had `ios/PrivacyInfo.xcprivacy`): no tracking, no tracking domains, and three categories, each with the reason that matches the code. The Kotlin core is linked into the app statically, so the app's manifest covers it too.
+
+- User defaults: `CA92.1` (the app's own settings) and `1C8F.1` (the App Group suite shared with the widgets, `WidgetStore`).
+- File timestamps: `C617.1` (dates of files in the app's container and App Group: the shared items' folders, `SharePlatform`, and the Kotlin/Native runtime and kotlinx-io, which call `stat` and `getattrlist`; the lint requires this category for the app even if the Swift use goes away).
+- System boot time: `35F9.1` (the time between two events in the app: how long a tap on post text lasted, `PostTextView`).
+
+The share, widget and notification service extensions use none of these APIs, so they carry no manifest. Sentry ships its own manifest, and so does Firebase. Collected data types are declared in App Store Connect's privacy labels, as RN did; the manifest leaves them empty.
+
+build-logic `PrivacyManifestTest` reads each bundle's sources and fails if code uses a category its manifest does not declare with these reasons, or if a manifest declares a category no code uses. iOS `PrivacyManifestBundleTests` checks that the build puts the file in the app bundle.
+
 ## Tests are required
 
 Every change lands with tests:
