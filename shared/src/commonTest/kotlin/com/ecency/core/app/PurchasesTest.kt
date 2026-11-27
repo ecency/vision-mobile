@@ -1167,6 +1167,34 @@ class PurchasesTest {
         register.close()
     }
 
+    /**
+     * PR review: an earlier paid account purchase found after the link's name check ended (the store is read at start,
+     * asynchronously) still opens the card, so "Claim Paid Account" can be reached for a name that now exists.
+     */
+    @Test
+    fun anEarlierPurchaseFoundAfterTheNameCheckOpensTheClaimCard() = runTest {
+        val r = rig(signedIn = null, start = false)
+        r.env.signupPrefill = SignupPrefill(bob, "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        assertFalse(register.current.optionsOpen, "a taken name, nothing waiting yet")
+        answers = mutableListOf(HttpResult(500, "")) // Ecency does not take it yet: it stays unfinished
+        PurchaseService.Intents.save(r.env.prefs, PurchaseSkus.ACCOUNT, PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta(bob, "new@example.com", "")), r.app.now)
+        r.store.held += r.store.paid(PurchaseSkus.ACCOUNT)
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(register.current.optionsOpen, "the claim card opens once the earlier purchase is known")
+        assertEquals(PurchaseCopy.CLAIM_ACCOUNT, register.current.paidButton)
+        // closed by the reader, it stays closed when the purchase state changes for something else
+        register.closeOptions()
+        val before = r.env.purchases.current
+        r.env.purchases.buy("999points", PurchaseTarget())
+        assertTrue(r.env.purchases.current != before, "the state did change")
+        testScheduler.advanceUntilIdle()
+        assertFalse(register.current.optionsOpen, "a closed card is not reopened by a later state change")
+        register.close()
+    }
+
     /** PR review: a list whose entries are not all names is no answer either (`[null]` is not "nobody has it"). */
     @Test
     fun aLookupListWithMalformedEntriesIsNoAnswer() = runTest {

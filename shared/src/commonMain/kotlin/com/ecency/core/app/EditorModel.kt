@@ -1212,7 +1212,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: EcencyHttpException) {
                 // a 404 names no cause: replace the draft only when the drafts list confirms it is gone (a broken
                 // route with the draft still there fails instead of making a second draft; a failed list read too)
-                if (e.status != 404 || env.editorApi.allDrafts(owner).any { it.id == id }) throw e
+                if (e.status != 404 || env.editorApi.hasDraft(owner, id)) throw e
                 false
             }
             if (updated) {

@@ -66,6 +66,9 @@ class EditorModelTest {
 
         /** When set, `drafts-add` answers this status (a failed replacement). */
         var draftAddStatus: Int? = null
+
+        /** When set, the whole body of the unpaged `drafts` list (a malformed answer). */
+        var draftsListBody: String? = null
         var postingAuths = """[["ecency.app",1]]"""
         var accountsDown = false
 
@@ -165,7 +168,7 @@ class EditorModelTest {
             fun wrapped(items: List<JsonObject>) = HttpResult(200, """{"data":${JsonArray(items)},"pagination":{"total":${items.size},"limit":20,"offset":0,"has_next":false}}""")
             return when {
                 path.startsWith("drafts?") -> wrapped(drafts)
-                path == "drafts" -> HttpResult(200, JsonArray(drafts).toString())
+                path == "drafts" -> HttpResult(200, draftsListBody ?: JsonArray(drafts).toString())
                 path == "drafts-add" && draftAddStatus != null -> HttpResult(draftAddStatus!!, "{}")
                 path == "drafts-add" -> {
                     val d = Json.parseToJsonElement("""{"_id":"d${drafts.size + 1}","modified":"2026-10-06T11:00:00.000Z","created":"2026-10-06T11:00:00.000Z"}""").jsonObject
@@ -1468,6 +1471,26 @@ class EditorModelTest {
         assertTrue(w.api.none { it.first == "drafts-add" }, "the draft is still there: no replacement")
         assertEquals(listOf(listOf("Failed to save draft"), listOf("Failed to save draft")), shown)
         assertEquals("d9", m.current.draftId)
+        m.close()
+    }
+
+    /** PR review: an unreadable drafts list confirms nothing; with the update's 404 the save fails, no second draft. */
+    @Test
+    fun anUnreadableDraftsListNeverConfirmsADraftGone() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"old body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        w.draftUpdateStatus = 404
+        for (body in listOf("not json", "{}", "[null]", "[{\"title\":\"no id\"}]")) {
+            w.draftsListBody = body
+            m.setBody("text $body", TextSelection(1))
+            testScheduler.advanceUntilIdle()
+            w.toasts()
+            m.saveDraft()
+            testScheduler.advanceUntilIdle()
+            assertEquals(listOf("Failed to save draft"), w.toasts(), body)
+        }
+        assertTrue(w.api.none { it.first == "drafts-add" }, "no replacement on an unreadable list")
         m.close()
     }
 

@@ -129,11 +129,26 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
         if (prefill.referral.isNotEmpty()) setReferral(prefill.referral)
         setState { it.copy(purchaseOnly = prefill.purchaseOnly) }
         scope.launch { env.purchases.outcomes.collect { if (it.fromBuy && it.productId == PurchaseSkus.ACCOUNT) onPurchase(it) } }
-        scope.launch { env.purchases.state.collect { s -> setState { it.copy(paidWaiting = PurchaseSkus.ACCOUNT in s.unfinished) } } }
+        // a purchase link's name, when it can open the paid card (the same rule check as Continue)
+        val linkName = prefill.username.take(MAX_FIELD).lowercase().takeIf {
+            prefill.purchaseOnly && prefill.email.isNotEmpty() && it.isNotEmpty() && UsernameRules.error(it) == null
+        }
+        scope.launch {
+            var wasWaiting = false
+            env.purchases.state.collect { s ->
+                val waiting = PurchaseSkus.ACCOUNT in s.unfinished
+                setState { it.copy(paidWaiting = waiting) }
+                // an earlier purchase found after the link's name check (the store is read at start, asynchronously):
+                // the card opens for "Claim Paid Account", whatever the check said of the name (PR review). Only when
+                // it turns up: a later state change never reopens a card the reader closed
+                if (waiting && !wasWaiting && linkName != null && !current.optionsOpen && current.username == linkName) openOptions()
+                wasWaiting = waiting
+            }
+        }
         // RN: a purchase link with a creatable name opens the paid options at once. Unlike RN, only once the chain says
         // the name is free, as Continue needs: a taken name was sold (owner report 2026-11-27); a taken one stays in
         // the form with "username exists"
-        if (prefill.purchaseOnly && prefill.email.isNotEmpty() && prefill.username.isNotEmpty() && UsernameRules.error(prefill.username.lowercase()) == null) {
+        if (linkName != null) {
             scope.launch {
                 // the check of the name as it is now: an edit restarts it, and a cancelled one judged nothing
                 while (true) {
@@ -141,9 +156,8 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
                     job?.join()
                     if (usernameJob === job) break
                 }
-                val name = prefill.username.take(MAX_FIELD).lowercase()
                 // a card the reader opened meanwhile (Continue) is left alone: opening again resets its session
-                if (!current.optionsOpen && current.username == name && (current.usernameValid && usernameJob?.isCancelled != true || current.paidWaiting)) openOptions()
+                if (!current.optionsOpen && current.username == linkName && (current.usernameValid && usernameJob?.isCancelled != true || current.paidWaiting)) openOptions()
             }
         }
     }
