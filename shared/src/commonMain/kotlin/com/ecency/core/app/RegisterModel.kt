@@ -120,6 +120,9 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
     StateModel<RegisterState>(RegisterState(), env.dispatchers) {
 
     private var usernameJob: Job? = null
+
+    /** The reader closed the paid card: a purchase link does not open it again by itself. */
+    private var dismissed = false
     private var referralJob: Job? = null
 
     init {
@@ -141,7 +144,7 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
                 // an earlier purchase found after the link's name check (the store is read at start, asynchronously):
                 // the card opens for "Claim Paid Account", whatever the check said of the name (PR review). Only when
                 // it turns up: a later state change never reopens a card the reader closed
-                if (waiting && !wasWaiting && linkName != null && !current.optionsOpen && current.username == linkName) openOptions()
+                if (waiting && !wasWaiting && linkName != null && !dismissed && !current.optionsOpen && current.username == linkName) openOptions()
                 wasWaiting = waiting
             }
         }
@@ -157,7 +160,7 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
                     if (usernameJob === job) break
                 }
                 // a card the reader opened meanwhile (Continue) is left alone: opening again resets its session
-                if (!current.optionsOpen && current.username == linkName && (current.usernameValid && usernameJob?.isCancelled != true || current.paidWaiting)) openOptions()
+                if (!dismissed && !current.optionsOpen && current.username == linkName && (current.usernameValid && usernameJob?.isCancelled != true || current.paidWaiting)) openOptions()
             }
         }
     }
@@ -262,10 +265,18 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
             return
         }
         setState { it.copy(isRegistering = true) }
-        val target = PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta(s.username, s.email, s.referral))
         // "Claim Paid Account" sends a purchase already paid for again, under its saved name: never charged twice, and
-        // its account may exist by now (created, the answer lost), so its own name must not stop it
-        if (s.paidWaiting) return env.purchases.buy(PurchaseSkus.ACCOUNT, target)
+        // its account may exist by now (created, the answer lost), so its own name must not stop it. Claim only: with
+        // nothing left to claim it goes the checked way (NothingToClaim), never to a new sheet unchecked (PR review)
+        if (s.paidWaiting) return env.purchases.buy(PurchaseSkus.ACCOUNT, accountTarget(s), claimOnly = true)
+        checkedBuy(s)
+    }
+
+    private fun accountTarget(s: RegisterState) = PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta(s.username, s.email, s.referral))
+
+    /** The chain's answer for [s]'s name, then the store sheet only when it is free. */
+    private fun checkedBuy(s: RegisterState) {
+        val target = accountTarget(s)
         scope.launch {
             val found = lookup(s.username)
             when {
@@ -297,6 +308,8 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
                 )
             }
             is PurchaseOutcome.Pending -> setState { it.copy(isRegistering = false, alert = RegisterAlert(PurchaseCopy.WARNING, PurchaseCopy.PENDING)) }
+            // the earlier purchase is gone: this tap goes on the checked way, the spinner still up
+            is PurchaseOutcome.NothingToClaim -> checkedBuy(current)
             is PurchaseOutcome.Held -> setState { it.copy(isRegistering = false, alert = RegisterAlert(PurchaseCopy.WARNING, PurchaseCopy.held(o.order))) }
             is PurchaseOutcome.Processing -> setState { it.copy(isRegistering = false, alert = RegisterAlert(PurchaseCopy.WARNING, PurchaseCopy.PROCESSING)) }
             is PurchaseOutcome.Failed -> setState { it.copy(isRegistering = false, alert = RegisterAlert(RegisterCopy.FAIL, "${PurchaseCopy.REGISTER_FAIL}\n${o.message}")) }
@@ -310,6 +323,8 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
 
     fun closeOptions() {
         if (current.isRegistering) return
+        // a purchase link's card the reader closed is not opened again by itself (PR review)
+        dismissed = true
         setState { it.copy(optionsOpen = false, captchaToken = "") }
     }
 

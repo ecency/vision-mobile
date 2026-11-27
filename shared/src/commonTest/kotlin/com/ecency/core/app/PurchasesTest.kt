@@ -1195,6 +1195,67 @@ class PurchasesTest {
         register.close()
     }
 
+    /**
+     * PR review: "Claim Paid Account" is claim only. When the store no longer holds the earlier purchase to deliver (taken
+     * meanwhile, or the state was stale), the tap goes the checked way: a taken name is never charged.
+     */
+    @Test
+    fun aClaimWithNothingLeftToClaimTakesTheCheckedWay() = runTest {
+        val r = rig(signedIn = null, start = false)
+        r.env.signupPrefill = SignupPrefill(bob, "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        answers = mutableListOf(HttpResult(500, ""))
+        PurchaseService.Intents.save(r.env.prefs, PurchaseSkus.ACCOUNT, PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta(bob, "new@example.com", "")), r.app.now)
+        val paid = r.store.paid(PurchaseSkus.ACCOUNT)
+        r.store.held += paid
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(PurchaseCopy.CLAIM_ACCOUNT, register.current.paidButton)
+        // Ecency took it meanwhile (another device's resend): only its finish is missing, so nothing is left to claim
+        PurchaseService.Marks.accept(r.env.prefs, r.env.purchases.orderKey(paid))
+        val sheetsBefore = r.store.sheets.size
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertEquals(sheetsBefore, r.store.sheets.size, "no new purchase for a taken name")
+        assertEquals(RegisterCopy.USERNAME_EXISTS, register.current.alert?.body)
+        assertFalse(register.current.isRegistering)
+        register.close()
+    }
+
+    @Test
+    fun aClaimOnlyBuyNeverOpensTheStore() = runTest {
+        val r = rig(signedIn = null)
+        val outcomes = mutableListOf<PurchaseOutcome>()
+        val job = launch { r.env.purchases.outcomes.collect { outcomes += it } }
+        testScheduler.runCurrent()
+        r.env.purchases.buy(PurchaseSkus.ACCOUNT, PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta("newbie.one", "a@b.co", "")), claimOnly = true)
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.store.sheets.isEmpty())
+        assertEquals(listOf<PurchaseOutcome>(PurchaseOutcome.NothingToClaim(PurchaseSkus.ACCOUNT, true)), outcomes)
+        assertFalse(PurchaseSkus.ACCOUNT in r.env.purchases.current.busy)
+        job.cancel()
+    }
+
+    /** PR review: a card the reader closed while the name check ran stays closed when that check ends. */
+    @Test
+    fun aClaimCardClosedDuringTheNameCheckStaysClosed() = runTest {
+        val r = rig(signedIn = null, start = false)
+        answers = mutableListOf(HttpResult(500, ""))
+        PurchaseService.Intents.save(r.env.prefs, PurchaseSkus.ACCOUNT, PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta(bob, "new@example.com", "")), r.app.now)
+        r.store.held += r.store.paid(PurchaseSkus.ACCOUNT)
+        r.env.purchases.start()
+        testScheduler.runCurrent()
+        r.env.signupPrefill = SignupPrefill(bob, "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceTimeBy(100) // the earlier purchase is known; the name check is still in its debounce
+        testScheduler.runCurrent()
+        assertTrue(register.current.optionsOpen, "opened for the claim")
+        register.closeOptions()
+        testScheduler.advanceUntilIdle()
+        assertFalse(register.current.optionsOpen, "the name check's end does not reopen it")
+        register.close()
+    }
+
     /** PR review: a list whose entries are not all names is no answer either (`[null]` is not "nobody has it"). */
     @Test
     fun aLookupListWithMalformedEntriesIsNoAnswer() = runTest {
