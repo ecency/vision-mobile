@@ -219,7 +219,7 @@ struct VoteWeightSheet: View {
                         .frame(maxWidth: .infinity, minHeight: minTapTarget)
                         .accessibilityIdentifier("vote-remove")
                 }
-                if let power = preview?.votingPowerText {
+                if let preview, let power = sheet.powerText(preview: preview) {
                     Text(power).font(.caption).foregroundStyle(theme.secondary).frame(maxWidth: .infinity)
                         .multilineTextAlignment(.center).accessibilityIdentifier("vote-power")
                 }

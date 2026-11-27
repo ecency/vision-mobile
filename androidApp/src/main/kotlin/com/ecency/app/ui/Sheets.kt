@@ -169,7 +169,7 @@ fun VoteSheet(
                     Text(ReadingUiCopy.REMOVE_VOTE, color = colors.darkGray)
                 }
             }
-            preview?.votingPowerText?.let {
+            preview?.let { sheet.powerText(it) }?.let {
                 Text(it, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.align(Alignment.CenterHorizontally).testTag("voteVotingPower"))
             }
         }

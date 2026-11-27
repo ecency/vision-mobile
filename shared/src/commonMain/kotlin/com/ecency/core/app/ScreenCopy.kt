@@ -258,6 +258,7 @@ object ReadingUiCopy {
     fun upvotePercent(percent: Int): String = L.native.ui.reading.upvotePercent(percent = LocaleFormat.integer(percent.toLong()))
     /** [percent] is already formatted ("93%"). */
     fun votingPower(percent: String): String = L.native.ui.reading.votingPower(percent = percent)
+    fun downvotePower(percent: String): String = L.native.ui.reading.downvotePower(percent = percent)
     val WHATS_HAPPENING: String get() = L.quickReply.placeholderWave
     val YOUR_FEEDS: String get() = L.waves.yourFeeds
     fun downvotePercent(percent: Int): String = L.native.ui.reading.downvotePercent(percent = LocaleFormat.integer(percent.toLong()))

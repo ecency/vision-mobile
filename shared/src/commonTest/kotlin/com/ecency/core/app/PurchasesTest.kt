@@ -17,6 +17,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -136,8 +137,23 @@ class PurchasesTest {
     /** Ecency's answers to purchase-order, in order; the last repeats. */
     private var answers = mutableListOf(HttpResult(201, "{}"))
 
+    /** Names the chain holds for `lookup_accounts` (the paid account's last check); a test adds one taken meanwhile. */
+    private val chainNames = mutableSetOf(alice, bob)
+    private var lookupDown = false
+
+    /** When set, the node's whole `result` for `lookup_accounts` (a malformed answer). */
+    private var lookupResult: String? = null
+
+    private fun lookupAccounts(req: com.ecency.core.api.Sent): HttpResult? {
+        if (req.method != "condenser_api.lookup_accounts") return null
+        if (lookupDown) return HttpResult(500, "")
+        lookupResult?.let { return com.ecency.core.api.FakeTransport.result(req, it) }
+        val prefix = Regex("\"params\":\\[\"([^\"]*)\"").find(req.body)!!.groupValues[1]
+        return com.ecency.core.api.FakeTransport.result(req, chainNames.filter { it >= prefix }.sorted().joinToString(",", "[", "]") { "\"$it\"" })
+    }
+
     private fun TestScope.rig(platform: String = PurchaseService.PLAY, signedIn: String? = alice, prefs: Prefs = InMemoryPrefs(), start: Boolean = true): Rig {
-        val app = appWithAccounts(this)
+        val app = appWithAccounts(this, before = ::lookupAccounts)
         val vault = KeyVault(app.store)
         listOf(bob, alice).forEach { vault.save(VaultAccount(it, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(it, com.ecency.core.hive.KeyRole.POSTING), accessToken = "access-$it")) }
         if (signedIn != null) vault.setCurrentUsername(signedIn) else vault.setCurrentUsername(null)
@@ -1106,6 +1122,113 @@ class PurchasesTest {
         assertEquals(alice, again.orders.single().json()["user"]!!.jsonPrimitive.content)
         assertEquals(1, again.store.finished.size)
         assertNull(again.env.prefs.getString(PurchaseService.Intents.KEY))
+    }
+
+    /** Owner (2026-11-27): a purchase link with a taken name opened the paid card, and the buyer paid for a name the chain had. */
+    @Test
+    fun aPurchaseLinkWithATakenNameNeverOpensThePaidCard() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill(bob, "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        assertFalse(register.current.optionsOpen, "no paid card for a taken name")
+        assertEquals(RegisterCopy.USERNAME_EXISTS, register.current.usernameError)
+        assertTrue(r.store.sheets.isEmpty(), "nothing charged")
+        register.close()
+    }
+
+    /** Review: a name typed away and back within the debounce must not open the card on the field's stale "valid". */
+    @Test
+    fun aPurchaseLinksNameTypedAwayAndBackIsCheckedBeforeTheCard() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill(bob, "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceTimeBy(100) // the link's wait has begun on the first check, still in its debounce
+        register.setUsername("x")
+        register.setUsername(bob)
+        testScheduler.advanceUntilIdle()
+        assertFalse(register.current.optionsOpen, "the taken name was never judged free")
+        register.close()
+    }
+
+    /** Review: a node answering anything but a list for `lookup_accounts` is no answer, never "free". */
+    @Test
+    fun aMalformedLookupAnswerIsNoAnswer() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill("newbie.one", "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        assertTrue(register.current.optionsOpen)
+        lookupResult = "null"
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.store.sheets.isEmpty(), "an unchecked name is never charged")
+        assertFalse(register.current.isRegistering)
+        register.close()
+    }
+
+    /**
+     * Review: "Claim Paid Account" finishes a purchase already paid for. Its account may exist by now (created, the
+     * answer lost), so the chain check must not stop it.
+     */
+    @Test
+    fun claimingAnEarlierPaidAccountIsNotStoppedByItsOwnName() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill("newbie.one", "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        answers = mutableListOf(HttpResult(500, ""))
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertEquals(PurchaseCopy.CLAIM_ACCOUNT, register.current.paidButton)
+        register.dismissAlert()
+        chainNames += "newbie.one" // Ecency created it; the app never heard
+        answers = mutableListOf(HttpResult(201, "{}"))
+        val ordersBefore = r.orders.size
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertEquals(ordersBefore + 1, r.orders.size, "the earlier purchase is sent again")
+        assertEquals(1, r.store.sheets.size, "and never charged twice")
+        register.close()
+    }
+
+    /** The name is asked of the chain again right before the store sheet: someone may have taken it meanwhile. */
+    @Test
+    fun aNameTakenBeforeTheBuyIsNotCharged() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill("newbie.one", "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        assertTrue(register.current.optionsOpen)
+        chainNames += "newbie.one" // registered elsewhere while the card was open
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.store.sheets.isEmpty(), "no store sheet for a taken name")
+        assertEquals(RegisterCopy.USERNAME_EXISTS, register.current.alert?.body)
+        assertFalse(register.current.isRegistering)
+        assertTrue(r.orders.isEmpty())
+        register.close()
+    }
+
+    @Test
+    fun withoutTheChainsAnswerTheBuyDoesNotStart() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill("newbie.one", "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        assertTrue(register.current.optionsOpen)
+        lookupDown = true
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.store.sheets.isEmpty(), "an unchecked name is never charged")
+        assertFalse(register.current.isRegistering)
+        assertNotNull(register.current.alert)
+        lookupDown = false
+        register.dismissAlert()
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, r.store.sheets.size, "with the chain's answer back, the buy goes on")
+        register.close()
     }
 
     @Test

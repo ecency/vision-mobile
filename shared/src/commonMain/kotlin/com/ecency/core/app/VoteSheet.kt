@@ -29,7 +29,10 @@ data class VoteSheetState(val percent: Int, val down: Boolean) {
     fun withPercent(value: Double): VoteSheetState = copy(percent = clamp(value))
 
     /** The `$` estimate, with RN's "-" in downvote mode. */
-    fun valueText(preview: VotePreview): String = (if (down) "-" else "") + preview.text(percent * 100)
+    fun valueText(preview: VotePreview): String = (if (down) "-" else "") + preview.text(weight)
+
+    /** The footer: the mana this direction spends (the two refill apart). */
+    fun powerText(preview: VotePreview): String? = if (down) preview.downvotePowerText else preview.votingPowerText
 
     companion object {
         val PRESETS: List<Int> = listOf(25, 50, 75, 100)

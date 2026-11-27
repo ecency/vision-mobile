@@ -4,7 +4,7 @@
   "description": "Offline generators for the native app's golden fixtures (tools/README.md). Not part of any build. The render generators have their own install in tools/render.",
   "type": "module",
   "dependencies": {
-    "@ecency/sdk": "2.9.8",
+    "@ecency/sdk": "2.9.9",
     "@hiveio/wax": "2.0.2",
     "@noble/curves": "^2.2.0",
     "@noble/hashes": "^2.2.0",

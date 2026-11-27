@@ -201,6 +201,15 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                     item.layer == AssetLayer.ENGINE -> broadcast(user, WalletOps.ops(listOf(WalletOps.engineClaim(user, listOf(symbol)))), KeyRole.POSTING)
                     else -> {
                         val account = api.account(user) ?: throw IllegalStateException("account not found")
+                        val left = when (symbol) {
+                            "HIVE" -> account.rewardHive
+                            "HBD" -> account.rewardHbd
+                            else -> account.rewardVests
+                        }
+                        if ((left.trim().substringBefore(' ').toDoubleOrNull() ?: 0.0) <= 0.0) {
+                            // claimed on the web or another phone since the row was read: not a failure
+                            return@launch finishClaimedElsewhere(user, symbol, key, claimed)
+                        }
                         val op = WalletOps.claimRewardBalance(
                             user,
                             if (symbol == "HIVE") account.rewardHive else "0.000 HIVE",
@@ -226,6 +235,17 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             publish()
             if (ok) readUntilClaimed(user, symbol, claimed)
         }
+    }
+
+    /**
+     * Sentry ECENCY-MOBILE-3Q0: nothing left to claim (claimed on the web or another phone). Nothing is sent or shown;
+     * the portfolio can report the reward for a while yet, so it is masked as after a claim and read until it agrees.
+     */
+    private suspend fun finishClaimedElsewhere(user: String, symbol: String, key: String, claimed: Double) {
+        claimingNow -= key
+        claimMask[key] = ClaimMask(claimed, env.nowMillis() + CLAIM_MASK_MILLIS)
+        publish()
+        if (owns(user)) readUntilClaimed(user, symbol, claimed)
     }
 
     /**

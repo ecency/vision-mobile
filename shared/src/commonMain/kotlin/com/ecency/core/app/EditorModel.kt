@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.EcencyHttpException
 import com.ecency.core.api.broadcast.Comments
 import com.ecency.core.api.broadcast.OperationJson
 import com.ecency.core.api.ecency.RemoteDraft
@@ -1144,6 +1145,10 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         s.thumbUrl, s.videoThumbs, s.videoThumbUrls,
     )
 
+    /** A draft gone from the server was replaced by a new one in this editor (at most once). */
+    @kotlin.concurrent.Volatile
+    private var replacedGoneDraft = false
+
     /** The explicit save running now, and what it sent. */
     private var remoteSave: Job? = null
     private var remoteSaveSent: EditorState? = null
@@ -1202,13 +1207,24 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             // RN re-checks right before the request: a save that started before a publish must not recreate the draft
             if (published) return
             val id = s.draftId
-            if (id != null && !saveAsNew) {
+            // Sentry ECENCY-MOBILE-3R2: the draft was deleted elsewhere (the web, another phone) and the update answers
+            // 404 every time; the text is saved as a new draft instead (RN only failed). Any other failure stays one.
+            val updated = id != null && !saveAsNew && try {
                 env.editorApi.updateDraft(owner, id, s.title, s.body, tags, meta)
-                env.localDrafts.delete(owner, LocalDrafts.draft(id))
+                true
+            } catch (e: EcencyHttpException) {
+                // once per editor: a 404 for every update would be the route, not the draft (review)
+                if (e.status != 404 || replacedGoneDraft) throw e
+                replacedGoneDraft = true
+                false
+            }
+            if (updated) {
+                env.localDrafts.delete(owner, LocalDrafts.draft(id!!))
                 onMain { if (fromModel) setState { it.copy(isDraftSaved = true, isDraftSaving = false) } }
             } else {
+                if (published) return
                 val created = env.editorApi.addDraft(owner, s.title, s.body, tags, meta) ?: throw IllegalStateException("newly saved draft not returned in response")
-                // the id-less local copy became this server draft
+                // the id-less local copy (or the gone draft's) became this server draft
                 env.localDrafts.delete(owner, if (id != null) LocalDrafts.draft(id) else LocalDrafts.NEW_POST)
                 onMain { if (fromModel) setState { it.copy(isDraftSaved = true, isDraftSaving = false, draftId = created.id) } }
             }

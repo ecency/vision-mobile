@@ -184,6 +184,8 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         put("vesting_withdraw_rate", "0.000000 VESTS"); put("to_withdraw", 0); put("withdrawn", 0)
         DemoWallet.accountFields().forEach { (k, v) -> put(k, v) }
         putJsonObject("voting_manabar") { put("current_mana", "873000000"); put("last_update_time", nowSeconds()) }
+        // the downvote mana is its own (max a quarter of the voting mana's): 160000000 of 250000000 reads 64% on both
+        putJsonObject("downvote_manabar") { put("current_mana", "160000000"); put("last_update_time", nowSeconds()) }
         // `--ez demoGovernance true` (#3728, iOS `-demoGovernance inactive`): spike-alice's governance votes expired, so
         // the wallet shows its governance card
         if (user == AUTHORS[0] && demoGovernanceInactive) {

@@ -21,6 +21,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import com.ecency.core.api.json.SafeJson
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -412,7 +413,21 @@ class HiveApi(val client: HiveRpcClient) {
         /** The chain's "no such thing"; a broken node's error that reads the same ("Method not found", a missing table) is not. */
         internal fun isNotFound(e: RpcErrorException): Boolean =
             !HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage) &&
-                Regex("does not exist|not found|unknown account", RegexOption.IGNORE_CASE).containsMatchIn(e.rpcMessage)
+                (Regex("does not exist|not found|unknown account", RegexOption.IGNORE_CASE).containsMatchIn(e.rpcMessage) || isDeleted(e))
+
+        /**
+         * A deleted post: hivemind answers `-31999 "Invalid parameters"` with the reason as the error's whole `data`
+         * string ("Post a/b was deleted 1 time(s)", Sentry ECENCY-MOBILE-3R3), or, as the web app checks it (vision-web
+         * c650c46fe6), as an assert message. Only those two places: the words inside an assert's details are an echo
+         * of the request.
+         */
+        private val DELETED = Regex("""^(Assert Exception:)?\s*Post \S+ was deleted\b""")
+
+        private fun isDeleted(e: RpcErrorException): Boolean {
+            if (DELETED.containsMatchIn(e.rpcMessage)) return true
+            val data = SafeJson.parseOrNull(e.data ?: "") as? JsonPrimitive ?: return false
+            return data.isString && DELETED.containsMatchIn(data.content)
+        }
     }
 }
 

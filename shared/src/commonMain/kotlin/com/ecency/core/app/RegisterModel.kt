@@ -130,9 +130,20 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
         setState { it.copy(purchaseOnly = prefill.purchaseOnly) }
         scope.launch { env.purchases.outcomes.collect { if (it.fromBuy && it.productId == PurchaseSkus.ACCOUNT) onPurchase(it) } }
         scope.launch { env.purchases.state.collect { s -> setState { it.copy(paidWaiting = PurchaseSkus.ACCOUNT in s.unfinished) } } }
-        // RN: a purchase link with a creatable name opens the paid options at once (the same rule check as Continue)
+        // RN: a purchase link with a creatable name opens the paid options at once. Unlike RN, only once the chain says
+        // the name is free, as Continue needs: a taken name was sold (owner report 2026-11-27); a taken one stays in
+        // the form with "username exists"
         if (prefill.purchaseOnly && prefill.email.isNotEmpty() && prefill.username.isNotEmpty() && UsernameRules.error(prefill.username.lowercase()) == null) {
-            openOptions()
+            scope.launch {
+                // the check of the name as it is now: an edit restarts it, and a cancelled one judged nothing
+                while (true) {
+                    val job = usernameJob
+                    job?.join()
+                    if (usernameJob === job) break
+                }
+                val name = prefill.username.take(MAX_FIELD).lowercase()
+                if (current.username == name && (current.usernameValid && usernameJob?.isCancelled != true || current.paidWaiting)) openOptions()
+            }
         }
     }
 
@@ -224,7 +235,9 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
 
     /**
      * RN's paid card: the name is checked once more (the buyer would be charged for a name the chain rejects), then
-     * the store sheet opens with the account's details saved for an interrupted purchase.
+     * the store sheet opens with the account's details saved for an interrupted purchase. Unlike RN, "once more" also
+     * asks the chain right before the sheet: a name taken since the form was checked, or one never checked (a purchase
+     * link), was charged for (owner report 2026-11-27). Without the chain's answer nothing is bought.
      */
     fun buyAccount() {
         val s = current
@@ -234,10 +247,27 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
             return
         }
         setState { it.copy(isRegistering = true) }
-        env.purchases.buy(
-            PurchaseSkus.ACCOUNT,
-            PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta(s.username, s.email, s.referral)),
-        )
+        val target = PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta(s.username, s.email, s.referral))
+        // "Claim Paid Account" sends a purchase already paid for again, under its saved name: never charged twice, and
+        // its account may exist by now (created, the answer lost), so its own name must not stop it
+        if (s.paidWaiting) return env.purchases.buy(PurchaseSkus.ACCOUNT, target)
+        scope.launch {
+            val found = lookup(s.username)
+            when {
+                // a failed lookup has alerted already; offline it has not
+                found == null -> setState { it.copy(isRegistering = false, alert = it.alert ?: RegisterAlert(RegisterCopy.ERROR, RegisterCopy.UNKNOWN_ERROR)) }
+                s.username in found -> setState {
+                    it.copy(
+                        isRegistering = false,
+                        alert = RegisterAlert(RegisterCopy.FAIL, RegisterCopy.USERNAME_EXISTS),
+                        usernameError = RegisterCopy.USERNAME_EXISTS,
+                        userExists = true,
+                        usernameValid = false,
+                    )
+                }
+                else -> env.purchases.buy(PurchaseSkus.ACCOUNT, target)
+            }
+        }
     }
 
     /** RN `_handleOnPurchaseSuccess` / `_handleOnPurchaseFailure`. */

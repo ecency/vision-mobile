@@ -39,6 +39,9 @@ class PostDoubleCheckTest {
             "missing" -> FakeTransport.error(req, -32602, missing)
             "other" -> FakeTransport.result(req, Fixtures.entry("spike-author", "another-post"))
             "invalid" -> FakeTransport.error(req, -32602, "Invalid parameters: observer")
+            // every node's answer for a deleted post (HAF hivemind, seen 2026-11-26): the reason only in `data`
+            "deleted" -> FakeTransport.error(req, -31999, "Invalid parameters", "\"Post spike-author/spike-post was deleted 1 time(s)\"")
+            "other-invalid" -> FakeTransport.error(req, -31999, "Invalid parameters", "\"Post spike-author/spike-post has an invalid observer\"")
             "no-bridge" -> FakeTransport.error(req, -32601, "Method not found")
             "broken" -> FakeTransport.error(req, -32603, "Internal error: relation \"hivemind_app.hive_posts\" does not exist")
             "limited" -> HttpResult(429, "slow down", mapOf("retry-after" to "60"))
@@ -70,6 +73,27 @@ class PostDoubleCheckTest {
     @Test
     fun whenEveryOtherNodeFailsTheReadFailsInsteadOfNotFound() = runTest {
         assertFails { api(nodes(mapOf(a to "null"))).postVerified("spike-author", "spike-post", "spike-me") }
+    }
+
+    /** Sentry ECENCY-MOBILE-3R3: a deleted comment opened from a notification was "Something went wrong" and Retry. */
+    @Test
+    fun aDeletedPostIsNotFound() = runTest {
+        assertNull(api(nodes(mapOf(a to "deleted", b to "deleted", c to "deleted"))).postVerified("spike-author", "spike-post", "spike-me"))
+        assertNull(api(nodes(mapOf(a to "deleted", b to "deleted", c to "deleted"))).post("spike-author", "spike-post", "spike-me"))
+        assertNull(api(nodes(mapOf(a to "deleted", b to "deleted", c to "deleted"))).discussion("spike-author", "spike-post", "spike-me"))
+        // the same words as an assert message, as the web app checks them (vision-web c650c46fe6)
+        val asAssert = FakeTransport { req -> FakeTransport.error(req, -32602, "Assert Exception:Post spike-author/spike-post was deleted 2 time(s)") }
+        assertNull(api(asAssert).post("spike-author", "spike-post", "spike-me"))
+    }
+
+    @Test
+    fun anotherInvalidParametersAnswerIsStillAFailure() = runTest {
+        assertFails { api(nodes(mapOf(a to "other-invalid", b to "other-invalid", c to "other-invalid"))).post("spike-author", "spike-post", "spike-me") }
+        // the deletion words echoed inside an assert's details (a crafted permlink) are not the node's answer
+        val echoed = FakeTransport { req ->
+            FakeTransport.error(req, -32602, "Assert Exception:invalid permlink", """{"extension":{"assertion_expression":"Post a/b was deleted 1 time(s)"}}""")
+        }
+        assertFails { api(echoed).post("spike-author", "spike-post", "spike-me") }
     }
 
     @Test

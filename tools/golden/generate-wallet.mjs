@@ -1,11 +1,11 @@
 // Golden vectors for the wallet operations (WalletOperations.kt, WalletOps.kt), fully offline:
-// - operation JSON from the @ecency/sdk 2.9.8 builders and mutations themselves (the shape the RN app broadcasts);
+// - operation JSON from the @ecency/sdk 2.9.9 builders and mutations themselves (the shape the RN app broadcasts);
 // - serialized bytes, transaction id and digest from the SDK's own serializer (HiveTxTransaction), checked against
 //   hived's own code by generate-wax.mjs;
 // - deterministic RFC 6979 signatures (noble, extraEntropy false), plus the SDK's own randomised signature must recover.
 //
 // The SDK and noble come from a scratch install (not from the RN app's node_modules, which pins an older SDK):
-//   npm install --prefix /tmp/golden-wallet @ecency/sdk@2.9.8 @noble/curves@2 @noble/hashes@2 @tanstack/react-query@5 react
+//   npm install --prefix /tmp/golden-wallet @ecency/sdk@2.9.9 @noble/curves@2 @noble/hashes@2 @tanstack/react-query@5 react
 //   GOLDEN_MODULES=/tmp/golden-wallet node tools/golden/generate-wallet.mjs \
 //     shared/src/commonTest/kotlin/com/ecency/core/hive/WalletGoldenVectors.kt
 //
@@ -26,7 +26,7 @@ const out = process.argv[2]
 if (!out) throw new Error('usage: generate-wallet.mjs <output.kt>')
 const version = (pkg) => JSON.parse(readFileSync(join(base, 'node_modules', pkg, 'package.json'), 'utf8')).version
 const sdkVersion = version('@ecency/sdk')
-if (sdkVersion !== '2.9.8') throw new Error(`expected @ecency/sdk 2.9.8, found ${sdkVersion}`)
+if (sdkVersion !== '2.9.9') throw new Error(`expected @ecency/sdk 2.9.9, found ${sdkVersion}`)
 
 const hex = (b) => Buffer.from(b).toString('hex')
 const SEED = 'ecency-native-spike-golden-vector-throwaway'

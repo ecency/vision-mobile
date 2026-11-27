@@ -77,4 +77,52 @@ class VoteSheetTest {
         assertEquals("Voting power 93%", preview.votingPowerText)
         assertNull(VotePreview(account.copy(votingManabar = null), props, TestApp.NOW).votingPowerText)
     }
+
+    /** Owner's report (2026-11-27): the Down side showed the upvote mana; the two refill apart. */
+    @Test
+    fun theDownSideShowsTheDownvotePower() {
+        val props = RewardProps(6e17, 800000.0, 0.25, 1.0, 10.0, 28)
+        // 1000 VESTS: voting mana max 1e9 (93%), downvote mana max a quarter of it, 1e8 of 2.5e8 (40%)
+        val account = Account(
+            name = "tester", vestingShares = "1000.000000 VESTS",
+            votingManabar = Manabar(930_000_000.0, TestApp.NOW / 1000),
+            downvoteManabar = Manabar(100_000_000.0, TestApp.NOW / 1000),
+        )
+        val preview = VotePreview(account, props, TestApp.NOW)
+        val s = VoteSheetState.open(100.0, votedByMe = false, downvotedByMe = false)
+        assertEquals("Voting power 93%", s.powerText(preview))
+        assertEquals("Downvote power 40%", s.withDirection(down = true).powerText(preview))
+        // it refills like the voting mana, over five days to its own max
+        val later = VotePreview(account, props, TestApp.NOW + 432_000_000L / 10)
+        assertEquals("Downvote power 50%", s.withDirection(down = true).powerText(later))
+        assertNull(s.withDirection(down = true).powerText(VotePreview(account.copy(downvoteManabar = null), props, TestApp.NOW)))
+    }
+
+    /** hived 1.28 (stable vote): a downvote may spend the voting and the downvote mana together. */
+    @Test
+    fun aDownvoteIsWorthSomethingWhileTheDownvoteManaCoversIt() {
+        val props = RewardProps(6e17, 800000.0, 0.25, 1.0, 10.0, 28)
+        // 1,000,000 VESTS (a 10% vote is well above the dust threshold); downvote mana full at 2.5e11
+        val drained = Account(
+            name = "tester", vestingShares = "1000000.000000 VESTS",
+            votingManabar = Manabar(0.0, TestApp.NOW / 1000),
+            downvoteManabar = Manabar(250_000_000_000.0, TestApp.NOW / 1000),
+        )
+        val preview = VotePreview(drained, props, TestApp.NOW)
+        val s = VoteSheetState.open(10.0, votedByMe = false, downvotedByMe = false)
+        assertEquals("$" + VoteValue.format(0.0), s.valueText(preview), "no upvote without voting mana")
+        assertTrue(s.withDirection(down = true).valueText(preview) != "-$" + VoteValue.format(0.0), "the downvote mana pays for it")
+        assertTrue(preview.estimate(-1000).rshares < 0)
+        assertEquals(0L, preview.estimate(1000).rshares)
+        // without downvote mana the downvote is no more affordable than the upvote
+        assertEquals(0L, VotePreview(drained.copy(downvoteManabar = null), props, TestApp.NOW).estimate(-1000).rshares)
+    }
+
+    @Test
+    fun theDownvoteManabarIsReadFromTheAccount() {
+        val json = kotlinx.serialization.json.Json.parseToJsonElement(
+            """{"name":"tester","vesting_shares":"1000.000000 VESTS","voting_manabar":{"current_mana":"930000000","last_update_time":1},"downvote_manabar":{"current_mana":"100000000","last_update_time":2}}""",
+        )
+        assertEquals(Manabar(100_000_000.0, 2), Account.fromJson(json)?.downvoteManabar)
+    }
 }
