@@ -123,7 +123,10 @@ class CommunityApi(private val client: HiveRpcClient) {
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun lookupAccounts(prefix: String, limit: Int = 50): List<String> = guarded {
         if (!isQueryableAccountName(prefix)) return@guarded emptyList()
-        client.call("condenser_api.lookup_accounts", buildJsonArray { add(JsonPrimitive(prefix)); add(JsonPrimitive(limit)) })
+        // anything but a list of names is a broken answer, never "no such names" (a paid account's name check relies on it)
+        client.call("condenser_api.lookup_accounts", buildJsonArray { add(JsonPrimitive(prefix)); add(JsonPrimitive(limit)) }, validate = { r ->
+            r is kotlinx.serialization.json.JsonArray && r.all { (it as? JsonPrimitive)?.isString == true }
+        })
             .arr().orEmpty().mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }
     }
 

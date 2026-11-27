@@ -160,6 +160,9 @@ sealed interface PurchaseOutcome {
     /** Ecency holds this receipt for review ([order]): kept unfinished, the user contacts support with the order number. */
     data class Held(override val productId: String, override val fromBuy: Boolean, val order: String) : PurchaseOutcome
 
+    /** A claim-only buy found no earlier purchase to deliver: nothing was bought and no store sheet opened. */
+    data class NothingToClaim(override val productId: String, override val fromBuy: Boolean) : PurchaseOutcome
+
     /** The store refused or the user cancelled ([report] says whether the user still has to hear about it). */
     data class StoreFailed(override val productId: String, override val fromBuy: Boolean, val error: StoreError, val report: IapReport) : PurchaseOutcome
 }
@@ -337,9 +340,10 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
      * the target it was saved with (it was paid for that account): a paid one is delivered to it instead of buying
      * again (RN), a pending one blocks a second purchase; the user is told when that target is another account. Only
      * without an earlier purchase (or one with no saved target) is [target] saved, before the store sheet opens. The
-     * outcome arrives on [outcomes]. Main thread.
+     * outcome arrives on [outcomes]. Main thread. [claimOnly] never opens the store: with no earlier purchase to deliver
+     * it ends with [PurchaseOutcome.NothingToClaim] (the paid account's "Claim", which skipped the name check).
      */
-    fun buy(productId: String, target: PurchaseTarget) {
+    fun buy(productId: String, target: PurchaseTarget, claimOnly: Boolean = false) {
         if (productId !in PurchaseSkus.ALL || productId in current.busy) return
         mutableState.update { it.copy(busy = it.busy + productId) }
         env.background.launch {
@@ -353,6 +357,8 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
             held.filter { isAccepted(it) }.forEach { process(it, fromBuy = false) }
             mutableState.update { it.copy(busy = it.busy + productId) }
             val earlier = held.firstOrNull { !isAccepted(it) }
+            // claim only: without an earlier purchase to deliver nothing is bought, no sheet, nothing saved (PR review)
+            if (claimOnly && earlier == null) return@launch emit(PurchaseOutcome.NothingToClaim(productId, true))
             val saved = earlier?.let { Intents.find(env.prefs, productId, orderKey(it)) }
             val buyer = target.user.ifEmpty { env.session.current.username.orEmpty() }
             // no account (a paid account bought signed out): no token

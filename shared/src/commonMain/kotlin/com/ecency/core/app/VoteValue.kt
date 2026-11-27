@@ -43,15 +43,19 @@ object VoteValue {
         return min(cur, max)
     }
 
-    /** SDK votingRshares; [vPower] 0..10000, [weight] 0..10000. */
-    fun rshares(account: Account, props: RewardProps, vPower: Double, weight: Double, nowMillis: Long): Double {
+    /**
+     * SDK votingRshares; [vPower] 0..10000, [weight] 0..10000. A [downvote] may spend the downvote mana with the voting
+     * mana (hived 1.28 `vote2`: the vote passes while both together cover it); the SDK checks the voting mana only.
+     */
+    fun rshares(account: Account, props: RewardProps, vPower: Double, weight: Double, nowMillis: Long, downvote: Boolean = false): Double {
         if (!vPower.isFinite() || !weight.isFinite()) return 0.0
         val vests = Mana.effectiveVests(account)
         if (props.lastHardfork >= 28) {
             val rate = props.votePowerReserveRate
             if (!rate.isFinite() || rate <= 0 || vests <= 0) return 0.0
             val used = ceil(vests * 1e6 * weight * 86400 / 10000 / (rate * REGEN))
-            if (used > currentMana(account, nowMillis)) return 0.0
+            val mana = currentMana(account, nowMillis) + if (downvote) Mana.downvoteMana(account, nowMillis) else 0.0
+            if (used > mana) return 0.0
             return max(used - 5e7, 0.0)
         }
         return (vPower * weight / 1e4 / 50 + 1) * (vests * 1e6) / 1e4
@@ -61,7 +65,7 @@ object VoteValue {
     fun value(account: Account, props: RewardProps, weight: Int, nowMillis: Long): Double {
         if (props.fundRecentClaims == 0.0 || props.quote == 0.0) return 0.0
         val vPower = Mana.votingPowerPercent(account, nowMillis) * 100
-        val r = rshares(account, props, vPower, kotlin.math.abs(weight).toDouble(), nowMillis)
+        val r = rshares(account, props, vPower, kotlin.math.abs(weight).toDouble(), nowMillis, downvote = weight < 0)
         return r / props.fundRecentClaims * props.fundRewardBalance * (props.base / props.quote)
     }
 
@@ -118,8 +122,13 @@ class VotePreview(private val account: Account, private val props: RewardProps, 
         if (weight == 0) return VoteEstimate.NONE
         val sign = if (weight < 0) -1 else 1
         val vPower = Mana.votingPowerPercent(account, nowMillis) * 100
-        val rshares = VoteValue.rshares(account, props, vPower, kotlin.math.abs(weight).toDouble(), nowMillis)
+        val rshares = VoteValue.rshares(account, props, vPower, kotlin.math.abs(weight).toDouble(), nowMillis, downvote = weight < 0)
         return VoteEstimate(VoteValue.value(account, props, weight, nowMillis) * sign, rshares.toLong() * sign)
+    }
+
+    /** "Downvote power 40%" for the footer in downvote mode (owner's report 2026-11-27; RN showed the voting power); null without the bar. */
+    val downvotePowerText: String? get() = account.downvoteManabar?.let {
+        ReadingUiCopy.downvotePower(LocaleFormat.percent(Mana.downvotePowerPercent(account, nowMillis), 0, 0))
     }
 
     /** "Voting power 93%" for the vote sheet's footer; null when the account has no manabar. */

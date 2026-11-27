@@ -91,6 +91,19 @@ class EditorApi(private val private: EcencyPrivateApi) {
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun allDrafts(username: String): List<RemoteDraft> = list(call(username, "drafts")).mapNotNull(::draft)
 
+    /**
+     * Whether the account still has the draft [id], from the unpaged list. Strict where [allDrafts] is lenient: only a
+     * readable list whose every row has a string `_id` answers; anything else throws, since an empty list read from a
+     * broken answer would say "gone" (the editor replaces a draft only on a confirmed "gone").
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun hasDraft(username: String, id: String): Boolean {
+        val result = call(username, "drafts")
+        val rows = result.arr() ?: result.obj()?.get("data").arr() ?: throw EcencyException("unreadable drafts list")
+        val ids = rows.map { row -> row.obj()?.str("_id") ?: throw EcencyException("unreadable drafts list") }
+        return id in ids
+    }
+
     /** `drafts-add`; [tags] is RN's space-joined string. Returns the new draft when the answer carries it. */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun addDraft(username: String, title: String, body: String, tags: String, meta: JsonElement): RemoteDraft? {

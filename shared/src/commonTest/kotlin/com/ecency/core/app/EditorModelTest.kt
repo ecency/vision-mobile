@@ -60,6 +60,15 @@ class EditorModelTest {
         var contentAnswer: ((Sent) -> HttpResult)? = null
         var supportPercent = 0
         var apiDown = false
+
+        /** When set, `drafts-update` answers this status whatever the id (a server failure, not a gone draft). */
+        var draftUpdateStatus: Int? = null
+
+        /** When set, `drafts-add` answers this status (a failed replacement). */
+        var draftAddStatus: Int? = null
+
+        /** When set, the whole body of the unpaged `drafts` list (a malformed answer). */
+        var draftsListBody: String? = null
         var postingAuths = """[["ecency.app",1]]"""
         var accountsDown = false
 
@@ -159,14 +168,18 @@ class EditorModelTest {
             fun wrapped(items: List<JsonObject>) = HttpResult(200, """{"data":${JsonArray(items)},"pagination":{"total":${items.size},"limit":20,"offset":0,"has_next":false}}""")
             return when {
                 path.startsWith("drafts?") -> wrapped(drafts)
-                path == "drafts" -> HttpResult(200, JsonArray(drafts).toString())
+                path == "drafts" -> HttpResult(200, draftsListBody ?: JsonArray(drafts).toString())
+                path == "drafts-add" && draftAddStatus != null -> HttpResult(draftAddStatus!!, "{}")
                 path == "drafts-add" -> {
                     val d = Json.parseToJsonElement("""{"_id":"d${drafts.size + 1}","modified":"2026-10-06T11:00:00.000Z","created":"2026-10-06T11:00:00.000Z"}""").jsonObject
                     val full = JsonObject(d + body.filterKeys { it != "code" })
                     drafts += full
                     HttpResult(200, """{"drafts":[$full]}""")
                 }
-                path == "drafts-update" -> HttpResult(200, "{}")
+                // the private API passes the store's 404 through for a draft id it no longer has
+                path == "drafts-update" && draftUpdateStatus != null -> HttpResult(draftUpdateStatus!!, "{}")
+                path == "drafts-update" ->
+                    if (drafts.any { it["_id"]!!.jsonPrimitive.content == body["id"]!!.jsonPrimitive.content }) HttpResult(200, "{}") else HttpResult(404, "Not found")
                 path == "drafts-delete" -> {
                     drafts.removeAll { it["_id"]!!.jsonPrimitive.content == body["id"]!!.jsonPrimitive.content }
                     HttpResult(200, "{}")
@@ -1407,6 +1420,118 @@ class EditorModelTest {
         assertEquals(1, w.api.count { it.first == "drafts-add" })
         val update = w.api.single { it.first == "drafts-update" }.second
         assertEquals("a new summary", update["meta"]!!.jsonObject["description"]!!.jsonPrimitive.content)
+    }
+
+    /** Sentry ECENCY-MOBILE-3R2: saving a draft deleted elsewhere (web, another phone) failed with a 404 every time. */
+    @Test
+    fun aDraftDeletedElsewhereIsSavedAsANewDraft() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"old body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        w.drafts.clear() // deleted on the web meanwhile
+        m.setBody("new body", TextSelection(8))
+        testScheduler.advanceUntilIdle()
+        w.toasts()
+        m.saveDraft()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("Draft Saved"), w.toasts())
+        val add = w.api.single { it.first == "drafts-add" }.second
+        assertEquals("new body", add["body"]!!.jsonPrimitive.content)
+        val created = w.drafts.single()["_id"]!!.jsonPrimitive.content
+        assertEquals(created, m.current.draftId, "the next save updates the new draft")
+        assertTrue(m.current.isDraftSaved)
+        assertTrue(w.storage.values.isEmpty(), "the local copy of the gone draft became the new one")
+        // and the next save is an update of it, not one more new draft
+        m.setBody("newer body", TextSelection(10))
+        testScheduler.advanceUntilIdle()
+        m.saveDraft()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, w.api.count { it.first == "drafts-add" })
+        val update = w.api.last { it.first == "drafts-update" }.second
+        assertEquals(created, update["id"]!!.jsonPrimitive.content)
+        assertEquals("newer body", update["body"]!!.jsonPrimitive.content)
+        m.close()
+    }
+
+    /** PR review: a 404 from a broken update route, with the draft still on the server, never makes a second draft. */
+    @Test
+    fun aBrokenUpdateRouteNeverDuplicatesAnExistingDraft() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"old body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        w.draftUpdateStatus = 404
+        w.toasts()
+        val shown = listOf("one", "two").map { body ->
+            m.setBody(body, TextSelection(body.length))
+            testScheduler.advanceUntilIdle()
+            m.saveDraft()
+            testScheduler.advanceUntilIdle()
+            w.toasts()
+        }
+        assertTrue(w.api.none { it.first == "drafts-add" }, "the draft is still there: no replacement")
+        assertEquals(listOf(listOf("Failed to save draft"), listOf("Failed to save draft")), shown)
+        assertEquals("d9", m.current.draftId)
+        m.close()
+    }
+
+    /** PR review: an unreadable drafts list confirms nothing; with the update's 404 the save fails, no second draft. */
+    @Test
+    fun anUnreadableDraftsListNeverConfirmsADraftGone() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"old body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        w.draftUpdateStatus = 404
+        for (body in listOf("not json", "{}", "[null]", "[{\"title\":\"no id\"}]")) {
+            w.draftsListBody = body
+            m.setBody("text $body", TextSelection(1))
+            testScheduler.advanceUntilIdle()
+            w.toasts()
+            m.saveDraft()
+            testScheduler.advanceUntilIdle()
+            assertEquals(listOf("Failed to save draft"), w.toasts(), body)
+        }
+        assertTrue(w.api.none { it.first == "drafts-add" }, "no replacement on an unreadable list")
+        m.close()
+    }
+
+    /** PR review (P2): a replacement that failed to be created is tried again by the next save. */
+    @Test
+    fun aFailedReplacementIsTriedAgainByTheNextSave() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"old body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        w.drafts.clear() // deleted on the web
+        w.draftAddStatus = 503
+        m.setBody("new body", TextSelection(8))
+        testScheduler.advanceUntilIdle()
+        w.toasts()
+        m.saveDraft()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("Failed to save draft"), w.toasts())
+        w.draftAddStatus = null // the server is back
+        m.saveDraft()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("Draft Saved"), w.toasts())
+        assertEquals(1, w.drafts.size)
+        assertEquals(w.drafts.single()["_id"]!!.jsonPrimitive.content, m.current.draftId)
+        m.close()
+    }
+
+    @Test
+    fun anotherDraftUpdateFailureIsStillAFailure() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"old body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        w.draftUpdateStatus = 500
+        m.setBody("new body", TextSelection(8))
+        testScheduler.advanceUntilIdle()
+        w.toasts()
+        m.saveDraft()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("Failed to save draft"), w.toasts())
+        assertTrue(w.api.none { it.first == "drafts-add" }, "a server error never makes a second draft")
+        assertEquals("d9", m.current.draftId)
+        m.close()
     }
 
     @Test

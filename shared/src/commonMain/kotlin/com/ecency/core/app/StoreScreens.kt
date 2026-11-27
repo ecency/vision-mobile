@@ -142,6 +142,8 @@ class StoreScreenModel internal constructor(
             is PurchaseOutcome.Pending -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.PENDING)) }
             is PurchaseOutcome.Held -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.held(o.order))) }
             is PurchaseOutcome.Processing -> env.ui.toast(PurchaseCopy.PROCESSING)
+            // only the register screen asks for a claim-only buy
+            is PurchaseOutcome.NothingToClaim -> Unit
             is PurchaseOutcome.Failed ->
                 if (points) env.ui.toast(PurchaseCopy.pointsFailed(o.message)) else setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, o.message)) }
             is PurchaseOutcome.StoreFailed -> when {

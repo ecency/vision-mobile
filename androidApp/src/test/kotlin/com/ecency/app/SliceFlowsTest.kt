@@ -363,6 +363,34 @@ class SliceFlowsTest {
         assertEquals(listOf(50f), savedWeights)
     }
 
+    /** Owner (2026-11-27): the Down side shows the downvote power, a mana of its own, not the voting power. */
+    @Test
+    fun theDownSideOfTheVoteSheetShowsTheDownvotePower() {
+        node.signIn()
+        // 10000 VESTS: voting mana long since full (100%); downvote mana 1e9 of 2.5e9 (40%) as of the app's clock
+        node.extra = { method, _ ->
+            when (method) {
+                "condenser_api.get_accounts" -> """[{"name":"tester","posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${node.key.publicKey()}",1]]},""" +
+                    """"memo_key":"${node.key.publicKey()}","vesting_shares":"10000.000000 VESTS","voting_manabar":{"current_mana":"0","last_update_time":0},""" +
+                    """"downvote_manabar":{"current_mana":"1000000000","last_update_time":${env.nowMillis() / 1000}}}]"""
+                "condenser_api.get_dynamic_global_properties" ->
+                    """{"head_block_number":100003,"head_block_id":"000186a3${"11".repeat(16)}","time":"2026-10-06T11:59:00","vote_power_reserve_rate":10}"""
+                "condenser_api.get_reward_fund" -> """{"recent_claims":"150000000000000","reward_balance":"800000.000 HIVE"}"""
+                else -> null
+            }
+        }
+        launch()
+        waitFor("card:alice/trending-one")
+        compose.onAllNodes(hasTestTag("vote"))[0].performClick()
+        waitFor("voteSheet")
+        compose.await("the voting power") { compose.onAllNodes(hasTestTag("voteVotingPower"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("voteVotingPower", useUnmergedTree = true).assertTextEquals("Voting power 100%")
+        compose.onNodeWithTag("voteDirDown").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteVotingPower", useUnmergedTree = true).assertTextEquals("Downvote power 40%")
+        compose.onNodeWithTag("voteDirUp").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteVotingPower", useUnmergedTree = true).assertTextEquals("Voting power 100%")
+    }
+
     /** Owner (TestFlight): the payout moves by the vote's estimate at once, as RN; a failed vote puts it back. */
     @Test
     fun aVoteMovesTheCardsPayoutAtOnceAndAFailurePutsItBack() {

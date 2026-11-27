@@ -196,7 +196,9 @@ final class FakeHiveTransport: NSObject, RpcTransport {
                 "json_metadata": "", "posting_json_metadata": metadata(user), "reputation": 0,
                 "created": "2021-03-14T09:00:00", "vesting_shares": "1000.000000 VESTS", "delegated_vesting_shares": "0.000000 VESTS",
                 "received_vesting_shares": "0.000000 VESTS", "vesting_withdraw_rate": "0.000000 VESTS", "to_withdraw": 0, "withdrawn": 0,
-                "voting_manabar": ["current_mana": "873000000", "last_update_time": Int(Date().timeIntervalSince1970)]]
+                "voting_manabar": ["current_mana": "873000000", "last_update_time": Int(Date().timeIntervalSince1970)],
+                // the downvote mana is its own (max a quarter of the voting mana's): 64%, as the Android demo
+                "downvote_manabar": ["current_mana": "160000000", "last_update_time": Int(Date().timeIntervalSince1970)]]
         // `-demoEstablished YES` (#3728): 50 posts, an established account (no Getting started card; the proposal card
         // asks at once); otherwise one post, a new account
         fields["post_count"] = UserDefaults.standard.bool(forKey: "demoEstablished") ? 50 : 1

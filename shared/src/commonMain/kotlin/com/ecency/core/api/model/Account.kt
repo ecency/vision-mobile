@@ -94,6 +94,8 @@ data class Account(
     val withdrawn: Double = 0.0,
     /** `voting_manabar`; null when the node left it out. */
     val votingManabar: Manabar? = null,
+    /** `downvote_manabar`: a separate mana for downvotes, its max a quarter of the voting mana's (HF21). */
+    val downvoteManabar: Manabar? = null,
     /** The raw metadata strings, for a profile edit that must keep everything it does not change. */
     val postingJsonMetadata: String = "",
     val jsonMetadata: String = "",
@@ -133,6 +135,11 @@ data class Account(
                 toWithdraw = o.double("to_withdraw") ?: 0.0,
                 withdrawn = o.double("withdrawn") ?: 0.0,
                 votingManabar = o["voting_manabar"].obj()?.let { m ->
+                    val mana = m.double("current_mana") ?: return@let null
+                    val updated = m.long("last_update_time") ?: return@let null
+                    Manabar(mana, updated)
+                },
+                downvoteManabar = o["downvote_manabar"].obj()?.let { m ->
                     val mana = m.double("current_mana") ?: return@let null
                     val updated = m.long("last_update_time") ?: return@let null
                     Manabar(mana, updated)
@@ -181,6 +188,30 @@ object Mana {
         val delta = nowMillis / 1000.0 - bar.lastUpdateTime
         val current = bar.currentMana + delta * max / REGENERATION_SECONDS
         val basis = kotlin.math.floor(current / max * 10000 + 0.5) // JS Math.round
+        val clamped = if (basis.isNaN() || basis.isInfinite() || basis < 0) 0.0 else minOf(basis, 10000.0)
+        return clamped / 100
+    }
+
+    /** The downvote mana's max: a quarter of the voting mana's (hived `downvote_pool_percent` 25%, HF21). */
+    fun downvoteMaxMana(account: Account): Double = effectiveVests(account) * 1e6 / 4
+
+    /** The downvote mana at [nowMillis], refilled over the same five days and capped at its max; 0 without the bar. */
+    fun downvoteMana(account: Account, nowMillis: Long): Double {
+        val bar = account.downvoteManabar ?: return 0.0
+        val max = downvoteMaxMana(account)
+        if (max <= 0) return 0.0
+        return minOf(bar.currentMana + (nowMillis / 1000.0 - bar.lastUpdateTime) * max / REGENERATION_SECONDS, max)
+    }
+
+    /**
+     * Downvote power in percent (0 to 100, two decimals) at [nowMillis], SDK downVotingPower; 0 without the bar. The
+     * max is from [effectiveVests] (a power down lowers it, as hived counts it) where the SDK leaves the power down out.
+     */
+    fun downvotePowerPercent(account: Account, nowMillis: Long): Double {
+        if (account.downvoteManabar == null) return 0.0
+        val max = downvoteMaxMana(account)
+        if (max <= 0) return 0.0
+        val basis = kotlin.math.floor(downvoteMana(account, nowMillis) / max * 10000 + 0.5)
         val clamped = if (basis.isNaN() || basis.isInfinite() || basis < 0) 0.0 else minOf(basis, 10000.0)
         return clamped / 100
     }

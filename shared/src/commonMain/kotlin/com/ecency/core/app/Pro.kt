@@ -413,6 +413,8 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
         if (buyingFor == null || buyingFor != current.account) return
         when (o) {
             is PurchaseOutcome.Delivered, is PurchaseOutcome.Pending, is PurchaseOutcome.Processing -> buyingFor = null
+            // only the register screen asks for a claim-only buy
+            is PurchaseOutcome.NothingToClaim -> buyingFor = null
             // another account's earlier purchase goes first: told here, its delivery is not this buy's
             is PurchaseOutcome.Earlier -> {
                 if (!o.pending) buyingFor = null

@@ -130,6 +130,48 @@ class WalletModelsTest {
         }
     }
 
+    /**
+     * Sentry ECENCY-MOBILE-3Q0: the row still showed a reward already claimed elsewhere (the web, another phone); the
+     * tap read the account, found nothing to claim, and showed "Claim failed" with an error report.
+     */
+    @Test
+    fun aRewardClaimedElsewhereIsNoFailure() = runTest {
+        val w = world(this)
+        val reporter = RecordingReporter()
+        w.app.env.crashReporter = reporter
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        val portfolioReads = w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") }
+        // claimed on the web meanwhile: the chain has no reward left
+        w.rpc["condenser_api.get_accounts"] = { r ->
+            w.accountsJson(r, leo).replace("\"reward_vesting_balance\":\"1234.567890 VESTS\"", "\"reward_vesting_balance\":\"0.000000 VESTS\"")
+        }
+        w.app.env.ui.current.toast?.let { w.app.env.ui.dismiss(it.id) }
+        w.env.wallet.claim("HP")
+        testScheduler.advanceUntilIdle()
+        assertTrue(w.broadcastOpsJson().isEmpty(), "nothing to sign")
+        assertNull(w.app.env.ui.current.toast, "no failure shown")
+        assertTrue(reporter.reports.none { it.tags["where"] == "wallet.claim" }, "nothing reported")
+        assertTrue(w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") } > portfolioReads, "the wallet is read again")
+        assertFalse(w.env.wallet.current.rows.first { it.symbol == "HP" }.claiming)
+        // review: the portfolio still reports the claimed reward for a while; the row reads 0 meanwhile, as after a claim
+        assertNull(w.env.wallet.current.rows.first { it.symbol == "HP" }.pendingText)
+    }
+
+    /** PR review: an account read without the reward field says nothing about the reward; it is never masked as claimed. */
+    @Test
+    fun anAccountReadWithoutTheRewardFieldMasksNothing() = runTest {
+        val w = world(this)
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        w.rpc["condenser_api.get_accounts"] = { r ->
+            w.accountsJson(r, leo).replace("\"reward_vesting_balance\":\"1234.567890 VESTS\",", "")
+        }
+        w.env.wallet.claim("HP")
+        testScheduler.advanceUntilIdle()
+        assertEquals("0.617 HP", w.env.wallet.current.rows.first { it.symbol == "HP" }.pendingText, "the reward still shows")
+    }
+
     @Test
     fun aClaimOnItsWayIsNotSentAgainAfterSwitchingAwayAndBack() = runTest {
         val w = world(this)
