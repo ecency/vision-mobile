@@ -158,6 +158,20 @@ class WalletModelsTest {
         assertNull(w.env.wallet.current.rows.first { it.symbol == "HP" }.pendingText)
     }
 
+    /** PR review: an account read without the reward field says nothing about the reward; it is never masked as claimed. */
+    @Test
+    fun anAccountReadWithoutTheRewardFieldMasksNothing() = runTest {
+        val w = world(this)
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        w.rpc["condenser_api.get_accounts"] = { r ->
+            w.accountsJson(r, leo).replace("\"reward_vesting_balance\":\"1234.567890 VESTS\",", "")
+        }
+        w.env.wallet.claim("HP")
+        testScheduler.advanceUntilIdle()
+        assertEquals("0.617 HP", w.env.wallet.current.rows.first { it.symbol == "HP" }.pendingText, "the reward still shows")
+    }
+
     @Test
     fun aClaimOnItsWayIsNotSentAgainAfterSwitchingAwayAndBack() = runTest {
         val w = world(this)

@@ -1145,10 +1145,6 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         s.thumbUrl, s.videoThumbs, s.videoThumbUrls,
     )
 
-    /** A draft gone from the server was replaced by a new one in this editor (at most once). */
-    @kotlin.concurrent.Volatile
-    private var replacedGoneDraft = false
-
     /** The explicit save running now, and what it sent. */
     private var remoteSave: Job? = null
     private var remoteSaveSent: EditorState? = null
@@ -1208,14 +1204,15 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             if (published) return
             val id = s.draftId
             // Sentry ECENCY-MOBILE-3R2: the draft was deleted elsewhere (the web, another phone) and the update answers
-            // 404 every time; the text is saved as a new draft instead (RN only failed). Any other failure stays one.
+            // 404 every time; the text is saved as a new draft instead (RN only failed). Any other failure stays one,
+            // and a failed replacement is tried again by the next save (the id stays the gone one until it succeeds).
             val updated = id != null && !saveAsNew && try {
                 env.editorApi.updateDraft(owner, id, s.title, s.body, tags, meta)
                 true
             } catch (e: EcencyHttpException) {
-                // once per editor: a 404 for every update would be the route, not the draft (review)
-                if (e.status != 404 || replacedGoneDraft) throw e
-                replacedGoneDraft = true
+                // a 404 names no cause: replace the draft only when the drafts list confirms it is gone (a broken
+                // route with the draft still there fails instead of making a second draft; a failed list read too)
+                if (e.status != 404 || env.editorApi.allDrafts(owner).any { it.id == id }) throw e
                 false
             }
             if (updated) {

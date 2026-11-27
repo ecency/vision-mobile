@@ -206,7 +206,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                             "HBD" -> account.rewardHbd
                             else -> account.rewardVests
                         }
-                        if ((left.trim().substringBefore(' ').toDoubleOrNull() ?: 0.0) <= 0.0) {
+                        // only a reward the node sent and that reads zero is gone; a missing or unreadable one says nothing
+                        if (account.rewardsSent && left.trim().substringBefore(' ').toDoubleOrNull() == 0.0) {
                             // claimed on the web or another phone since the row was read: not a failure
                             return@launch finishClaimedElsewhere(user, symbol, key, claimed)
                         }

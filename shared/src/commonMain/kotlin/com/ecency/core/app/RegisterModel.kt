@@ -142,7 +142,8 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
                     if (usernameJob === job) break
                 }
                 val name = prefill.username.take(MAX_FIELD).lowercase()
-                if (current.username == name && (current.usernameValid && usernameJob?.isCancelled != true || current.paidWaiting)) openOptions()
+                // a card the reader opened meanwhile (Continue) is left alone: opening again resets its session
+                if (!current.optionsOpen && current.username == name && (current.usernameValid && usernameJob?.isCancelled != true || current.paidWaiting)) openOptions()
             }
         }
     }

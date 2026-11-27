@@ -1167,6 +1167,36 @@ class PurchasesTest {
         register.close()
     }
 
+    /** PR review: a list whose entries are not all names is no answer either (`[null]` is not "nobody has it"). */
+    @Test
+    fun aLookupListWithMalformedEntriesIsNoAnswer() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill("newbie.one", "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        assertTrue(register.current.optionsOpen)
+        lookupResult = "[null]"
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.store.sheets.isEmpty(), "an unchecked name is never charged")
+        register.close()
+    }
+
+    /** PR review: the link's deferred opening never reopens a card the reader already opened (its spinner would reset). */
+    @Test
+    fun theLinksDeferredOpeningLeavesAnOpenCardAlone() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill("newbie.one", "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        register.continueToOptions() // Continue is enabled before the first check ends
+        testScheduler.runCurrent()
+        assertTrue(register.current.optionsOpen)
+        val session = register.current.captchaKey
+        testScheduler.advanceUntilIdle() // the link's own check ends with the card already open
+        assertEquals(session, register.current.captchaKey, "the open card was not opened again (a new session resets it)")
+        register.close()
+    }
+
     /**
      * Review: "Claim Paid Account" finishes a purchase already paid for. Its account may exist by now (created, the
      * answer lost), so the chain check must not stop it.

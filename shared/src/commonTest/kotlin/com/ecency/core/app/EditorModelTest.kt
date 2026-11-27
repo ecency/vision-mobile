@@ -63,6 +63,9 @@ class EditorModelTest {
 
         /** When set, `drafts-update` answers this status whatever the id (a server failure, not a gone draft). */
         var draftUpdateStatus: Int? = null
+
+        /** When set, `drafts-add` answers this status (a failed replacement). */
+        var draftAddStatus: Int? = null
         var postingAuths = """[["ecency.app",1]]"""
         var accountsDown = false
 
@@ -163,6 +166,7 @@ class EditorModelTest {
             return when {
                 path.startsWith("drafts?") -> wrapped(drafts)
                 path == "drafts" -> HttpResult(200, JsonArray(drafts).toString())
+                path == "drafts-add" && draftAddStatus != null -> HttpResult(draftAddStatus!!, "{}")
                 path == "drafts-add" -> {
                     val d = Json.parseToJsonElement("""{"_id":"d${drafts.size + 1}","modified":"2026-10-06T11:00:00.000Z","created":"2026-10-06T11:00:00.000Z"}""").jsonObject
                     val full = JsonObject(d + body.filterKeys { it != "code" })
@@ -1446,23 +1450,47 @@ class EditorModelTest {
         m.close()
     }
 
-    /** Review: a 404 for every update (a broken route, not a gone draft) must not make a new draft on every save. */
+    /** PR review: a 404 from a broken update route, with the draft still on the server, never makes a second draft. */
     @Test
-    fun aDraftIsReplacedOnceNotOnEverySave() = runTest {
+    fun aBrokenUpdateRouteNeverDuplicatesAnExistingDraft() = runTest {
         val w = World(this)
         w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"old body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject
         val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
         w.draftUpdateStatus = 404
         w.toasts()
-        val shown = listOf("one", "two", "three").map { body ->
+        val shown = listOf("one", "two").map { body ->
             m.setBody(body, TextSelection(body.length))
             testScheduler.advanceUntilIdle()
             m.saveDraft()
             testScheduler.advanceUntilIdle()
             w.toasts()
         }
-        assertEquals(1, w.api.count { it.first == "drafts-add" }, "one replacement draft at most")
-        assertEquals(listOf(listOf("Draft Saved"), listOf("Failed to save draft"), listOf("Failed to save draft")), shown)
+        assertTrue(w.api.none { it.first == "drafts-add" }, "the draft is still there: no replacement")
+        assertEquals(listOf(listOf("Failed to save draft"), listOf("Failed to save draft")), shown)
+        assertEquals("d9", m.current.draftId)
+        m.close()
+    }
+
+    /** PR review (P2): a replacement that failed to be created is tried again by the next save. */
+    @Test
+    fun aFailedReplacementIsTriedAgainByTheNextSave() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"old body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        w.drafts.clear() // deleted on the web
+        w.draftAddStatus = 503
+        m.setBody("new body", TextSelection(8))
+        testScheduler.advanceUntilIdle()
+        w.toasts()
+        m.saveDraft()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("Failed to save draft"), w.toasts())
+        w.draftAddStatus = null // the server is back
+        m.saveDraft()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("Draft Saved"), w.toasts())
+        assertEquals(1, w.drafts.size)
+        assertEquals(w.drafts.single()["_id"]!!.jsonPrimitive.content, m.current.draftId)
         m.close()
     }
 

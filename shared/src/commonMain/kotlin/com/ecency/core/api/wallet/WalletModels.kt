@@ -121,6 +121,8 @@ data class WalletAccount(
     val rewardHive: String = "0.000 HIVE",
     val rewardHbd: String = "0.000 HBD",
     val rewardVests: String = "0.000000 VESTS",
+    /** The node sent all three reward fields (a missing one reads "0" above, which says nothing). */
+    val rewardsSent: Boolean = true,
     val vestingShares: String = "0.000000 VESTS",
     val delegatedVestingShares: String = "0.000000 VESTS",
     val receivedVestingShares: String = "0.000000 VESTS",
@@ -162,6 +164,7 @@ data class WalletAccount(
                 withdrawn = o["withdrawn"].asDouble() ?: 0.0,
                 profileTokens = ProfileToken.fromMetadata(o["posting_json_metadata"]),
                 rewardVestingHive = a("reward_vesting_hive", "0.000 HIVE"),
+                rewardsSent = listOf("reward_hive_balance", "reward_hbd_balance", "reward_vesting_balance").all { o.str(it) != null },
             )
         }
     }
