@@ -305,13 +305,14 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
         env.session.state.map { if (it.isLoading) null else AccountNow(it.username) }.distinctUntilChanged().collect { it?.let { now -> navigator.accountIs(now.username) } }
     }
 
-    // the login screen left and nobody signed in: a share link's text that waited for that login goes
+    // the login screen left and nobody signed in: a share link's text, and a link's screen, that waited for that login go
     LaunchedEffect(env, navigator) {
         var shown = false
         androidx.compose.runtime.snapshotFlow { navigator.state.screens.any { it == AppScreen.Login } }.collect { showing ->
             if (shown && !showing && !env.session.current.isLoggedIn) {
                 env.waves.dropComposeText()
                 env.share.loginDismissed()
+                navigator.dropAfterLogin()
             }
             shown = showing
         }
@@ -631,8 +632,9 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
                             BotCommentsScreen(env, entry, root, { navigator.pop() }, actions, env.votes.state, now)
                         }
                         // ---- login and accounts (AuthUi.kt, LoginScreen.kt) ----
+                        // signed in: the login screen goes, unless the account change already put a waiting link's screen in its place
                         AppScreen.Login -> Box(Modifier.fillMaxSize().statusBarsPadding()) {
-                            LoginScreen(env, host, onBack = { navigator.pop() }, onSignedIn = { navigator.pop() }, onSignUp = { navigator.push(AppScreen.Register()) })
+                            LoginScreen(env, host, onBack = { navigator.pop() }, onSignedIn = { if (navigator.state.top == AppScreen.Login) navigator.pop() }, onSignUp = { navigator.push(AppScreen.Register()) })
                         }
                         is AppScreen.Register -> Box(Modifier.fillMaxSize().statusBarsPadding()) {
                             RegisterScreen(

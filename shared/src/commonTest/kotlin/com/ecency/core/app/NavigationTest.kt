@@ -213,6 +213,43 @@ class NavigationTest {
     }
 
     @Test
+    fun aGatedDeepLinkOpensWhereItWasGoingAfterSignIn() {
+        val transfer = AppScreen.of(RouteName.TRANSFER)
+        val entry = NavEntry(AppTab.WALLET, listOf(transfer, post))
+        val out = NavState().open(entry, loggedIn = false)
+        assertEquals(entry, out.afterLogin)
+        val signedIn = out.afterAccountChange(signedIn = true)
+        assertEquals(AppTab.WALLET, signedIn.tab)
+        assertEquals(listOf(transfer, post), signedIn.screens, "the login screen goes, the link's screens open")
+        assertNull(signedIn.afterLogin)
+        // a notification without a tab (a push's editor) goes on top of what was open, as when signed in
+        val editor = AppScreen.of(RouteName.EDITOR)
+        val pushed = NavState().push(post).open(NavEntry.screen(editor), loggedIn = false)
+        assertEquals(listOf(post, AppScreen.Login), pushed.screens)
+        assertEquals(listOf(post, editor), pushed.afterAccountChange(signedIn = true).screens)
+    }
+
+    @Test
+    fun aPendingGatedLinkGoesWithoutASignIn() {
+        val transfer = AppScreen.of(RouteName.TRANSFER)
+        val out = NavState().open(NavEntry(AppTab.WALLET, listOf(transfer)), loggedIn = false)
+        // the login closed, nobody signed in
+        assertNull(out.popTo(0).dropAfterLogin().afterLogin)
+        // a sign-out (or any change that leaves nobody signed in) drops it too
+        val signedOut = out.afterAccountChange(signedIn = false)
+        assertNull(signedOut.afterLogin)
+        assertFalse(transfer in signedOut.screens, "nothing that needs an account opens for nobody")
+        assertNull(out.afterAccountChange().afterLogin)
+        // a later link that needs no account replaces it
+        assertNull(out.open(NavEntry.screen(post), loggedIn = false).afterLogin)
+        // never saved: the saved navigation carries no pending screen and no arguments of it
+        assertNull(NavState.decode(out.encode()).afterLogin)
+        assertEquals(listOf("tab\u001FWALLET", "login"), out.encode())
+        // a reset (wipe) forgets it
+        assertNull(out.reset().afterLogin)
+    }
+
+    @Test
     fun deepLinksToGatedScreensAskForLoginFirst() {
         val transfer = AppScreen.of(RouteName.TRANSFER)
         val out = NavState().open(NavEntry(AppTab.WALLET, listOf(transfer, post)), loggedIn = false)

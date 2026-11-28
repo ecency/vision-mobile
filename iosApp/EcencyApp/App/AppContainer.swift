@@ -244,8 +244,11 @@ final class AppContainer: ObservableObject {
     }
     @Published var sheet: AppSheet? {
         didSet {
-            // the login sheet closed and nobody signed in: a share link's text that waited for that login goes
-            if oldValue?.id == "login", sheet?.id != "login", !env.session.current.isLoggedIn { env.waves.dropComposeText() }
+            // the login sheet closed and nobody signed in: a share link's text, and a link's screen, that waited for that login go
+            if oldValue?.id == "login", sheet?.id != "login", !env.session.current.isLoggedIn {
+                env.waves.dropComposeText()
+                nav = nav.dropAfterLogin()
+            }
         }
     }
     @Published var alert: AppAlert?
@@ -463,8 +466,12 @@ final class AppContainer: ObservableObject {
         accountChanges = session.$state.filter { !$0.isLoading }.map(\.username).removeDuplicates().dropFirst()
             .sink { [weak self] username in
                 guard let self else { return }
+                // a link that asked for the login sheet (NavState.afterLogin) opens now for whoever signed in; on a
+                // wide window its screen shows beside the list, as the link would have opened it signed in
+                let opens = username != nil && self.nav.afterLogin != nil
+                let changed = self.nav.afterAccountChange(signedIn: username != nil)
                 // the reply editor's account tile asked for this switch: the reply opens again for the new account
-                self.nav = self.env.replyHandoff.reopen(afterChange: self.nav.afterAccountChange(), username: username)
+                self.nav = self.env.replyHandoff.reopen(afterChange: opens ? changed.fitTo(wide: self.wideWindow) : changed, username: username)
                 // what the post menu had open belongs to the account that opened it
                 self.confirm = nil
                 // also a sheet still queued behind the one that is closing
@@ -1025,7 +1032,9 @@ final class AppContainer: ObservableObject {
     func closeDrawer() { nav = nav.closeDrawer() }
     func open(entry: NavEntry, loggedIn: Bool? = nil, fromList: Bool = false) {
         // one screen on a wide window: as a push, so a list's row replaces the pane and anything else goes on in it
-        if wideWindow, entry.tab == nil, entry.screens.count == 1, let screen = entry.screens.first, loggedIn == nil {
+        // (not a screen that asks for the login first: NavState.open keeps it for after the sign-in)
+        if wideWindow, entry.tab == nil, entry.screens.count == 1, let screen = entry.screens.first, loggedIn == nil,
+           session.state.isLoggedIn || !screen.route.requiresLogin {
             push(screen, fromList: fromList)
             env.entryOpened()
             return

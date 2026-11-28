@@ -545,6 +545,13 @@ data class NavState(
      * that opened in turn. Empty on a phone-sized window, and on Android, which never asks for it.
      */
     val pane: List<NavItem> = emptyList(),
+    /**
+     * Where a link or notification was going when [open] put the login screen in place of a screen that needs an
+     * account (a chat link opened signed out): opened by [afterAccountChange] once someone signs in, dropped by
+     * [dropAfterLogin] when the login closes with nobody signed in. Never saved ([encode]): a restored navigation
+     * has none.
+     */
+    val afterLogin: NavEntry? = null,
 ) {
     /** The screen on top, or null when the tabs show. */
     val top: AppScreen? get() = stack.lastOrNull()?.screen
@@ -634,13 +641,17 @@ data class NavState(
 
     fun closeDrawer(): NavState = if (drawerOpen) copy(drawerOpen = false) else this
 
-    /** A deep link or notification: see [NavEntry]. Screens that need an account open the login screen when [loggedIn] is false. */
+    /**
+     * A deep link or notification: see [NavEntry]. Screens that need an account open the login screen when [loggedIn]
+     * is false, and the entry waits in [afterLogin] for the sign-in. The latest link wins: one that opens without the
+     * login screen drops an earlier one waiting.
+     */
     fun open(entry: NavEntry, loggedIn: Boolean): NavState {
         var s = if (entry.tab != null) copy(tab = entry.tab, stack = emptyList(), pane = emptyList()) else this
-        s = s.copy(drawerOpen = false)
+        s = s.copy(drawerOpen = false, afterLogin = null)
         for (screen in entry.screens) {
             s = s.pushGated(screen, loggedIn)
-            if (s.top == AppScreen.Login) break // nothing behind the login screen that needs the account
+            if (s.top == AppScreen.Login) return s.copy(afterLogin = entry) // nothing behind the login screen that needs the account
         }
         return s
     }
@@ -660,7 +671,23 @@ data class NavState(
         // what the pane showed was opened from the previous account's list
         pane = emptyList(),
         drawerOpen = false,
+        afterLogin = null,
     )
+
+    /**
+     * [afterAccountChange]. When the change signed someone in ([signedIn]) while a link waited for it ([afterLogin]),
+     * the login screen leaves the stack and the link opens for the account that signed in, whichever it is: the
+     * reader chose it on that login screen, and what opens is that account's own (its conversation, its wallet).
+     */
+    fun afterAccountChange(signedIn: Boolean): NavState {
+        val waiting = afterLogin
+        val changed = afterAccountChange()
+        if (!signedIn || waiting == null) return changed
+        return changed.copy(stack = changed.stack.filter { it.screen != AppScreen.Login }).open(waiting, loggedIn = true)
+    }
+
+    /** The login screen (or sheet) closed with nobody signed in: [afterLogin] is not opened later. */
+    fun dropAfterLogin(): NavState = if (afterLogin == null) this else copy(afterLogin = null)
 
     /**
      * A navigation saved while [owner] was signed in (null: nobody, or unknown), restored while [current] is.

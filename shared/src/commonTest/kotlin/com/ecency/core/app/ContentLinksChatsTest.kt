@@ -58,6 +58,33 @@ class ContentLinksChatsTest {
     }
 
     @Test
+    fun signedOutTheConversationOpensAfterSignIn() {
+        val entry = assertNotNull(ContentLinks.entry("https://ecency.com/chats/$id"))
+        val out = NavState().open(entry, loggedIn = false)
+        // Android: the login screen is on the stack and the sign-in replaces it
+        val android = out.afterAccountChange(signedIn = true)
+        assertEquals(AppTab.CHATS, android.tab)
+        assertEquals(listOf<AppScreen>(AppScreen.ChatThread(id)), android.screens, "the conversation, not the Chats list")
+        assertNull(android.afterLogin, "opened once")
+        // iOS: the login screen is a sheet, popped off the stack before it shows
+        val ios = out.popTo(0).afterAccountChange(signedIn = true)
+        assertEquals(AppTab.CHATS, ios.tab)
+        assertEquals(listOf<AppScreen>(AppScreen.ChatThread(id)), ios.screens)
+        // the reader left the thread; a later sign-in (another account) opens nothing again
+        assertEquals(emptyList(), ios.popTo(0).afterAccountChange(signedIn = true).screens)
+    }
+
+    @Test
+    fun aCancelledLoginLeavesNoConversationForLater() {
+        val entry = assertNotNull(ContentLinks.entry("https://ecency.com/chats/$id"))
+        val cancelled = NavState().open(entry, loggedIn = false).popTo(0).dropAfterLogin()
+        assertNull(cancelled.afterLogin)
+        val later = cancelled.afterAccountChange(signedIn = true)
+        assertEquals(AppTab.CHATS, later.tab)
+        assertEquals(emptyList(), later.screens, "a sign-in later (accounts sheet, another link) does not open the old thread")
+    }
+
+    @Test
     fun aChatLinkInContentOpensTheConversationOnTop() {
         // tapped in a chat message or a post: the conversation goes on top, the open tab stays
         assertEquals(NavEntry.screen(AppScreen.ChatThread(id)), ContentLinks.contentEntry("https://ecency.com/chats/$id"))

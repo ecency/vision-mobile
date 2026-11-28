@@ -166,6 +166,36 @@ final class ChatUITests: XCTestCase {
         signedOut.launch()
         XCTAssertTrue(signedOut.textFields["login-username"].waitForExistence(timeout: 20), "the login gate first")
         XCTAssertFalse(signedOut.staticTexts["chat-title"].exists)
+        // signed in on that sheet: the conversation the link named opens, not the Chats list
+        signIn(signedOut)
+        XCTAssertTrue(signedOut.staticTexts["chat-title"].waitForExistence(timeout: 20), "the conversation opens after the sign-in")
+        XCTAssertTrue(any(signedOut, prefix: "chat-message-").waitForExistence(timeout: 10), "its messages load")
+    }
+
+    /// The same link signed out, its login closed: a sign-in later (the Chats tab's prompt) opens the list only.
+    func testAChatLinkWhoseLoginWasClosedOpensNothingLater() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments += ["-fakeData", "YES", "-openLink", "https://ecency.com/chats/offtopicdemochannel0000001"]
+        app.launch()
+        XCTAssertTrue(app.buttons["login-cancel"].waitForExistence(timeout: 20))
+        app.buttons["login-cancel"].tap()
+        let prompt = app.buttons["login-prompt-button"]
+        XCTAssertTrue(prompt.waitForExistence(timeout: 10), "the Chats tab asks for a sign-in")
+        prompt.tap()
+        signIn(app)
+        XCTAssertTrue(element(app, "chat-row-ch-ecency").waitForExistence(timeout: 20), "the Chats list")
+        XCTAssertFalse(app.staticTexts["chat-title"].exists, "no conversation from the closed login")
+    }
+
+    /// The login sheet with the offline auth services (`-fakeData YES`, LoginUITests): a throwaway account.
+    private func signIn(_ app: XCUIApplication) {
+        let user = app.textFields["login-username"]
+        XCTAssertTrue(user.waitForExistence(timeout: 20))
+        user.focusAndType("spike-alice")
+        app.secureTextFields["login-key"].focusAndType("P5UiTestThrowawayPasswordNotReal")
+        app.buttons["login-submit"].tap()
+        XCTAssertTrue(user.waitForNonExistence(timeout: 20), "signed in")
     }
 
     /// The author's name on someone else's message: a long press opens the message options only, a tap the
