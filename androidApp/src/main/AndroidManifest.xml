@@ -106,6 +106,9 @@
                 <data android:path="/created" />
                 <data android:path="/waves" />
                 <data android:pathPattern="/waves/.*" />
+                <!-- #3753: the Chats tab and a conversation, /chats/<channel id> (ContentLinks checks the id) -->
+                <data android:path="/chats" />
+                <data android:pathPattern="/chats/.*" />
             </intent-filter>
             <!-- Share into the app (RN react-native-receive-sharing-intent): text, an image, several images. -->
             <intent-filter>

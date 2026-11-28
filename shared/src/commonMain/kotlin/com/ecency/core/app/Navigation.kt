@@ -848,6 +848,9 @@ object ContentLinks {
     /** A Hive permlink as ecency.com links carry it. */
     private val PERMLINK = Regex("^[a-z0-9-]{1,256}$")
 
+    /** A Mattermost channel id, as ecency.com/chats/<id> carries it: 26 lowercase letters and digits. */
+    private val CHANNEL_ID = Regex("^[a-z0-9]{26}$")
+
     /** First-party hosts whose pages the app may be handed (App Links, universal links: ecency.com and alpha). */
     private val FIRST_PARTY_HOSTS = HOSTS + "alpha.ecency.com"
 
@@ -882,6 +885,8 @@ object ContentLinks {
             com.ecency.core.render.blocks.SafeTarget.post(reply.groupValues[1], reply.groupValues[2])
                 ?.let { NavEntry.from(LinkRouter.route(it)) }?.let { return it }
         }
+        // a conversation goes on top of the open tab, as a post does
+        if (page.tab == AppTab.CHATS) return page.screens.takeIf { it.isNotEmpty() }?.let { NavEntry(null, it) }
         return page.takeIf { it.tab == null }
     }
 
@@ -908,6 +913,17 @@ object ContentLinks {
                 }
             }
             return if (com.ecency.core.api.waves.Waves.composeText(safe) != null) NavEntry.tab(AppTab.WAVES) else null
+        }
+        // #3753: /chats is the Chats tab, /chats/<channel id> that conversation on it (RN had no chat link). Ecency's
+        // own pages only; an id that is no Mattermost channel id is left to the browser. The thread needs an account,
+        // so NavState.open puts the login screen first for a signed-out reader.
+        if (parts.firstOrNull()?.lowercase() == "chats") {
+            if (!firstParty) return null
+            return when {
+                parts.size == 1 -> NavEntry.tab(AppTab.CHATS)
+                parts.size == 2 && CHANNEL_ID.matches(parts[1]) -> NavEntry(AppTab.CHATS, listOf(AppScreen.ChatThread(parts[1])))
+                else -> null
+            }
         }
         val target: com.ecency.core.render.blocks.LinkTarget? = when {
             // /@author/followers and /following: the follows list (RN deepLinkParser)

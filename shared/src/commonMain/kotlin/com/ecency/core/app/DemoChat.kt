@@ -109,7 +109,8 @@ class DemoChat(private val nowMillis: () -> Long) {
         channels += Room("ch-dm-alice", "u-VIEWER__u-spike-alice", "spike-alice", "D", lastViewed = t - 30 * min, members = mutableListOf("VIEWER", "spike-alice"))
         channels += Room("ch-group", "group-1", "spike-alice, spike-bob, spike-carol", "G", groupOwner = true, lastViewed = t - 10 * min, members = mutableListOf("VIEWER", "spike-alice", "spike-bob", "spike-carol"))
         channels += Room("ch-photo", "hive-139531", "Photography", "O", header = "hive-139531", favorite = true, lastViewed = t - 5 * min, members = (people + "VIEWER").toMutableList())
-        channels += Room("ch-muted", "hive-174578", "Off topic", "O", header = "hive-174578", muted = true, lastViewed = t - 300 * min, members = (people + "VIEWER").toMutableList())
+        // a Mattermost shaped id (26 lowercase letters and digits): the one an ecency.com/chats link can open (#3753)
+        channels += Room("offtopicdemochannel0000001", "hive-174578", "Off topic", "O", header = "hive-174578", muted = true, lastViewed = t - 300 * min, members = (people + "VIEWER").toMutableList())
         channels += Room("ch-public", "hive-100001", "Hive Devs", "O", header = "hive-100001", joined = false, members = people.toMutableList())
 
         fun post(ch: String, user: String, msg: String, ago: Long, type: String = "", props: JsonObject = JsonObject(emptyMap()), root: String = "") =
@@ -132,7 +133,7 @@ class DemoChat(private val nowMillis: () -> Long) {
         post("ch-group", "spike-carol", "Nice name :+1:", 8)
         channels.first { it.id == "ch-group" }.groupName = "Book club"
         post("ch-photo", "spike-bob", "Golden hour today", 30)
-        post("ch-muted", "spike-dave", "Muted chatter", 200)
+        post("offtopicdemochannel0000001", "spike-dave", "Muted chatter", 200)
         post("ch-public", "spike-alice", "Public channel you have not joined.", 500)
         // seeded last so the ids above stay; read before the viewer's last visit, so no unread count changes
         post("ch-ecency", "spike-bob", BLOCKS_MESSAGE, 75)

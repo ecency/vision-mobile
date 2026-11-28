@@ -30,8 +30,17 @@ class AppLinksTest {
         assertTrue(opensHere("https://ecency.com/trending/photography"))
     }
 
+    /** #3753: a conversation's link (ecency.com/chats/<channel id>) and the Chats tab open the app. */
+    @Test
+    fun chatLinksOpenTheApp() {
+        for (url in listOf("https://ecency.com/chats", "https://ecency.com/chats/sk6xregduj81pj5hx67a3r8ath")) {
+            assertTrue(url, opensHere(url))
+        }
+        assertEquals(false, opensHere("https://ecency.com/chatsx"))
+    }
+
     /**
-     * #3655: `/auth` is the website's HiveSigner login callback (`/auth?code=...`). The app taking it left a website
+     * #3655:`/auth` is the website's HiveSigner login callback (`/auth?code=...`). The app taking it left a website
      * login unfinished; the app signs in through its own loopback redirect and `ecency://auth-transfer`.
      */
     @Test
