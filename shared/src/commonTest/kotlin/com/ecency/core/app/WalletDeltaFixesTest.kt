@@ -337,6 +337,19 @@ class WalletDeltaFixesTest {
         assertEquals(listOf("a1"), w.env.sendJournal.current.entries.map { it.actionId })
     }
 
+    @Test
+    fun aChangeWhileTheStoreRefusesReadsKeepsWhatIsStored() = runTest {
+        val w = WalletWorld(this)
+        val stored = """[{"account":"spike-voter","actionId":"a1","txId":"${"ab".repeat(20)}","expiration":"2026-10-06T11:45:00","operation":"transfer"}]"""
+        w.app.store.putString(SendJournal.ENTRY, stored)
+        w.app.store.failingReads[SendJournal.ENTRY] = com.ecency.core.secure.SecureStoreException.Unavailable(-25308, untilUnlock = true)
+        w.env.sendJournal.record("spike-voter", "b1", "transfer", "cd".repeat(20), "2026-10-06T11:46:00")
+        testScheduler.runCurrent()
+        assertEquals(listOf("b1"), w.env.sendJournal.current.entries.map { it.actionId }, "kept in memory")
+        w.app.store.failingReads.clear()
+        assertEquals(stored, w.app.store.getString(SendJournal.ENTRY), "the stored entry the read could not see is not written over")
+    }
+
     companion object {
         private const val HAS_KEY = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e"
     }

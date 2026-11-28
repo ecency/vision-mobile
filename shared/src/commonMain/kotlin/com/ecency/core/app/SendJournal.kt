@@ -191,12 +191,14 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
         val next = try {
             io {
                 store.withLock {
-                    val before = read().orEmpty()
+                    // a read the store refused writes nothing: what is stored stays for the next read (a write of the
+                    // change over nothing would drop every entry the read could not see)
+                    val before = read() ?: return@withLock null
                     val updated = transform(before)
                     if (updated != before) write(updated)
                     updated
                 }
-            }
+            } ?: transform(current.entries)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
