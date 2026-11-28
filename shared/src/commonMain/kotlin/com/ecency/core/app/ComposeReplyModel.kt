@@ -273,10 +273,8 @@ class ComposeReplyModel internal constructor(
         if (pending == null) pending = base?.pending
         if (text.isEmpty() && image == null && pending == null) {
             env.localDrafts.delete(user, slot)
-            env.replyDraftWrittenBySheet(parent.key, user, null)
         } else {
-            val draft = (base ?: LocalDraft()).copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image)
-            if (env.localDrafts.save(user, slot, draft)) env.replyDraftWrittenBySheet(parent.key, user, draft)
+            env.localDrafts.save(user, slot, (base ?: LocalDraft()).copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image))
         }
     }
 
@@ -423,7 +421,6 @@ class ComposeReplyModel internal constructor(
                 env.api.posts.addLocalComment(root, local)
                 pending = null
                 env.localDrafts.delete(author, slot)
-                env.replyPostedBySheet(parent.key, author, link, text)
                 setState { ReplyState(sent = local.key) }
                 env.replySent(this@ComposeReplyModel)
                 env.emit(AppEvent.CommentPosted(root, local.key))

@@ -252,13 +252,6 @@ class LocalDrafts(private val storage: DraftStorage, private val dispatchers: Ap
         withContext(dispatchers.io) { gate.withLock { runCatching { storage.write(account, slot, null) } } }
     }
 
-    /** Deletes the draft only if [matches] holds for what is stored, checked and deleted under one lock. */
-    suspend fun deleteIf(account: String, slot: String, matches: (LocalDraft?) -> Boolean) {
-        withContext(dispatchers.io) {
-            gate.withLock { runCatching { if (matches(LocalDraft.decode(storage.read(account, slot)))) storage.write(account, slot, null) } }
-        }
-    }
-
     /** [account] signed out: nothing it wrote stays on the device. False when it failed or did not finish in time. */
     suspend fun clear(account: String): Boolean {
         departed(listOf(account))
