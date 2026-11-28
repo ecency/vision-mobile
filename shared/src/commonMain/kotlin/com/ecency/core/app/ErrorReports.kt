@@ -156,6 +156,7 @@ object ErrorReports {
         isSessionRefused(root) -> true
         isDeviceLocked(root) -> true
         isChatRefusal(root) -> true
+        isSignupRefusal(root) -> true
         root is AuthException -> isUserMistake(root)
         else -> false
     }
@@ -171,6 +172,13 @@ object ErrorReports {
     /** The chat server refused in its own words ("@user is not on Ecency chat yet."): an answer, not a bug of the app. */
     private fun isChatRefusal(root: Throwable): Boolean =
         (root as? com.ecency.core.api.chat.ChatApiException)?.let { it.serverText && it.status in 400..499 } == true
+
+    /**
+     * The signup server refused in its own words (a 4xx with a message, which the user is shown): its answer, not a bug
+     * of the app (ECENCY-MOBILE-3RD). Without a message (the user sees "unknown error"), a 5xx or no answer stays an error.
+     */
+    private fun isSignupRefusal(root: Throwable): Boolean =
+        (root as? com.ecency.core.api.ecency.SignupException)?.let { it.status in 400..499 && !it.serverMessage.isNullOrEmpty() } == true
 
     /** Ecency refused the session (401) after the renewal: the user's to fix by signing in again. */
     private fun isSessionRefused(root: Throwable): Boolean = (root as? com.ecency.core.api.EcencyHttpException)?.isSessionRefused == true

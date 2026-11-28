@@ -108,6 +108,23 @@ class ErrorReportsTest {
         assertEquals("error", reporter.reports.single().level, "a refusal without the server's words is still a bug")
     }
 
+    /** ECENCY-MOBILE-3RD: a signup the server refused in its own words (a 4xx with a message) is its answer, not a bug. */
+    @Test
+    fun aSignupRefusalTheServerExplainsIsAnExpectedWarningWithNoCode() {
+        val refused = AppError.from(com.ecency.core.api.ecency.SignupException(406, null, "Not accepted"), "register.signUp")
+        assertEquals(null, refused.code)
+        assertEquals("warning", reporter.reports.single().level)
+        assertEquals("true", reporter.reports.single().tags["expected"])
+        reporter.reports.clear()
+        // the user sees "unknown error" then: no words of the server, still a bug to look at
+        AppError.from(com.ecency.core.api.ecency.SignupException(406, null, ""), "register.signUp")
+        now += ErrorReports.THROTTLE_MILLIS
+        AppError.from(com.ecency.core.api.ecency.SignupException(500, null, "Internal"), "register.signUp")
+        now += ErrorReports.THROTTLE_MILLIS
+        AppError.from(com.ecency.core.api.ecency.SignupException(0, null, null, RuntimeException("lost")), "register.signUp")
+        assertEquals(listOf("error", "error", "error"), reporter.reports.map { it.level })
+    }
+
     @Test
     fun anExpiredHiveSignerLoginIsTheUsersToFixWithNoCode() {
         val error = AppError.from(AuthException.HiveSignerApi(401, "invalid_grant", "The token has invalid role"), "editor.publish")
