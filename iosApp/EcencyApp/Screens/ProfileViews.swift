@@ -479,9 +479,9 @@ private struct ProfileSummaryView: View {
             ZStack {
                 Rectangle().fill(scheme == .dark ? Color(hex: 0x2E3D51) : Color(hex: 0xE6EEF9))
                 if !header.coverUrl.isEmpty {
-                    // decoded for the window's width (it spans it), which changes as iPhone Duo folds and unfolds;
-                    // 400 pt until the window is measured
-                    LoadedImageView(src: header.coverUrl, maxWidth: viewport?.width ?? 400, contentMode: .scaleAspectFill) { _ in }
+                    // decoded at least as wide as the window (it spans it, which changes as iPhone Duo folds and
+                    // unfolds; 400 pt until measured) and wide enough to fill the height (#3754)
+                    LoadedImageView(src: header.coverUrl, maxWidth: CoverDecode.width(window: viewport?.width, boxHeight: 160), contentMode: .scaleAspectFill) { _ in }
                         .accessibilityIdentifier("cover")
                 }
             }
@@ -811,7 +811,7 @@ struct ProfileEditScreen: View {
                             ZStack(alignment: .bottomTrailing) {
                                 RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground)
                                 if !state.coverPreview.isEmpty {
-                                    LoadedImageView(src: state.coverPreview, maxWidth: 400, contentMode: .scaleAspectFill) { _ in }
+                                    LoadedImageView(src: state.coverPreview, maxWidth: CoverDecode.width(window: nil, boxHeight: 140), contentMode: .scaleAspectFill) { _ in }
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                 }
                                 if state.uploading == .cover { uploadingCover.clipShape(RoundedRectangle(cornerRadius: 8)) }
@@ -1089,4 +1089,12 @@ struct AccountListScreen: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("account-list")
     }
+}
+
+/// The width a cover is decoded at (#3754). `LoadedImageView` decodes no wider than its `maxWidth` (in points, times
+/// the scale), and a cover is aspect-filled into a fixed height with the sides cropped: decoded only as wide as the
+/// window, a wide cover came out shorter than the box and was scaled up. A width of six heights keeps covers up to
+/// 6:1 (the web's default is 2688 x 480, 5.6:1) sharp.
+enum CoverDecode {
+    static func width(window: CGFloat?, boxHeight: CGFloat) -> CGFloat { max(window ?? 400, boxHeight * 6) }
 }

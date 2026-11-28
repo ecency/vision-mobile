@@ -120,4 +120,15 @@ final class ProfileTests: XCTestCase {
         while edit.state.value(field: .name) != "x" && Date() < end2 { RunLoop.main.run(until: Date().addingTimeInterval(0.05)) }
         XCTAssertEqual(edit.state.value(field: .name), "x")
     }
+
+    /// #3754: a wide cover on a phone window is decoded tall enough to fill the 160 pt header at 3x, not scaled up.
+    func testAWideCoverIsDecodedTallEnoughForTheHeader() throws {
+        let cover = UIGraphicsImageRenderer(size: CGSize(width: 2688, height: 480), format: { let f = UIGraphicsImageRendererFormat(); f.scale = 1; return f }())
+            .image { ctx in UIColor.blue.setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 2688, height: 480)) }.pngData()!
+        let header = try XCTUnwrap(ImageLoader.decode(cover, maxPixel: CoverDecode.width(window: 390, boxHeight: 160) * 3))
+        XCTAssertGreaterThanOrEqual(header.image.size.height, 480 - 1, "160 pt at 3x")
+        let preview = try XCTUnwrap(ImageLoader.decode(cover, maxPixel: CoverDecode.width(window: nil, boxHeight: 140) * 3))
+        XCTAssertGreaterThanOrEqual(preview.image.size.height, 420 - 1, "140 pt at 3x")
+        XCTAssertEqual(CoverDecode.width(window: 1400, boxHeight: 160), 1400, "a wide window still decodes for its width")
+    }
 }

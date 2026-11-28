@@ -336,8 +336,12 @@ object ProfileUiCopy {
     val WALLET: String get() = L.profile.wallet
     val YOUR_WALLET_IS_ON: String get() = L.native.ui.profile.yourWalletIsOnTheWallet
     fun userHasNoComments(username: String): String = L.native.ui.profile.userHasNoComments(username = username)
-    /** Under the Edit Profile cover picker (#3754): the web's default cover size. */
-    val COVER_HINT: String get() = L.native.ui.profile.coverHint(width = LocaleFormat.integer(2688), height = LocaleFormat.integer(480))
+    /** Under the Edit Profile cover picker (#3754), the web's text (vision-web#2213): its default cover size and half of it. */
+    val COVER_HINT: String
+        get() = L.native.ui.profile.coverHint(
+            width = LocaleFormat.integer(2688), height = LocaleFormat.integer(480),
+            minWidth = LocaleFormat.integer(1344), minHeight = LocaleFormat.integer(240),
+        )
 }
 
 /** Wallet, transfer and store screens. */
