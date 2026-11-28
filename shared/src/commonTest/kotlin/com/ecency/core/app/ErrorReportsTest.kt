@@ -332,6 +332,39 @@ class ErrorReportsTest {
         assertEquals("", reporter.reports.last().fingerprint[4])
     }
 
+    /**
+     * ECENCY-MOBILE-3R6: the message sent (the issue's title) names no account, as its fingerprint does not: a typed
+     * @name, and the account the chain or HiveSigner names in its own words.
+     */
+    @Test
+    fun theMessageSentNamesNoAccount() {
+        AppError.from(AuthException.UnknownAccount("typed-name1"), "session.signIn")
+        AppError.from(AuthException.HiveSignerApi(500, "server_error", "Account voter-12 already submitted 5 custom json operation(s) this block."), "post.reblog")
+        AppError.from(AuthException.HiveSignerApi(500, "server_error", "Account: abc.def has 172173227 RC, needs 956894907 RC."), "post.reblog")
+        AppError.from(rejected("Assert Exception:Account someone does not exist"), "wallet.transfer")
+        AppError.from(rejected("Account does not have enough mana to vote. voting_mana: 1199"), "comment.vote")
+        // an e-mail address goes whole, never as its name before an @<user>
+        AppError.from(IllegalStateException("no answer for jane.doe@mail.example"), "settings.contact")
+        // the out-of-RC count is an event of its own
+        val handled = reporter.reports.filter { it.tags["handled"] == "true" }
+        assertEquals(
+            listOf(
+                "account @<user> does not exist",
+                "HiveSigner error server_error: Account <user> already submitted 5 custom json operation(s) this block.",
+                "HiveSigner error server_error: Account: <user> has 172173227 RC, needs 956894907 RC.",
+                "Assert Exception:Account <user> does not exist",
+                "Account does not have enough mana to vote. voting_mana: 1199",
+                "no answer for <redacted-email>",
+            ),
+            handled.map { it.message },
+        )
+        for (r in handled) {
+            for (name in listOf("typed-name1", "voter-12", "abc.def", "someone", "jane.doe")) {
+                assertFalse(name in r.fingerprint.joinToString(" "), "${r.fingerprint}")
+            }
+        }
+    }
+
     @Test
     fun theMessageSentLosesAddressesUrisAndPaths() {
         AppError.from(IllegalStateException("copy of content://media/external/images/12 to /data/user/0/app/cache/x.jpg failed: https://images.example/upload?sig=1"), "media.copyPicked")

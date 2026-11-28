@@ -243,8 +243,10 @@ object ErrorReports {
         val s = sink.load() ?: return null
         val reporter = s.reporter()
         if (reporter === CrashReporter.None) return null
-        // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI)
-        val message = withoutPlaces(e.message.orEmpty())
+        // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI), nor
+        // account names (the issue's title: a typed username, ECENCY-MOBILE-3R6); secrets first, so an e-mail address
+        // goes whole
+        val message = withoutNames(withoutPlaces(CrashScrubber.scrub(e.message.orEmpty()).orEmpty()))
         val now = s.nowMillis()
         while (true) {
             val before = seen.load()
@@ -345,6 +347,14 @@ object ErrorReports {
     fun withoutPlaces(text: String): String = text.replace(URL, "<url>").replace(PATH, "<path>")
 
     private val URL = Regex("\\b[a-z][a-z0-9+.-]*://[^\\s,;)]*[^\\s,;):.]",RegexOption.IGNORE_CASE)
+    /**
+     * Account names replaced: @names, and the account the chain or HiveSigner names in its own words ("Account x
+     * already submitted", "Account: x has", "Account x does not exist").
+     */
+    fun withoutNames(text: String): String =
+        text.replace(AT_NAME, "@<user>").replace(ACCOUNT_NAME) { "${it.groupValues[1]}<user>" }
+
+    private val ACCOUNT_NAME = Regex("\\b([Aa]ccount:? )[a-z][a-z0-9.-]{2,15}(?= (?:has|already|does not exist)\\b)")
     private val QUOTED = Regex("\"[^\"]*\"|'[^']*'|`[^`]*`")
     private val AT_NAME = Regex("@[a-z0-9][a-z0-9.-]{1,15}", RegexOption.IGNORE_CASE)
     private val HEX = Regex("\\b(?:0x)?(?=[0-9a-fA-F]*[0-9])(?=[0-9a-fA-F]*[a-fA-F])[0-9a-fA-F]{6,}\\b")
@@ -353,7 +363,7 @@ object ErrorReports {
 
     /**
      * The message as the fingerprint keeps it: secrets scrubbed, then addresses (the node that answered last),
-     * quoted names, @names, hex and numbers replaced (an account, a node, a block number or a trx id must not split one
+     * quoted names, account names ([withoutNames]), hex and numbers replaced (an account, a node, a block number or a trx id must not split one
      * bug into many issues), cut to [MESSAGE_CHARS].
      */
     fun normalise(message: String): String {
@@ -361,7 +371,7 @@ object ErrorReports {
         return scrubbed
             .let(::withoutPlaces)
             .replace(QUOTED, "<q>")
-            .replace(AT_NAME, "@<user>")
+            .let(::withoutNames)
             .replace(HEX, "<hex>")
             .replace(NUMBER, "<n>")
             .replace(SPACES, " ")
