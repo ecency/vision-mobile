@@ -40,6 +40,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -1175,6 +1176,7 @@ class EditorModelTest {
             testScheduler.advanceUntilIdle()
             val again = w.app.env.replyModel(parent.key, parent)
             testScheduler.advanceUntilIdle()
+            assertSame(quick, again, "read again in place: a sheet showing it stays alive")
             assertEquals(body, again.current.text, "the quick reply continues what the editor wrote (started with '$start')")
             // typing on keeps the editor's text instead of writing the stale copy over it
             again.setText("$body three")
@@ -1207,10 +1209,32 @@ class EditorModelTest {
         testScheduler.advanceTimeBy(EditorModel.LOCAL_SAVE_DELAY_MILLIS + 100)
         testScheduler.runCurrent()
         assertTrue(quick.current.isSending)
+        assertEquals("on its way", quick.current.text, "a reply on its way is not read again under its send")
         assertTrue(w.app.env.replyModel(parent.key, parent) === quick, "the sending sheet keeps its model")
         gate.complete(Unit)
         testScheduler.advanceUntilIdle()
         assertNotNull(quick.current.sent, "the send was not cancelled")
+    }
+
+    @Test
+    fun editingAReplyLeavesTheQuickRepliesToItAlone() = runTest {
+        val w = World(this)
+        w.posts["$user/re-alice-1"] = replyEntry("re-alice-1", "my reply")
+        testScheduler.advanceUntilIdle()
+        val mine = w.app.env.api.posts.getPost(user, "re-alice-1")!!
+        val quick = w.app.env.replyModel(mine.key, mine)
+        quick.setText("an answer to my own reply")
+        testScheduler.advanceUntilIdle()
+        val seq = quick.current.prefillSeq
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "re-alice-1"))
+        assertEquals(EditorKind.EDIT_REPLY, edit.current.kind)
+        edit.setBody("my reply, edited", TextSelection(0))
+        testScheduler.advanceUntilIdle()
+        edit.leave()
+        edit.close()
+        testScheduler.advanceUntilIdle()
+        assertEquals(seq, quick.current.prefillSeq, "an edit writes its own slot: the quick reply under it is not read again")
+        assertEquals("an answer to my own reply", quick.current.text)
     }
 
     // ---- fields ----

@@ -299,4 +299,37 @@ class QuickReplyToolsTest {
         assertEquals(EditorKind.REPLY, args?.kind)
         assertEquals("half a thought\n\n ![]($url)", reply.current.text)
     }
+
+    /** The editor saved the shared slot: a composer uploading an image, or with a change not saved yet, keeps its own. */
+    @Test
+    fun aDraftSavedElsewhereNeverReplacesAnUploadOrUnsavedTyping() = runTest {
+        val app = signedIn()
+        val upload = CompletableDeferred<String?>()
+        app.uploads { upload.await() }
+        val reply = app.env.replyModel(key, parent)
+        reply.setText("half")
+        reply.attach(WaveImageSource.GALLERY)
+        testScheduler.advanceUntilIdle()
+        assertTrue(reply.current.isAttaching)
+        val slot = LocalDrafts.reply("alice", "root")
+        app.env.localDrafts.save(TestApp.USER, slot, LocalDraft(body = "from the editor", updated = 1))
+        app.env.replyDraftWrittenElsewhere(key)
+        testScheduler.advanceUntilIdle()
+        assertEquals("half", reply.current.text, "not while the image uploads")
+        upload.complete(url)
+        testScheduler.advanceUntilIdle()
+        assertEquals(url, reply.current.imageUrl, "the upload still lands")
+
+        reply.setText("half, typed on")
+        app.env.localDrafts.save(TestApp.USER, slot, LocalDraft(body = "from the editor", updated = 2))
+        app.env.replyDraftWrittenElsewhere(key)
+        testScheduler.advanceUntilIdle()
+        assertEquals("half, typed on", reply.current.text, "not while a change typed here waits to be saved")
+
+        app.env.localDrafts.save(TestApp.USER, slot, LocalDraft(body = "from the editor", updated = 3))
+        app.env.replyDraftWrittenElsewhere(key)
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor", reply.current.text, "otherwise the saved draft is read again")
+        assertNull(reply.current.imageUrl, "with its image: none")
+    }
 }

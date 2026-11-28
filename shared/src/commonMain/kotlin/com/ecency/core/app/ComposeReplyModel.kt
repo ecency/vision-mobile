@@ -237,6 +237,24 @@ class ComposeReplyModel internal constructor(
         if (local.replyImage != null && current.imageUrl == null && !current.isAttaching) setState { it.copy(imageUrl = local.replyImage) }
     }
 
+    /**
+     * The editor's reply mode saved this reply's slot: the text, image and pending publish are read from it again, so
+     * the sheet continues the editor's text instead of writing its older copy over it. Not while this composer sends
+     * or attaches, nor while a change typed here waits to be saved (two composers written at once on a two pane
+     * window: the later save wins, as before).
+     */
+    internal fun draftChangedElsewhere() {
+        val s = current
+        if (s.isSending || s.isAttaching || saveJob?.isActive == true) return
+        val user = owner ?: return
+        scope.launch {
+            val local = env.localDrafts.load(user, slot)
+            if (current.isSending || current.isAttaching || saveJob?.isActive == true) return@launch
+            pending = local?.pending
+            setState { it.copy(text = local?.body.orEmpty(), imageUrl = local?.replyImage, draftPermlink = local?.pending?.permlink, sent = null, prefillSeq = it.prefillSeq + 1) }
+        }
+    }
+
     /** The slot's draft with [text] and [image] (the attached one); the pending publish is always carried along. */
     private suspend fun store(user: String, text: String, image: String?) {
         if (text.isEmpty() && image == null && pending == null) {

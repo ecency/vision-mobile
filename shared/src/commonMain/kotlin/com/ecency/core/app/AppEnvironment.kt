@@ -1082,14 +1082,11 @@ class AppEnvironment(
 
     /**
      * The editor's reply mode wrote the reply draft of [parent] (the slot the quick reply shares): a quick reply model
-     * kept from before would show its older text, or none, and write it over the editor's on the next keystroke.
-     * It goes, unless its send is running; the next sheet reads the saved draft.
+     * kept from before would show its older text, or none, and write it over the editor's on the next keystroke. It
+     * reads the saved draft again in place ([ComposeReplyModel.draftChangedElsewhere]): a sheet showing it stays alive.
      */
     internal fun replyDraftWrittenElsewhere(parent: PostKey) {
-        val model = replies[parent] ?: return
-        if (model.current.isSending) return
-        replies.remove(parent)
-        model.dispose()
+        replies[parent]?.draftChangedElsewhere()
     }
 
     /** The editor posted the reply to [parent]: the quick reply sheet's model for it (same draft slot) starts fresh. */
