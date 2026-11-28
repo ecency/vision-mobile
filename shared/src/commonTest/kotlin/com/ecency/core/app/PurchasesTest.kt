@@ -144,8 +144,12 @@ class PurchasesTest {
     /** When set, the node's whole `result` for `lookup_accounts` (a malformed answer). */
     private var lookupResult: String? = null
 
+    /** Runs as the chain is asked `lookup_accounts` (something that happens meanwhile). */
+    private var onLookup: (() -> Unit)? = null
+
     private fun lookupAccounts(req: com.ecency.core.api.Sent): HttpResult? {
         if (req.method != "condenser_api.lookup_accounts") return null
+        onLookup?.invoke()
         if (lookupDown) return HttpResult(500, "")
         lookupResult?.let { return com.ecency.core.api.FakeTransport.result(req, it) }
         val prefix = Regex("\"params\":\\[\"([^\"]*)\"").find(req.body)!!.groupValues[1]
@@ -1234,6 +1238,96 @@ class PurchasesTest {
         assertEquals(listOf<PurchaseOutcome>(PurchaseOutcome.NothingToClaim(PurchaseSkus.ACCOUNT, true)), outcomes)
         assertFalse(PurchaseSkus.ACCOUNT in r.env.purchases.current.busy)
         job.cancel()
+    }
+
+    /**
+     * #3751: a buy tapped while its product is busy (a foreground recovery still sends an earlier purchase of it) is
+     * dropped by [PurchaseService.buy] and no outcome comes for it: the paid card's spinner ends at once and the card
+     * can be closed. No store sheet opens and no order is sent for the tap.
+     */
+    @Test
+    fun aClaimTappedWhileARecoveryHoldsThePaidAccountEndsItsSpinner() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill("newbie.one", "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        answers = mutableListOf(HttpResult(500, ""))
+        register.buyAccount()
+        testScheduler.advanceUntilIdle()
+        assertEquals(PurchaseCopy.CLAIM_ACCOUNT, register.current.paidButton)
+        register.dismissAlert()
+        answers = mutableListOf(HttpResult(201, "{}"))
+        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
+        r.app.authBackend.gate = { req -> if (req.url.endsWith("purchase-order")) release.await() }
+        r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        r.env.purchases.onForeground()
+        testScheduler.runCurrent()
+        assertTrue(PurchaseSkus.ACCOUNT in r.env.purchases.current.busy, "the recovery holds the paid account")
+        val sheets = r.store.sheets.size
+        val orders = r.orders.size
+        register.buyAccount()
+        testScheduler.runCurrent()
+        assertFalse(register.current.isRegistering, "no outcome comes for a dropped buy: no spinner left")
+        assertEquals(PurchaseCopy.PROCESSING, register.current.alert?.body)
+        register.dismissAlert()
+        register.closeOptions()
+        assertFalse(register.current.optionsOpen, "the card can be closed")
+        assertEquals(sheets, r.store.sheets.size, "no store sheet")
+        assertEquals(orders, r.orders.size, "no order for the tap")
+        release.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        register.close()
+    }
+
+    /** #3751: the product turns busy while the paid card asks the chain for the name (the checked way). */
+    @Test
+    fun aBuyWhoseProductTurnedBusyDuringTheNameCheckEndsItsSpinner() = runTest {
+        val r = rig(signedIn = null)
+        r.env.signupPrefill = SignupPrefill("newbie.one", "new@example.com", "", purchaseOnly = true)
+        val register = r.env.registerModel("")
+        testScheduler.advanceUntilIdle()
+        assertTrue(register.current.optionsOpen)
+        // another buy of the paid account holds it busy, its sheet still open, while the chain answers this tap's check
+        r.store.onSheet = {}
+        onLookup = { r.env.purchases.buy(PurchaseSkus.ACCOUNT, PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta("newbie.two", "two@example.com", ""))) }
+        register.buyAccount()
+        testScheduler.runCurrent()
+        onLookup = null
+        assertTrue(PurchaseSkus.ACCOUNT in r.env.purchases.current.busy)
+        assertEquals(listOf(PurchaseSkus.ACCOUNT), r.store.sheets, "only the other buy's sheet")
+        assertFalse(register.current.isRegistering, "no outcome comes for a dropped buy: no spinner left")
+        register.dismissAlert()
+        register.closeOptions()
+        assertFalse(register.current.optionsOpen, "the card can be closed")
+        assertTrue(r.orders.isEmpty())
+        register.close()
+    }
+
+    /**
+     * #3751: the other buy callers see a dropped call: [PurchaseService.buy] answers false, and the store screen and
+     * Pro draw their spinner from [PurchaseServiceState.busy], which ends with the recovery's own outcome.
+     */
+    @Test
+    fun aPackTappedWhileARecoveryHoldsItIsToldDroppedAndTheSpinnerFollowsTheRecovery() = runTest {
+        val r = rig()
+        val model = screen(r, StoreScreenKind.POINTS)
+        answers = mutableListOf(HttpResult(201, "{}"))
+        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
+        r.app.authBackend.gate = { req -> if (req.url.endsWith("purchase-order")) release.await() }
+        r.store.held += r.store.paid("999points")
+        r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        r.env.purchases.onForeground()
+        testScheduler.runCurrent()
+        assertTrue(model.current.processing, "busy shows as processing")
+        model.buy("999points")
+        assertFalse(r.env.purchases.buy("999points", PurchaseTarget(user = alice)), "a dropped buy says so")
+        assertTrue(r.env.purchases.buy("099points", PurchaseTarget(user = alice)), "a buy that starts says so")
+        testScheduler.runCurrent()
+        assertEquals(listOf("099points"), r.store.sheets, "no sheet for the busy pack")
+        release.complete(Unit)
+        testScheduler.runCurrent()
+        assertFalse(model.current.processing, "the spinner ends with the recovery")
+        model.close()
     }
 
     /** PR review: a card the reader closed while the name check ran stays closed when that check ends. */
