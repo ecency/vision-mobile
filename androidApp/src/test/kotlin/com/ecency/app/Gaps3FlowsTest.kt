@@ -78,7 +78,13 @@ class Gaps3FlowsTest {
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
     /** [compose.await]: load does not make it fail (ComposeAwait.kt); [what] names the wait in a failure. */
-    private fun until(what: String = "condition", condition: () -> Boolean) = compose.await(what) { compose.waitForIdle(); condition() }
+    private fun until(what: String = "condition", condition: () -> Boolean) = try {
+        compose.await(what) { compose.waitForIdle(); condition() }
+    } catch (e: AssertionError) {
+        // what the spotlight held when the wait gave up
+        val sp = env.spotlight
+        throw AssertionError("${e.message}; spotlight card=${sp.state.value.card?.id} user=${env.session.current.username} prefs=${env.prefs.getString(com.ecency.core.app.SpotlightModel.DISMISSED_PREFIX + "s1_tester")} opened=$opened", e)
+    }
 
     private fun waitFor(tag: String) = until("$tag shown") { exists(tag) }
 
@@ -140,7 +146,7 @@ class Gaps3FlowsTest {
         waitFor("spotlight:s1")
         assertEquals("Try Waves", text("spotlightTitle"))
         compose.onNodeWithTag("spotlightDismiss").performClick()
-        until { !exists("spotlight:s1") }
+        until("the spotlight gone after Dismiss") { !exists("spotlight:s1") }
         assertEquals("1", env.prefs.getString(com.ecency.core.app.SpotlightModel.DISMISSED_PREFIX + "s1_tester"))
     }
 
