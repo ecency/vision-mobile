@@ -1111,9 +1111,9 @@ class AppEnvironment(
         replyEditors[parent]?.toList()?.forEach { it.draftChangedElsewhere(user, draft) }
     }
 
-    /** The quick reply posted [user]'s reply to [parent] as [permlink]: a reply editor open beside it lets it go. */
-    internal fun replyPostedBySheet(parent: PostKey, user: String, permlink: String) {
-        replyEditors[parent]?.toList()?.forEach { it.replyPostedElsewhere(user, permlink) }
+    /** The quick reply posted [user]'s reply [text] to [parent] as [permlink]: a reply editor open beside it lets it go. */
+    internal fun replyPostedBySheet(parent: PostKey, user: String, permlink: String, text: String) {
+        replyEditors[parent]?.toList()?.forEach { it.replyPostedElsewhere(user, permlink, text) }
     }
 
     /** The editor posted the reply to [parent]: the quick reply sheet's model for it (same draft slot) starts fresh. */

@@ -1347,6 +1347,146 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
     }
 
+    /** Draft storage that runs a hook once at the next read or write of a reply slot: a save landing in between. */
+    private class HookedDrafts : DraftStorage {
+        val inner = InMemoryDraftStorage()
+        var onRead: (() -> Unit)? = null
+        var beforeWrite: (() -> Unit)? = null
+        var afterWrite: (() -> Unit)? = null
+        var refuse = false
+        override fun read(account: String, slot: String): String? {
+            val value = inner.read(account, slot)
+            if (slot.startsWith("reply:")) onRead?.also { onRead = null }?.invoke()
+            return value
+        }
+        override fun write(account: String, slot: String, value: String?) {
+            if (!slot.startsWith("reply:")) return inner.write(account, slot, value)
+            beforeWrite?.also { beforeWrite = null }?.invoke()
+            if (refuse) throw IllegalStateException("disk full")
+            inner.write(account, slot, value)
+            afterWrite?.also { afterWrite = null }?.invoke()
+        }
+        override fun clear(account: String) = inner.clear(account)
+        override fun clearAll() = inner.clearAll()
+        fun body(): String? = inner.read(TestApp.USER, LocalDrafts.reply("alice", "root"))?.let { LocalDraft.decode(it)?.body }
+    }
+
+    /** The quick reply's save of [body] as it lands: written, then the editors told. */
+    private fun sheetSaves(w: World, drafts: HookedDrafts, body: String) {
+        val draft = LocalDraft(body = body, updated = w.app.env.nowMillis())
+        drafts.inner.write(user, LocalDrafts.reply("alice", "root"), draft.encode())
+        w.app.env.replyDraftWrittenBySheet(com.ecency.core.api.model.PostKey("alice", "root"), user, draft)
+    }
+
+    private fun hookedWorld(scope: TestScope): Pair<World, HookedDrafts> {
+        val w = World(scope)
+        val drafts = HookedDrafts()
+        w.app.env.draftStorage = drafts
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        scope.testScheduler.advanceUntilIdle()
+        return w to drafts
+    }
+
+    /** Review of #3759: the sheet saving while the editor loads, after the load read the older text, is shown once it loaded. */
+    @Test
+    fun aSheetSaveDuringTheEditorsLoadIsShownOnceItLoaded() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        drafts.inner.write(user, LocalDrafts.reply("alice", "root"), LocalDraft(body = "older").encode())
+        drafts.onRead = { sheetSaves(w, drafts, "newer from the sheet") }
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        assertEquals("newer from the sheet", editor.current.body)
+        editor.leave()
+        editor.close()
+        testScheduler.advanceUntilIdle()
+        assertEquals("newer from the sheet", drafts.body())
+    }
+
+    /** Review of #3759: whichever of the editor's save and the sheet's committed last is what the editor shows. */
+    @Test
+    fun theEditorShowsTheLastSaveCommittedWhenTheSheetsLandsDuringItsOwn() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        // the sheet's write commits first, then the editor's
+        drafts.beforeWrite = { sheetSaves(w, drafts, "from the sheet") }
+        editor.setBody("from the editor", TextSelection(15))
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor", drafts.body())
+        assertEquals("from the editor", editor.current.body, "the editor's write was the last")
+        // the editor's write commits first, then the sheet's
+        drafts.afterWrite = { sheetSaves(w, drafts, "the sheet, later") }
+        editor.setBody("from the editor again", TextSelection(21))
+        testScheduler.advanceUntilIdle()
+        assertEquals("the sheet, later", drafts.body())
+        assertEquals("the sheet, later", editor.current.body, "the sheet's write was the last")
+    }
+
+    /** Review of #3759: text whose autosave failed is typing not saved yet: the sheet's save does not replace it. */
+    @Test
+    fun textWhoseAutosaveFailedIsNotReplacedByTheSheet() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        drafts.refuse = true
+        editor.setBody("only in memory", TextSelection(14))
+        testScheduler.advanceUntilIdle()
+        assertTrue(editor.current.localSaveFailed)
+        drafts.refuse = false
+        sheetSaves(w, drafts, "from the sheet")
+        testScheduler.advanceUntilIdle()
+        assertEquals("only in memory", editor.current.body)
+        // leaving writes it at last
+        editor.leave()
+        editor.close()
+        testScheduler.advanceUntilIdle()
+        assertEquals("only in memory", drafts.body())
+    }
+
+    /** Review of #3759: the sheet posting an older text leaves a newer reply in the editor, saved, with no pending send. */
+    @Test
+    fun aNewerReplyInTheEditorStaysWhenTheSheetPostsTheOlderOne() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        val quick = w.app.env.replyModel(parent.key, parent)
+        testScheduler.advanceUntilIdle()
+        val gate = CompletableDeferred<Unit>()
+        w.broadcastAnswer = { gate.await(); FakeTransport.result(it, "{}") }
+        quick.setText("first reply")
+        testScheduler.advanceUntilIdle()
+        quick.send()
+        testScheduler.runCurrent()
+        assertTrue(quick.current.isSending)
+        editor.setBody("a newer reply", TextSelection(13))
+        testScheduler.advanceTimeBy(EditorModel.LOCAL_SAVE_DELAY_MILLIS + 10)
+        testScheduler.runCurrent()
+        assertEquals("a newer reply", drafts.body(), "the editor's autosave ran before the sheet's answer")
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertNotNull(quick.current.sent)
+        assertEquals("a newer reply", editor.current.body, "only the posted text leaves the editor")
+        assertEquals("a newer reply", drafts.body(), "and the newer reply stays saved after the sheet cleared the slot")
+        assertNull(LocalDraft.decode(drafts.inner.read(user, LocalDrafts.reply("alice", "root")))?.pending, "with no pending send: the next one is new")
+    }
+
+    /** Review of #3759: an open preview follows a body the sheet replaced. */
+    @Test
+    fun anOpenPreviewFollowsTheSheetsText() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        editor.setBody("before", TextSelection(6))
+        testScheduler.advanceUntilIdle()
+        editor.setPreview(true)
+        testScheduler.advanceUntilIdle()
+        val before = editor.current.preview
+        sheetSaves(w, drafts, "after, from the sheet")
+        testScheduler.advanceUntilIdle()
+        val shown = editor.current.preview
+        editor.setPreview(false)
+        editor.setPreview(true)
+        testScheduler.advanceUntilIdle()
+        assertNotEquals(before, shown)
+        assertEquals(editor.current.preview, shown, "the preview of the new text")
+    }
+
     /** Greptile on #3756: the editor's send whose answer was lost is asked about from the sheet, never sent again. */
     @Test
     fun aReplyTheEditorSentIsNeverSentAgainFromTheSheet() = runTest {

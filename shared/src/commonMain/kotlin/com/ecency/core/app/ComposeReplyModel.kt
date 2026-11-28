@@ -423,7 +423,7 @@ class ComposeReplyModel internal constructor(
                 env.api.posts.addLocalComment(root, local)
                 pending = null
                 env.localDrafts.delete(author, slot)
-                env.replyPostedBySheet(parent.key, author, link)
+                env.replyPostedBySheet(parent.key, author, link, text)
                 setState { ReplyState(sent = local.key) }
                 env.replySent(this@ComposeReplyModel)
                 env.emit(AppEvent.CommentPosted(root, local.key))

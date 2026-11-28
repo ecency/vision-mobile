@@ -135,23 +135,27 @@ final class AccessibilityUITests: XCTestCase {
                                 timeout: TimeInterval = 20) -> (pixels: Pixels, ignored: [CGRect])? {
         let start = Date()
         var last = Self.pixels(app.screenshot().image)
-        // Esie's place is looked up once per wait (she does not move about the screen)
         let scale = CGFloat(last.width) / max(app.windows.firstMatch.frame.width, 1)
-        let esie = Self.esieIdentifiers.flatMap { id in
-            app.descendants(matching: .any).matching(identifier: id).allElementsBoundByIndex.map { e -> CGRect in
-                let f = e.frame
-                return CGRect(x: f.minX * scale, y: f.minY * scale, width: f.width * scale, height: f.height * scale)
-            }
+        let statusBar = CGRect(x: 0, y: 0, width: CGFloat(last.width), height: Self.statusBarHeight * scale)
+        // Esie's place is looked up on every poll: the chats list's Esie button appears only once chat connects, which
+        // can be after the wait began
+        func ignored() -> [CGRect] {
+            Self.esieIdentifiers.flatMap { id in
+                app.descendants(matching: .any).matching(identifier: id).allElementsBoundByIndex.map { e -> CGRect in
+                    let f = e.frame
+                    return CGRect(x: f.minX * scale, y: f.minY * scale, width: f.width * scale, height: f.height * scale)
+                }
+            } + [statusBar]
         }
-        let ignored = esie + [CGRect(x: 0, y: 0, width: CGFloat(last.width), height: Self.statusBarHeight * scale)]
         var changed = -1
         while Date().timeIntervalSince(start) < timeout {
             Thread.sleep(forTimeInterval: interval)
             let now = Self.pixels(app.screenshot().image)
-            changed = Self.changedPixels(last, now, ignoring: ignored)
+            let leftOut = ignored()
+            changed = Self.changedPixels(last, now, ignoring: leftOut)
             if changed <= Self.stillTolerance {
                 print("AccessibilityUITests \(screen): still after \(String(format: "%.1f", Date().timeIntervalSince(start))) s (\(changed) px changed)")
-                return (now, ignored)
+                return (now, leftOut)
             }
             last = now
         }

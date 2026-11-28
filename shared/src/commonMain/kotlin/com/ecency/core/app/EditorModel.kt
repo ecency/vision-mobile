@@ -319,6 +319,8 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 setState { it.copy(error = AppError.from(e, "editor.start")) }
             }
             setState { s -> s.copy(loading = false, wordsCount = EditorMeta.wordsCount(s.body), tagWarning = EditorTags.warning(s.tags)) }
+            // what the quick reply saved or posted while this loaded (the load may have read the older text)
+            replaySheet()
             loadSupportPercent(owner)
             loadQuestChip(owner)
             loadRc(owner)
@@ -1056,40 +1058,112 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         // RN _saveCurrentDraft: nothing after a publish, so a late save cannot bring a published post back as a draft
         if (published || s.loading) return
         dirty = false
-        val ok = env.localDrafts.save(owner, slot, localDraft(s))
+        val draft = localDraft(s)
+        savingLocal = true
+        val ok = try {
+            env.localDrafts.save(owner, slot, draft)
+        } finally {
+            savingLocal = false
+        }
         if (ok && args.kind == EditorKind.REPLY) env.replyDraftWrittenElsewhere(PostKey(args.author, args.permlink))
         // a save refused because the account left the device (logout, wipe) is the teardown at work, not a failure to report
         val failed = !ok && !env.localDrafts.hasLeft(owner)
+        // the text is still only in memory: typing not saved yet, which nothing replaces, and written on leaving
+        if (failed) dirty = true
+        if (heldFromSheet != null) {
+            // the sheet's save landed during this one: shown only if it committed after it
+            val stored = env.localDrafts.load(owner, slot)
+            if (stored?.body == draft.body && stored.replyImage == draft.replyImage) heldFromSheet = null else replaySheet()
+        }
         if (current.localSaveFailed != failed) setState { it.copy(localSaveFailed = failed) }
     }
 
     /**
+     * What the quick reply did while this editor could not take it (its load, or its own save, was running), the
+     * latest only: taken once that ends ([replaySheet]).
+     */
+    private var heldFromSheet: SheetChange? = null
+
+    /** The quick reply saved [draft] (null: emptied), or posted [postedText] as [postedPermlink]. */
+    private class SheetChange(val draft: LocalDraft?, val postedPermlink: String? = null, val postedText: String? = null)
+
+    /** This editor's own local save is being written: a sheet save landing meanwhile may commit before or after it. */
+    private var savingLocal = false
+
+    /**
      * The quick reply under this reply's parent saved [user]'s draft ([draft], null when it emptied it): shown here,
      * so this editor's next save carries it instead of writing its older copy over it (a two pane window, #3755).
-     * Not while this editor loads, sends or uploads, after it published, nor while typing here waits to be saved
-     * (the later save wins, as the quick reply does for this editor's saves).
+     * Not while this editor sends or uploads, after it published, nor while typing here waits to be saved, a failed
+     * save's included (the later save wins, as the quick reply does for this editor's saves). While this editor
+     * loads, or writes its own save, it is held and taken once that ends: the load may have read the older text, and
+     * of two writes the one that committed last is what the editor shows.
      */
     internal fun draftChangedElsewhere(user: String, draft: LocalDraft?) {
         val s = current
-        if (s.owner != user || s.loading || s.isSending || s.uploading > 0 || published || dirty) return
+        if (s.owner != user || s.isSending || s.uploading > 0 || published) return
+        if (s.loading || savingLocal) {
+            heldFromSheet = SheetChange(draft)
+            return
+        }
+        if (dirty) return
+        applySheetDraft(draft)
+    }
+
+    private fun applySheetDraft(draft: LocalDraft?) {
         val body = draft?.let { com.ecency.core.api.waves.WavePublish.body(it.body, it.replyImage) }.orEmpty()
         // a permlink a failed send left is kept until a send settles it
         draft?.pending?.let { pending = it }
-        if (body == s.body) return
+        showBody(body)
+    }
+
+    /** A body the quick reply gave: the text field and an open preview follow it; nothing is saved. */
+    private fun showBody(body: String) {
+        if (body == current.body) return
         setState { it.copy(body = body, selection = TextSelection(body.length), bodyRevision = it.bodyRevision + 1, wordsCount = EditorMeta.wordsCount(body)) }
+        if (current.isPreview) setPreview(true)
     }
 
     /**
-     * The quick reply posted [user]'s reply as [permlink]: the posted text leaves this editor, so it is never saved
-     * back as a draft, and its permlink is no longer this editor's pending send (the next reply is a new one). Typing
-     * here not saved yet stays, as the start of that next reply.
+     * The quick reply posted [user]'s reply [text] as [permlink]: that permlink is no longer this editor's pending
+     * send (its next reply is a new one), and the posted text leaves this editor, so it is never saved back as a
+     * draft. Text here that is not the posted text (typed after it, saved or not) stays, and is saved again: the sheet
+     * cleared the slot.
      */
-    internal fun replyPostedElsewhere(user: String, permlink: String) {
+    internal fun replyPostedElsewhere(user: String, permlink: String, text: String) {
         val s = current
         if (s.owner != user || s.isSending || published) return
         if (pending?.permlink == permlink) pending = null
-        if (dirty || s.body.isEmpty()) return
-        setState { it.copy(body = "", selection = TextSelection(0), bodyRevision = it.bodyRevision + 1, wordsCount = 0) }
+        if (s.loading || savingLocal) {
+            heldFromSheet = SheetChange(null, permlink, text)
+            return
+        }
+        applyPosted(text)
+    }
+
+    private fun applyPosted(text: String) {
+        val body = current.body
+        when {
+            body.isEmpty() -> Unit
+            !dirty && body == text -> showBody("")
+            // a newer reply: kept, and written back (its own save, if one is waiting, writes it too)
+            else -> markChanged()
+        }
+    }
+
+    /** What the quick reply did during this editor's load or save, now that it ended. */
+    private fun replaySheet() {
+        val held = heldFromSheet ?: return
+        heldFromSheet = null
+        val s = current
+        if (s.isSending || s.uploading > 0 || published) return
+        val posted = held.postedPermlink
+        if (posted != null) {
+            // the load may have read the pending send the sheet then settled
+            if (pending?.permlink == posted) pending = null
+            applyPosted(held.postedText.orEmpty())
+        } else if (!dirty) {
+            applySheetDraft(held.draft)
+        }
     }
 
     /**
