@@ -340,7 +340,7 @@ class ErrorReportsTest {
     fun theMessageSentNamesNoAccount() {
         AppError.from(AuthException.UnknownAccount("typed-name1"), "session.signIn")
         AppError.from(AuthException.HiveSignerApi(500, "server_error", "Account voter-12 already submitted 5 custom json operation(s) this block."), "post.reblog")
-        AppError.from(AuthException.HiveSignerApi(500, "server_error", "Account: abc.def has 172173227 RC, needs 956894907 RC."), "post.reblog")
+        AppError.from(AuthException.HiveSignerApi(500, "server_error", "Account: abc.def has 1000 RC, needs 2000 RC."), "post.reblog")
         AppError.from(rejected("Assert Exception:Account someone does not exist"), "wallet.transfer")
         AppError.from(rejected("Account does not have enough mana to vote. voting_mana: 1199"), "comment.vote")
         // an e-mail address goes whole, never as its name before an @<user>
@@ -355,7 +355,7 @@ class ErrorReportsTest {
             listOf(
                 "account @<user> does not exist",
                 "HiveSigner error server_error: Account <user> already submitted 5 custom json operation(s) this block.",
-                "HiveSigner error server_error: Account: <user> has 172173227 RC, needs 956894907 RC.",
+                "HiveSigner error server_error: Account: <user> has 1000 RC, needs 2000 RC.",
                 "Assert Exception:Account <user> does not exist",
                 "Account does not have enough mana to vote. voting_mana: 1199",
                 "no answer for <redacted-email>",

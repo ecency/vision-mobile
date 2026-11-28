@@ -43,8 +43,8 @@ class ChainRefusalTest {
         ChainRefusal.VOTE_TOO_SMALL to "Assert Exception: Voting weight is too small, please accumulate more voting power or Hive Power.",
         ChainRefusal.VOTE_TOO_SMALL to "Assert Exception: Account does not have enough power to vote.",
         // hived 1.28 (Sentry ECENCY-MOBILE-3S0, 3S1: sent as an app error with a code)
-        ChainRefusal.VOTE_TOO_SMALL to "Assert Exception:voter.voting_manabar.has_mana( fc::uint128_to_int64( used_mana ) ): Account does not have enough mana to vote. voting_mana: 101241143",
-        ChainRefusal.VOTE_TOO_SMALL to "HiveSigner error server_error: Account does not have enough mana to vote. voting_mana: 1199918155623 required_mana: 1960664684790",
+        ChainRefusal.VOTE_TOO_SMALL to "Assert Exception:voter.voting_manabar.has_mana( fc::uint128_to_int64( used_mana ) ): Account does not have enough mana to vote. voting_mana: 1000",
+        ChainRefusal.VOTE_TOO_SMALL to "HiveSigner error server_error: Account does not have enough mana to vote. voting_mana: 1000 required_mana: 2000",
         ChainRefusal.VOTE_TOO_SMALL to "Assert Exception: Account does not have enough mana to downvote.",
         ChainRefusal.PAID_OUT to "Assert Exception: Votes evaluating for comment that is paid out is forbidden.",
         ChainRefusal.PAID_OUT to "Assert Exception: Updating parameters for comment that is paid out is forbidden.",
