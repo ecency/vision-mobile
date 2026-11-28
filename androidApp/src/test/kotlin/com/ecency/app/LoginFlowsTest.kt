@@ -131,16 +131,8 @@ class LoginFlowsTest {
     }
 
     /** waitUntil does not always drain Robolectric's main looper; idling between checks does. */
-    private fun until(condition: () -> Boolean) {
-        val end = System.currentTimeMillis() + 10_000
-        while (true) {
-            compose.waitForIdle()
-            if (condition()) return
-            if (System.currentTimeMillis() > end) throw AssertionError("condition not met in 10 s")
-            org.robolectric.shadows.ShadowLooper.idleMainLooper()
-            Thread.sleep(20)
-        }
-    }
+    /** [compose.await]: load does not make it fail (ComposeAwait.kt). */
+    private fun until(condition: () -> Boolean) = compose.await("condition") { compose.waitForIdle(); condition() }
 
     private fun store(vararg accounts: VaultAccount) = KeyVault(node.store).run {
         accounts.forEach { save(it) }

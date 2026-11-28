@@ -77,18 +77,10 @@ class Gaps3FlowsTest {
 
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
-    private fun until(condition: () -> Boolean) {
-        val end = System.currentTimeMillis() + 10_000
-        while (true) {
-            compose.waitForIdle()
-            if (condition()) return
-            if (System.currentTimeMillis() > end) throw AssertionError("condition not met in 10 s")
-            org.robolectric.shadows.ShadowLooper.idleMainLooper()
-            Thread.sleep(20)
-        }
-    }
+    /** [compose.await]: load does not make it fail (ComposeAwait.kt); [what] names the wait in a failure. */
+    private fun until(what: String = "condition", condition: () -> Boolean) = compose.await(what) { compose.waitForIdle(); condition() }
 
-    private fun waitFor(tag: String) = until { exists(tag) }
+    private fun waitFor(tag: String) = until("$tag shown") { exists(tag) }
 
     private fun text(tag: String): String =
         compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Text)?.joinToString("") { it.text }.orEmpty()
@@ -159,8 +151,8 @@ class Gaps3FlowsTest {
         launch()
         waitFor("spotlightAction")
         compose.onNodeWithTag("spotlightAction").performClick()
-        until { opened == listOf("https://example.com/feature") }
-        until { !exists("spotlight:s1") }
+        until("the link opened") { opened == listOf("https://example.com/feature") }
+        until("the spotlight gone") { !exists("spotlight:s1") }
     }
 
     // ---- walkthrough marker ----

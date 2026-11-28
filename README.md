@@ -92,7 +92,7 @@ Every change lands with tests:
 - Android device: `androidApp/src/androidTest` for what Robolectric cannot do (Android Keystore), `./gradlew :androidApp:connectedDebugAndroidTest`.
 - iOS: `EcencyAppTests` (XCTest) and `EcencyAppUITests` (XCUITest).
 - Test data uses throwaway keys and dummy values only.
-- Android Compose tests that wait on background work use `ComposeTestRule.await` (`ComposeAwait.kt`): it runs the main looper each round and has no 10 s wall-clock cap (`SliceFlowsTest`).
+- Android Compose tests that wait on background work use `ComposeTestRule.await` (`ComposeAwait.kt`): it runs the main looper each round and has no 10 s wall-clock cap (`SliceFlowsTest`). The flow tests' own `until` helpers wait through it too: their 10 s wall-clock loops failed under load (a full run beside an iOS build, `Gaps3FlowsTest.theSpotlightButtonOpensItsLinkAndGoesAway`).
 - Scaling tests (`LinearScaling`): every "stays linear" check bills the measuring thread's CPU time (JVM `ThreadMXBean`, Kotlin/Native `CLOCK_THREAD_CPUTIME_ID`), keeps the fastest run of each size across up to five attempts, and only uses wall time as a hang guard. A quadratic still fails (an ancestor walk in `Dom.insertNode`: exponent 2.37 to 2.47).
 - Golden files: regenerating a generator under `tools/golden` or `tools/render` (or, from the `rn-3.x-final` tag, one of those that ran the RN app's source; tools/README.md) reproduces its committed file, except the values that are random by design and checked by recovery or decryption instead (the SDK's randomised signatures in `GoldenVectors.kt`, `AuthGoldenVectors.kt` and `EditorGoldenVectors.kt`, crypto-js salts in `AuthGoldenVectors.kt` and `LegacyFixtures.kt`).
 

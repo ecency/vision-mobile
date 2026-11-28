@@ -38,7 +38,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import org.robolectric.shadows.ShadowLooper
 
 /** Esie at her placements (README "Esie"): resting on empty lists, sad on failures, waving on welcome and login. */
 @RunWith(RobolectricTestRunner::class)
@@ -84,16 +83,8 @@ class EsieFlowsTest {
     /** The moods of every Esie on screen. */
     private fun moods() = compose.onAllNodes(hasTestTag("esie"), useUnmergedTree = true).fetchSemanticsNodes().map { it.config[EsieMoodKey] }
 
-    private fun until(condition: () -> Boolean) {
-        val end = System.currentTimeMillis() + 10_000
-        while (true) {
-            compose.waitForIdle()
-            if (condition()) return
-            if (System.currentTimeMillis() > end) throw AssertionError("condition not met in 10 s")
-            ShadowLooper.idleMainLooper()
-            Thread.sleep(20)
-        }
-    }
+    /** [compose.await]: load does not make it fail (ComposeAwait.kt). */
+    private fun until(condition: () -> Boolean) = compose.await("condition") { compose.waitForIdle(); condition() }
 
     @Test
     fun anEmptyFeedShowsEsieResting() {

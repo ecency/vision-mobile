@@ -212,16 +212,8 @@ class WalletFlowsTest {
 
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
-    private fun until(condition: () -> Boolean) {
-        val end = System.currentTimeMillis() + 15_000
-        while (true) {
-            compose.waitForIdle()
-            if (condition()) return
-            if (System.currentTimeMillis() > end) throw AssertionError("condition not met in 15 s")
-            org.robolectric.shadows.ShadowLooper.idleMainLooper()
-            Thread.sleep(20)
-        }
-    }
+    /** [compose.await]: load does not make it fail (ComposeAwait.kt). */
+    private fun until(condition: () -> Boolean) = compose.await("condition") { compose.waitForIdle(); condition() }
 
     private fun text(tag: String): String =
         compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Text)?.joinToString("") { it.text }.orEmpty()
