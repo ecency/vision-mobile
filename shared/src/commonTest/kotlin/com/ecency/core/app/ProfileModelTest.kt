@@ -159,6 +159,8 @@ class ProfileModelTest {
         assertEquals(42, h.resourceCreditsHours)
         assertEquals("my-post", h.pinned)
         assertTrue(h.coverUrl.startsWith(TestApp.PROXY + "/"))
+        // #3754: asked by height for the 160 dp header at 3x (the sides are cropped), never squeezed into 640 x 320
+        assertTrue(h.coverUrl.endsWith("?format=match&mode=fit&height=480"), h.coverUrl)
         assertEquals("${TestApp.PROXY}/u/alice/avatar/large", h.avatarUrl)
         assertTrue(s.isFollowing)
         assertFalse(s.isMuted)

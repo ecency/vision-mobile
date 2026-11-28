@@ -2253,6 +2253,7 @@
         "open_wallet": "Open Wallet",
         "your_wallet_is_on_the_wallet": "Your wallet is on the Wallet tab.",
         "user_has_no_comments": "@{username} haven't commented anything yet",
+        "cover_hint": "Recommended size {width} × {height} px. Keep what matters in the middle: the sides are cropped on narrow screens.",
         "menu": "More",
         "users": "Users"
       },

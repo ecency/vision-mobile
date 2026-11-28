@@ -806,7 +806,7 @@ struct ProfileEditScreen: View {
                         }
                     }
                     .listRowBackground(Color.clear)
-                    Section(ProfileUiCopy.shared.COVER_IMAGE) {
+                    Section {
                         Button { source = .cover } label: {
                             ZStack(alignment: .bottomTrailing) {
                                 RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground)
@@ -822,6 +822,11 @@ struct ProfileEditScreen: View {
                         .buttonStyle(.plain)
                         .disabled(state.uploading != nil || state.isSaving)
                         .accessibilityLabel(ProfileUiCopy.shared.COVER_IMAGE).accessibilityIdentifier("edit-cover")
+                    } header: {
+                        Text(ProfileUiCopy.shared.COVER_IMAGE)
+                    } footer: {
+                        // #3754: the size that stays sharp in the 160 pt header
+                        Text(ProfileUiCopy.shared.COVER_HINT).accessibilityIdentifier("cover-hint")
                     }
                     .themedCardRow()
                     ForEach(ProfileField.companion.form, id: \.self) { field in
