@@ -2253,7 +2253,7 @@
         "open_wallet": "Open Wallet",
         "your_wallet_is_on_the_wallet": "Your wallet is on the Wallet tab.",
         "user_has_no_comments": "@{username} haven't commented anything yet",
-        "cover_hint": "Best size {width} × {height} px (at least {minWidth} × {minHeight}). Keep text and logos in the centre: phones crop the sides and wide screens crop the top and bottom.",
+        "cover_hint": "Best size {width} × {height} px (at least {minWidth} × {minHeight}). Keep text and logos in the centre: every screen crops the edges, the sides in narrow boxes such as phones and the profile card, the top and bottom on wider ones such as tablets.",
         "menu": "More",
         "users": "Users"
       },

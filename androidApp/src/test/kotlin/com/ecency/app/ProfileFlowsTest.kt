@@ -824,7 +824,7 @@ class ProfileFlowsTest {
         compose.onNodeWithTag("field:NAME").performTextInput("New Name")
         waitFor("saveProfile")
         // #3754: the size hint under the cover picker
-        compose.onNodeWithTag("coverHint", useUnmergedTree = true).assertTextEquals("Best size 2,688 × 480 px (at least 1,344 × 240). Keep text and logos in the centre: phones crop the sides and wide screens crop the top and bottom.")
+        compose.onNodeWithTag("coverHint", useUnmergedTree = true).assertTextEquals("Best size 2,688 × 480 px (at least 1,344 × 240). Keep text and logos in the centre: every screen crops the edges, the sides in narrow boxes such as phones and the profile card, the top and bottom on wider ones such as tablets.")
         // an image link for the cover
         compose.onNodeWithTag("editCover").performClick()
         waitFor("source:link")
