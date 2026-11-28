@@ -72,13 +72,11 @@ class KtorAuthHttp(
         val bound = request.timeoutMillis?.coerceIn(1, MAX_TIMEOUT_MILLIS) ?: timeoutMillis
         val result = try {
             exchange(request, bound)
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            throw e
-        } catch (e: com.ecency.core.api.EcencyException) {
-            throw e
-        } catch (e: Exception) {
-            // the platform's own failure (no route, DNS, connect timeout, connection lost): a lost connection for every
-            // caller, as `ofSendFailure` makes it (Sentry ECENCY-MOBILE-3JM: reported as unknown before)
+        } catch (e: kotlinx.io.IOException) {
+            // the platform's own I/O failure (no route, DNS, connect timeout, connection lost; Java's and Ktor's socket
+            // exceptions and Darwin's request exception are all IOExceptions): a lost connection for every caller, as
+            // `ofSendFailure` makes it (Sentry ECENCY-MOBILE-3JM: reported as unknown before). A bug in building the
+            // request (an illegal header, say) is no IOException and stays one.
             throw EcencyHttpException.ofSendFailure(e)
         }
         // the address a redirect names stays out of the message: it is not ours and may carry a token

@@ -203,4 +203,11 @@ class KtorAuthHttpTest {
         assertEquals(com.ecency.core.app.ErrorKind.NETWORK, com.ecency.core.app.AppError.kindOf(e))
         assertIs<kotlinx.io.IOException>(e.cause, "the cause is kept for the report")
     }
+
+    /** Not a lost connection: a fault in the request stays itself, so it is reported as the bug it is. */
+    @Test
+    fun aFaultThatIsNoIoFailureIsNotMadeANetworkError() = runBlocking<Unit> {
+        val http = KtorAuthHttp(HttpClient(MockEngine { throw IllegalStateException("bad header") }), build)
+        assertFailsWith<IllegalStateException> { http.send(AuthHttpRequest("GET", "https://ecency.com/private-api/quests")) }
+    }
 }
