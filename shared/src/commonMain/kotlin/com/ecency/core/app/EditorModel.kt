@@ -1416,7 +1416,9 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     private suspend fun remember(owner: String, permlink: String, hash: String) {
         val now = env.nowMillis()
         pending = pending?.takeIf { it.permlink == permlink }?.alsoSent(hash, now) ?: PendingPublish(permlink, listOf(hash), now)
-        env.localDrafts.save(owner, slot, localDraft(current))
+        val saved = env.localDrafts.save(owner, slot, localDraft(current))
+        // the quick reply sheet learns the permlink before the broadcast, so a retry there asks the chain first
+        if (saved && args.kind == EditorKind.REPLY) env.replyDraftWrittenElsewhere(PostKey(args.author, args.permlink))
     }
 
     /**

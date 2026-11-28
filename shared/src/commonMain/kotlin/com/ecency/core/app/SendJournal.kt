@@ -7,6 +7,7 @@ import com.ecency.core.secure.SecureStore
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -215,7 +216,15 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
      * Every change is idempotent, so one applied twice (a write that failed after the read) is the same. A null
      * [change] only reconciles ([start]).
      */
-    private suspend fun update(change: Change?): Boolean {
+    private suspend fun update(change: Change?): Boolean = updates.withLock { updateNow(change) }
+
+    /**
+     * One update at a time, from taking [unsaved] to clearing it: two at once after the unlock would both replay the
+     * same queued change, and the later write could bring back what the earlier one settled (Greptile on #3756).
+     */
+    private val updates = kotlinx.coroutines.sync.Mutex()
+
+    private suspend fun updateNow(change: Change?): Boolean {
         val replay = withContext(env.dispatchers.main) { unsaved.toList() }
         val saved = try {
             io {

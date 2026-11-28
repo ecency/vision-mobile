@@ -420,6 +420,29 @@ class WalletDeltaFixesTest {
         assertEquals(setOf("a1", "b1"), storedIds(w).toSet())
     }
 
+    /** Greptile on #3756: two changes at once after the unlock replay the queued ones once, so a settled send stays gone. */
+    @Test
+    fun twoChangesAtOnceAfterTheUnlockNeverBringASettledSendBack() = runTest {
+        val w = WalletWorld(this)
+        w.statusAnswer = { "\"unknown\"" }
+        w.app.store.putString(SendJournal.ENTRY, "[${storedEntry("spike-voter", "a1", "ab")}]")
+        w.app.store.failingReads[SendJournal.ENTRY] = locked
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        w.env.sendJournal.record("spike-voter", "b1", "transfer", "cd".repeat(20), "2026-10-06T11:46:00")
+        testScheduler.runCurrent()
+        w.app.store.failingReads.clear()
+        // the settle of b1 and another send, in the same moment
+        val settle = launch { w.env.sendJournal.settle("spike-voter", "b1") }
+        val other = launch { w.env.sendJournal.record("spike-voter", "c1", "transfer", "ce".repeat(20), "2026-10-06T11:47:00") }
+        testScheduler.runCurrent()
+        settle.join()
+        other.join()
+        testScheduler.runCurrent()
+        assertEquals(setOf("a1", "c1"), storedIds(w).toSet(), "the settled b1 is not written back by the other change")
+        assertEquals(setOf("a1", "c1"), w.env.sendJournal.current.entries.map { it.actionId }.toSet())
+    }
+
     /** iOS starts the journal again on becoming active: one that comes while the launch read is in flight is not lost. */
     @Test
     fun aStartDuringAnInFlightReadThatFailsReadsOnceMore() = runTest {

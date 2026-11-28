@@ -1295,6 +1295,28 @@ class EditorModelTest {
         assertTrue(quick.current.conflict, "the text changed since: the user chooses")
     }
 
+    /** Greptile and CodeRabbit on #3756: the sheet learns the editor's permlink when it is saved, before the broadcast. */
+    @Test
+    fun theSheetKnowsTheEditorsPermlinkBeforeItsBroadcastAnswers() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val quick = w.app.env.replyModel(parent.key, parent)
+        quick.setText("first thought")
+        testScheduler.advanceUntilIdle()
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        w.broadcastAnswer = { gate.await(); FakeTransport.result(it, "{}") }
+        editor.submit()
+        testScheduler.advanceTimeBy(1_000)
+        testScheduler.runCurrent()
+        val link = field(w.ops().last(), 0, "permlink")
+        assertEquals(link, quick.current.draftPermlink, "the permlink reached the sheet with its save")
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+    }
+
     // ---- fields ----
 
     @Test

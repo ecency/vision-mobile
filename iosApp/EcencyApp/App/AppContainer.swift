@@ -1035,6 +1035,8 @@ final class AppContainer: ObservableObject {
         // (not a screen that asks for the login first: NavState.open keeps it for after the sign-in)
         if wideWindow, entry.tab == nil, entry.screens.count == 1, let screen = entry.screens.first, loggedIn == nil,
            session.state.isLoggedIn || !screen.route.requiresLogin {
+            // the latest link wins, as NavState.open: one that waited for a sign-in goes
+            nav = nav.dropAfterLogin()
             push(screen, fromList: fromList)
             env.entryOpened()
             return
