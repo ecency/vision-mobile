@@ -56,16 +56,19 @@ class ImageUploaderTest {
         val reporter = RecordingReporter()
         ErrorReports.install({ reporter }, { 0L })
         try {
-            val host = Host({ HttpResult(403, "") })
+            val host = Host({ HttpResult(403, """{"error":{"info":null,"name":"deplorable"}}""") })
             val e = assertFailsWith<EcencyHttpException> { ImageUploader(host, "https://images.example") { 0 }.upload(file, token) }
             assertEquals(1, host.requests.size)
             assertEquals(L.native.uploads.refused, ImageUploader.message(e))
             assertEquals(null, AppError.from(e, "profileEdit.upload").code)
             assertEquals("warning", reporter.reports.single().level)
-            // any other refusal of the host is still a bug to look at
+            // any other refusal of the host is still a bug to look at: another status, or a 403 that is not its answer
             val other = assertFailsWith<EcencyHttpException> { ImageUploader(Host({ HttpResult(401, "") }), "https://images.example") { 0 }.upload(file, token) }
             AppError.from(other, "profileEdit.upload")
-            assertEquals(listOf("warning", "error"), reporter.reports.map { it.level })
+            val edge = assertFailsWith<EcencyHttpException> { ImageUploader(Host({ HttpResult(403, "<html>Forbidden</html>") }), "https://images.example") { 0 }.upload(file, token) }
+            assertFalse(edge is ImageUploadRefused, "a 403 page from the edge is no refusal of the account")
+            AppError.from(edge, "editor.upload")
+            assertEquals(listOf("warning", "error", "error"), reporter.reports.map { it.level })
         } finally {
             ErrorReports.install({ CrashReporter.None }, { 0L })
         }

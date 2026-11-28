@@ -42,6 +42,13 @@ class ImageSigningUnavailable : EcencyException("SIGN_IMAGE_UNAVAILABLE")
  */
 class ImageUploadRefused : EcencyHttpException(403, "image upload refused")
 
+/**
+ * The host's own answer that it refuses the account: a 403 whose JSON names the `deplorable` error (ecency/imagehoster
+ * `APIError`, `{"error":{"name":...}}`). Any other 403, an edge's HTML page for one, stays a failure to look at.
+ */
+internal fun refusesAccount(status: Int, body: String): Boolean =
+    status == 403 && runCatching { Json.parseToJsonElement(body) }.getOrNull().obj()?.get("error").obj()?.str("name") == "deplorable"
+
 /** RN `signImage`: the upload token, sent as `Authorization: Bearer <token>` (#3722). */
 object ImageSigning {
     /**
@@ -138,7 +145,7 @@ class ImageUploader(
                     return runCatching { Json.parseToJsonElement(response.body) }.getOrNull().obj()?.str("url")?.takeIf { it.isNotEmpty() }
                         ?: throw EcencyHttpException(response.status, "Returning response missing media data")
                 }
-                if (response.status == 403) ImageUploadRefused() else EcencyHttpException(response.status)
+                if (refusesAccount(response.status, response.body)) ImageUploadRefused() else EcencyHttpException(response.status)
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
                 EcencyHttpException(0, "timeout", e)
             } catch (e: UploadStalled) {
