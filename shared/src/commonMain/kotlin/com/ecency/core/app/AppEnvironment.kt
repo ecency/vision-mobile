@@ -1089,6 +1089,28 @@ class AppEnvironment(
         replies[parent]?.draftChangedElsewhere()
     }
 
+    /** Reply editors open now, per parent: a two pane window can show one beside the post's quick reply (#3755). */
+    private val replyEditors = mutableMapOf<PostKey, MutableList<EditorModel>>()
+
+    internal fun replyEditorOpened(parent: PostKey, editor: EditorModel) {
+        replyEditors.getOrPut(parent) { mutableListOf() } += editor
+    }
+
+    internal fun replyEditorClosed(parent: PostKey, editor: EditorModel) {
+        val open = replyEditors[parent] ?: return
+        open.removeAll { it === editor }
+        if (open.isEmpty()) replyEditors.remove(parent)
+    }
+
+    /**
+     * The quick reply saved [user]'s draft for [parent] ([draft], null when it emptied it): a reply editor open for
+     * the same parent shows it ([EditorModel.draftChangedElsewhere]), so its next save does not write its older copy
+     * over it.
+     */
+    internal fun replyDraftWrittenBySheet(parent: PostKey, user: String, draft: LocalDraft?) {
+        replyEditors[parent]?.toList()?.forEach { it.draftChangedElsewhere(user, draft) }
+    }
+
     /** The editor posted the reply to [parent]: the quick reply sheet's model for it (same draft slot) starts fresh. */
     internal fun replyPostedElsewhere(parent: PostKey) {
         replies.remove(parent)?.dispose()

@@ -273,8 +273,10 @@ class ComposeReplyModel internal constructor(
         if (pending == null) pending = base?.pending
         if (text.isEmpty() && image == null && pending == null) {
             env.localDrafts.delete(user, slot)
+            env.replyDraftWrittenBySheet(parent.key, user, null)
         } else {
-            env.localDrafts.save(user, slot, (base ?: LocalDraft()).copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image))
+            val draft = (base ?: LocalDraft()).copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image)
+            if (env.localDrafts.save(user, slot, draft)) env.replyDraftWrittenBySheet(parent.key, user, draft)
         }
     }
 

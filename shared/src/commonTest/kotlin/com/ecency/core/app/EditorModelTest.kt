@@ -1237,6 +1237,86 @@ class EditorModelTest {
         assertEquals("an answer to my own reply", quick.current.text)
     }
 
+    /** #3755: an editor left open in a second pane shows what the quick reply wrote after it, and never writes over it. */
+    @Test
+    fun anEditorOpenBesideTheSheetShowsWhatTheSheetWroteAfterIt() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        editor.setBody("from the editor", TextSelection(15))
+        testScheduler.advanceUntilIdle()
+        val revision = editor.current.bodyRevision
+        val quick = w.app.env.replyModel(parent.key, parent)
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor", quick.current.text)
+        quick.setText("from the editor, then the sheet")
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor, then the sheet", editor.current.body, "the editor reads the sheet's save")
+        assertTrue(editor.current.bodyRevision > revision, "the text field is given the new text")
+        // the editor leaving writes what it shows now, not its older copy
+        editor.leave()
+        editor.close()
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor, then the sheet", w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root")).current.body)
+        // the sheet emptied: the editor beside it empties too, so its next save does not bring the text back
+        val second = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        testScheduler.advanceUntilIdle()
+        quick.setText("")
+        testScheduler.advanceUntilIdle()
+        assertEquals("", second.current.body)
+    }
+
+    /** #3755: typing in the editor not saved yet is never replaced by the sheet's save; the later save wins. */
+    @Test
+    fun anEditorWithTypingNotSavedYetKeepsItOverTheSheetsSave() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val quick = w.app.env.replyModel(parent.key, parent)
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        testScheduler.advanceUntilIdle()
+        quick.setText("typed in the sheet")
+        testScheduler.advanceTimeBy(EditorModel.LOCAL_SAVE_DELAY_MILLIS / 2)
+        editor.setBody("typed in the editor", TextSelection(19))
+        // the sheet's save lands while the editor's typing waits for its own
+        testScheduler.advanceTimeBy(EditorModel.LOCAL_SAVE_DELAY_MILLIS / 2 + 10)
+        testScheduler.runCurrent()
+        assertEquals("typed in the sheet", w.app.env.localDrafts.load(user, LocalDrafts.reply("alice", "root"))?.body)
+        assertEquals("typed in the editor", editor.current.body)
+        // then the editor's save lands: the later save wins, and the sheet shows it
+        testScheduler.advanceUntilIdle()
+        assertEquals("typed in the editor", quick.current.text)
+        // another account's draft for the same parent is not this editor's
+        w.app.env.localDrafts.save("someone-else", LocalDrafts.reply("alice", "root"), LocalDraft(body = "not mine"))
+        w.app.env.replyDraftWrittenBySheet(parent.key, "someone-else", LocalDraft(body = "not mine"))
+        testScheduler.advanceUntilIdle()
+        assertEquals("typed in the editor", editor.current.body)
+    }
+
+    /** #3755: a reply on its way from the editor keeps its text whatever the sheet saves meanwhile. */
+    @Test
+    fun anEditorSendingKeepsItsTextOverTheSheetsSave() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        editor.setBody("on its way", TextSelection(10))
+        testScheduler.advanceUntilIdle()
+        val gate = CompletableDeferred<Unit>()
+        w.broadcastAnswer = { gate.await(); FakeTransport.result(it, "{}") }
+        editor.submit()
+        testScheduler.runCurrent()
+        assertTrue(editor.current.isSending)
+        w.app.env.replyDraftWrittenBySheet(parent.key, user, LocalDraft(body = "from the sheet"))
+        assertEquals("on its way", editor.current.body)
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+    }
+
     /** Greptile on #3756: the editor's send whose answer was lost is asked about from the sheet, never sent again. */
     @Test
     fun aReplyTheEditorSentIsNeverSentAgainFromTheSheet() = runTest {

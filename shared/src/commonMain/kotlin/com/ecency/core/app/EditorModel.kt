@@ -291,6 +291,13 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     /** The running load of [start] (a [retryLoad] never overlaps it). */
     private var loadJob: Job? = null
 
+    /** A reply's parent: the quick reply under it shares this editor's draft slot. */
+    private val replyParent: PostKey? = if (args.kind == EditorKind.REPLY) PostKey(args.author, args.permlink) else null
+
+    init {
+        replyParent?.let { env.replyEditorOpened(it, this) }
+    }
+
     fun start() {
         if (started) return
         started = true
@@ -1059,6 +1066,22 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     }
 
     /**
+     * The quick reply under this reply's parent saved [user]'s draft ([draft], null when it emptied it): shown here,
+     * so this editor's next save carries it instead of writing its older copy over it (a two pane window, #3755).
+     * Not while this editor loads, sends or uploads, after it published, nor while typing here waits to be saved
+     * (the later save wins, as the quick reply does for this editor's saves).
+     */
+    internal fun draftChangedElsewhere(user: String, draft: LocalDraft?) {
+        val s = current
+        if (s.owner != user || s.loading || s.isSending || s.uploading > 0 || published || dirty) return
+        val body = draft?.let { com.ecency.core.api.waves.WavePublish.body(it.body, it.replyImage) }.orEmpty()
+        // a permlink a failed send left is kept until a send settles it
+        draft?.pending?.let { pending = it }
+        if (body == s.body) return
+        setState { it.copy(body = body, selection = TextSelection(body.length), bodyRevision = it.bodyRevision + 1, wordsCount = EditorMeta.wordsCount(body)) }
+    }
+
+    /**
      * Writes the local draft now (app to background, screen leaving). Runs in the environment's scope, so it
      * finishes even when the screen and this model are gone.
      */
@@ -1081,6 +1104,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     /** Whatever removes the screen (back, an account change, the activity finishing), the text is written first. */
     override fun close() {
         flush()
+        replyParent?.let { env.replyEditorClosed(it, this) }
         super.close()
     }
 
