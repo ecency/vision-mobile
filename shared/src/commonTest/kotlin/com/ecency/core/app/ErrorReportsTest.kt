@@ -345,6 +345,10 @@ class ErrorReportsTest {
         AppError.from(rejected("Account does not have enough mana to vote. voting_mana: 1199"), "comment.vote")
         // an e-mail address goes whole, never as its name before an @<user>
         AppError.from(IllegalStateException("no answer for jane.doe@mail.example"), "settings.contact")
+        // quoted, as typed (any case), and the bare name in another case: gone too; apostrophes in words stay
+        AppError.from(IllegalStateException("Account \"Quoted-One\" was refused, 'single9' too"), "settings.quoted")
+        AppError.from(rejected("Assert Exception:Account CapName does not exist"), "wallet.capital")
+        AppError.from(IllegalStateException("it's the node's answer"), "settings.apostrophe")
         // the out-of-RC count is an event of its own
         val handled = reporter.reports.filter { it.tags["handled"] == "true" }
         assertEquals(
@@ -355,11 +359,14 @@ class ErrorReportsTest {
                 "Assert Exception:Account <user> does not exist",
                 "Account does not have enough mana to vote. voting_mana: 1199",
                 "no answer for <redacted-email>",
+                "Account <q> was refused, <q> too",
+                "Assert Exception:Account <user> does not exist",
+                "it's the node's answer",
             ),
             handled.map { it.message },
         )
         for (r in handled) {
-            for (name in listOf("typed-name1", "voter-12", "abc.def", "someone", "jane.doe")) {
+            for (name in listOf("typed-name1", "voter-12", "abc.def", "someone", "jane.doe", "Quoted-One", "single9", "CapName")) {
                 assertFalse(name in r.fingerprint.joinToString(" "), "${r.fingerprint}")
             }
         }

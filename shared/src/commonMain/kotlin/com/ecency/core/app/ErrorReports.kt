@@ -246,7 +246,7 @@ object ErrorReports {
         // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI), nor
         // account names (the issue's title: a typed username, ECENCY-MOBILE-3R6); secrets first, so an e-mail address
         // goes whole
-        val message = withoutNames(withoutPlaces(CrashScrubber.scrub(e.message.orEmpty()).orEmpty()))
+        val message = withoutNames(withoutPlaces(CrashScrubber.scrub(e.message.orEmpty()).orEmpty()).replace(QUOTED_IN_MESSAGE, "<q>"))
         val now = s.nowMillis()
         while (true) {
             val before = seen.load()
@@ -354,8 +354,14 @@ object ErrorReports {
     fun withoutNames(text: String): String =
         text.replace(AT_NAME, "@<user>").replace(ACCOUNT_NAME) { "${it.groupValues[1]}<user>" }
 
-    private val ACCOUNT_NAME = Regex("\\b([Aa]ccount:? )[a-z][a-z0-9.-]{2,15}(?= (?:has|already|does not exist)\\b)")
+    private val ACCOUNT_NAME = Regex("\\b([Aa]ccount:? )[A-Za-z][A-Za-z0-9.-]{2,15}(?= (?:has|already|does not exist)\\b)")
     private val QUOTED = Regex("\"[^\"]*\"|'[^']*'|`[^`]*`")
+
+    /**
+     * Quoted text in the message sent (a typed name, as the fingerprint drops it): double quotes and backticks whole,
+     * single quotes only around one word, so the apostrophes of a sentence ("it's the node's") are left alone.
+     */
+    private val QUOTED_IN_MESSAGE = Regex("\"[^\"]*\"|`[^`]*`|'[^'\\s]{1,40}'")
     private val AT_NAME = Regex("@[a-z0-9][a-z0-9.-]{1,15}", RegexOption.IGNORE_CASE)
     private val HEX = Regex("\\b(?:0x)?(?=[0-9a-fA-F]*[0-9])(?=[0-9a-fA-F]*[a-fA-F])[0-9a-fA-F]{6,}\\b")
     private val NUMBER = Regex("\\d+(\\.\\d+)?")
