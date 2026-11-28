@@ -136,4 +136,26 @@ final class TwoPaneUITests: XCTestCase {
         app.buttons["wallet-send"].tap()
         XCTAssertTrue(pane.waitForNonExistence(timeout: 10))
     }
+
+    /// One composer per reply at a time (#3755): the quick reply is a sheet over both panes, and its "Open editor" covers
+    /// the window, so the editor is never beside the post (or its quick reply) with the same reply draft.
+    func testAReplyContinuedInTheEditorCoversThePostAndTheFeed() throws {
+        let app = try launch(["-openPost", "spike-alice/fake-post-1"])
+        let pane = element(app, "detail-pane")
+        XCTAssertTrue(element(app, "post-views").waitForExistence(timeout: 20))
+        XCTAssertTrue(pane.exists, "the post beside the feed")
+        app.buttons["post-comments"].tap()
+        let reply = app.buttons["comments-reply"]
+        XCTAssertTrue(reply.waitForExistence(timeout: 10))
+        for _ in 0..<10 where !reply.isHittable { RunLoop.current.run(until: Date().addingTimeInterval(0.3)) }
+        reply.tap()
+        XCTAssertTrue(app.textViews["reply-text"].waitForExistence(timeout: 10))
+        let expand = app.buttons["reply-expand"]
+        XCTAssertTrue(expand.waitForExistence(timeout: 10))
+        expand.tap()
+        XCTAssertTrue(element(app, "editor-body").waitForExistence(timeout: 15))
+        XCTAssertTrue(pane.waitForNonExistence(timeout: 10), "the editor covers the window: no post pane beside it")
+        XCTAssertFalse(app.buttons.matching(identifier: "post-card").firstMatch.isHittable, "nor the feed")
+        XCTAssertFalse(app.textViews["reply-text"].exists, "the quick reply handed over")
+    }
 }

@@ -238,6 +238,14 @@ class LocalDrafts(private val storage: DraftStorage, private val dispatchers: Ap
         gate.withLock { !hasLeft(account) && runCatching { storage.write(account, slot, draft.encode()) }.isSuccess }
     }
 
+    /**
+     * As [load], telling a draft that is not there (success, null) from one that could not be read (failure: the
+     * storage refused, or what is stored is no draft), which [load] both answer as null.
+     */
+    suspend fun read(account: String, slot: String): Result<LocalDraft?> = withContext(dispatchers.io) {
+        runCatching { storage.read(account, slot)?.let { LocalDraft.decode(it) ?: error("unreadable draft") } }
+    }
+
     /** A value that is not a draft (an unfinished paid request), under the same rules as [load]. */
     suspend fun loadRaw(account: String, slot: String): String? = withContext(dispatchers.io) {
         runCatching { storage.read(account, slot) }.getOrNull()

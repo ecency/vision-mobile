@@ -241,6 +241,9 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     private var saveJob: Job? = null
     private var previewJob: Job? = null
     private var dirty = false
+
+    /** This editor's local save is being written ([saveLocal] cleared [dirty] before it). */
+    private var savingLocal = false
     private var published = false
     private var pending: PendingPublish? = null
 
@@ -292,7 +295,11 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     private var loadJob: Job? = null
 
     fun start() {
-        if (started) return
+        if (started) {
+            // its screen shows again (a screen it opened, such as a post from its preview, was closed)
+            readReplyAgain()
+            return
+        }
         started = true
         loadJob = scope.launch {
             env.session.awaitLoaded()
@@ -318,6 +325,34 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             loadQuestChip(owner)
             loadRc(owner)
         }
+    }
+
+    /**
+     * One composer per reply (#3755): a reply editor whose screen shows again reads the shared draft again, so a
+     * quick reply saved while it was under another screen is what it continues, and its next save never writes its
+     * older copy over that. Typing here not saved yet is kept, as are a load, a send or an upload under way.
+     */
+    private fun readReplyAgain() {
+        if (args.kind != EditorKind.REPLY) return
+        val owner = current.owner ?: return
+        scope.launch {
+            if (!mayReadReplyAgain()) return@launch
+            val before = current.body
+            // a read that failed is no deleted draft: what is shown, and its pending send, stay
+            val local = env.localDrafts.read(owner, slot).getOrElse { return@launch }
+            // typing or a send may have started during the read, or typing saved by its autosave meanwhile
+            if (!mayReadReplyAgain() || current.body != before) return@launch
+            pending = local?.pending
+            val body = local?.let { com.ecency.core.api.waves.WavePublish.body(it.body, it.replyImage) }.orEmpty()
+            if (body == current.body) return@launch
+            setState { it.copy(body = body, selection = TextSelection(body.length), bodyRevision = it.bodyRevision + 1, wordsCount = EditorMeta.wordsCount(body)) }
+            if (current.isPreview) setPreview(true)
+        }
+    }
+
+    private fun mayReadReplyAgain(): Boolean {
+        val s = current
+        return !s.loading && !s.isSending && s.uploading == 0 && s.error == null && !published && !dirty && !savingLocal
     }
 
     /** "Retry" after the post or reply to load could not be read: the editor loads again (nothing was shown yet). */
@@ -1051,10 +1086,17 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         // RN _saveCurrentDraft: nothing after a publish, so a late save cannot bring a published post back as a draft
         if (published || s.loading) return
         dirty = false
-        val ok = env.localDrafts.save(owner, slot, localDraft(s))
+        savingLocal = true
+        val ok = try {
+            env.localDrafts.save(owner, slot, localDraft(s))
+        } finally {
+            savingLocal = false
+        }
         if (ok && args.kind == EditorKind.REPLY) env.replyDraftWrittenElsewhere(PostKey(args.author, args.permlink))
         // a save refused because the account left the device (logout, wipe) is the teardown at work, not a failure to report
         val failed = !ok && !env.localDrafts.hasLeft(owner)
+        // the text is still only in memory: typing not saved yet, written on leaving
+        if (failed) dirty = true
         if (current.localSaveFailed != failed) setState { it.copy(localSaveFailed = failed) }
     }
 
@@ -1064,7 +1106,8 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
      */
     fun flush() {
         saveJob?.cancel()
-        if (!dirty) return
+        // an autosave cancelled here may not have written yet (it cleared dirty first): written now
+        if (!dirty && !savingLocal) return
         val s = current
         val owner = s.owner ?: return
         if (published || s.loading) return

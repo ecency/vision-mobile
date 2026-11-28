@@ -26,6 +26,19 @@ class PanesTest {
         assertTrue(NavState.hasRoomForPanes(951.0), "the inner display held sideways")
     }
 
+    /**
+     * One composer per reply at a time (#3755): a reply editor covers the window, so it is never beside the post whose
+     * quick reply shares its draft, and the editor does not need to follow the sheet's saves.
+     */
+    @Test
+    fun aReplyEditorCoversTheWindowAndIsNeverBesideThePost() {
+        val editor = AppScreen.Editor(EditorArgs(EditorKind.REPLY, "alice", "root"))
+        assertFalse(editor.fitsAPane)
+        val s = NavState().pushIn(post, loggedIn = true, wide = true).pushIn(editor, loggedIn = true, wide = true)
+        assertEquals(editor, s.screens.last(), "the editor is pushed over the window")
+        assertFalse(editor in screens(s.pane), "not into the post's pane")
+    }
+
     @Test
     fun aNarrowWindowPushesAsBefore() {
         val s = NavState().pushIn(post, loggedIn = true, wide = false)
