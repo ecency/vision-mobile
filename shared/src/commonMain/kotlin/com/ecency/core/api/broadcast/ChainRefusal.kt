@@ -20,7 +20,7 @@ enum class ChainRefusal(private val pattern: Regex) {
     IDENTICAL_VOTE(Regex("current vote on this comment is identical|already voted in a similar way", RegexOption.IGNORE_CASE)),
     VOTE_TOO_SMALL(
         Regex(
-            "voting weight is too small|does not have enough power to vote|does not have voting power|vote weight cannot be 0|cannot vote with 0 rshares",
+            "voting weight is too small|does not have enough power to vote|does not have enough mana to (down)?vote|does not have voting power|vote weight cannot be 0|cannot vote with 0 rshares",
             RegexOption.IGNORE_CASE,
         ),
     ),
