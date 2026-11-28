@@ -192,4 +192,15 @@ class KtorAuthHttpTest {
             assertNull(told(url), url)
         }
     }
+
+    /** Sentry ECENCY-MOBILE-3JM and others: a lost connection escaped as the platform's own exception, reported as unknown. */
+    @Test
+    fun aConnectionThatFailsIsANetworkError() = runBlocking<Unit> {
+        val http = KtorAuthHttp(HttpClient(MockEngine { throw kotlinx.io.IOException("Unable to resolve host \"ecency.com\"") }), build)
+        val e = assertFailsWith<EcencyHttpException> { http.send(AuthHttpRequest("GET", "https://ecency.com/private-api/quests")) }
+        assertEquals(0, e.status)
+        assertTrue(e.isNetwork)
+        assertEquals(com.ecency.core.app.ErrorKind.NETWORK, com.ecency.core.app.AppError.kindOf(e))
+        assertIs<kotlinx.io.IOException>(e.cause, "the cause is kept for the report")
+    }
 }

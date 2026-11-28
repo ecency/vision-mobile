@@ -70,7 +70,24 @@ class KtorAuthHttp(
     @Throws(Exception::class)
     override suspend fun send(request: AuthHttpRequest): HttpResult {
         val bound = request.timeoutMillis?.coerceIn(1, MAX_TIMEOUT_MILLIS) ?: timeoutMillis
-        val result = withTimeoutOrNull(bound) {
+        val result = try {
+            exchange(request, bound)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: com.ecency.core.api.EcencyException) {
+            throw e
+        } catch (e: Exception) {
+            // the platform's own failure (no route, DNS, connect timeout, connection lost): a lost connection for every
+            // caller, as `ofSendFailure` makes it (Sentry ECENCY-MOBILE-3JM: reported as unknown before)
+            throw EcencyHttpException.ofSendFailure(e)
+        }
+        // the address a redirect names stays out of the message: it is not ours and may carry a token
+        if (result.status in 300..399) throw EcencyHttpException(result.status, "Unexpected redirect (${result.status})")
+        return result
+    }
+
+    private suspend fun exchange(request: AuthHttpRequest, bound: Long): HttpResult =
+        withTimeoutOrNull(bound) {
             val response = client.request(request.url) {
                 method = HttpMethod.parse(request.method)
                 ClientIdentity.headers(request, userAgent).forEach { (k, v) -> header(k, v) }
@@ -84,10 +101,6 @@ class KtorAuthHttp(
             }
             HttpResult(response.status.value, response.bodyAsText(), response.headers.entries().associate { (name, values) -> name.lowercase() to values.firstOrNull().orEmpty() })
         } ?: throw EcencyTimeoutException()
-        // the address a redirect names stays out of the message: it is not ours and may carry a token
-        if (result.status in 300..399) throw EcencyHttpException(result.status, "Unexpected redirect (${result.status})")
-        return result
-    }
 
     companion object {
         /** Every call through this transport gives up after this long. */
