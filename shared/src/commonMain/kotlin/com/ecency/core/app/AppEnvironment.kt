@@ -1089,7 +1089,7 @@ class AppEnvironment(
         replies[parent]?.draftChangedElsewhere()
     }
 
-    /** Reply editors open now, per parent: a two pane window can show one beside the post's quick reply (#3755). */
+    /** Reply editors started and not closed yet, per parent: a two pane window can show one beside the post's quick reply (#3755). */
     private val replyEditors = mutableMapOf<PostKey, MutableList<EditorModel>>()
 
     internal fun replyEditorOpened(parent: PostKey, editor: EditorModel) {
@@ -1109,6 +1109,11 @@ class AppEnvironment(
      */
     internal fun replyDraftWrittenBySheet(parent: PostKey, user: String, draft: LocalDraft?) {
         replyEditors[parent]?.toList()?.forEach { it.draftChangedElsewhere(user, draft) }
+    }
+
+    /** The quick reply posted [user]'s reply to [parent] as [permlink]: a reply editor open beside it lets it go. */
+    internal fun replyPostedBySheet(parent: PostKey, user: String, permlink: String) {
+        replyEditors[parent]?.toList()?.forEach { it.replyPostedElsewhere(user, permlink) }
     }
 
     /** The editor posted the reply to [parent]: the quick reply sheet's model for it (same draft slot) starts fresh. */

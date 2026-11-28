@@ -294,13 +294,11 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     /** A reply's parent: the quick reply under it shares this editor's draft slot. */
     private val replyParent: PostKey? = if (args.kind == EditorKind.REPLY) PostKey(args.author, args.permlink) else null
 
-    init {
-        replyParent?.let { env.replyEditorOpened(it, this) }
-    }
-
     fun start() {
         if (started) return
         started = true
+        // registered once its screen starts it (iOS may build models its view never keeps); [close] lets it go
+        replyParent?.let { env.replyEditorOpened(it, this) }
         loadJob = scope.launch {
             env.session.awaitLoaded()
             val owner = env.session.current.username
@@ -1079,6 +1077,19 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         draft?.pending?.let { pending = it }
         if (body == s.body) return
         setState { it.copy(body = body, selection = TextSelection(body.length), bodyRevision = it.bodyRevision + 1, wordsCount = EditorMeta.wordsCount(body)) }
+    }
+
+    /**
+     * The quick reply posted [user]'s reply as [permlink]: the posted text leaves this editor, so it is never saved
+     * back as a draft, and its permlink is no longer this editor's pending send (the next reply is a new one). Typing
+     * here not saved yet stays, as the start of that next reply.
+     */
+    internal fun replyPostedElsewhere(user: String, permlink: String) {
+        val s = current
+        if (s.owner != user || s.isSending || published) return
+        if (pending?.permlink == permlink) pending = null
+        if (dirty || s.body.isEmpty()) return
+        setState { it.copy(body = "", selection = TextSelection(0), bodyRevision = it.bodyRevision + 1, wordsCount = 0) }
     }
 
     /**

@@ -39,6 +39,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 import kotlin.test.assertNull
@@ -1294,6 +1295,35 @@ class EditorModelTest {
         w.app.env.replyDraftWrittenBySheet(parent.key, "someone-else", LocalDraft(body = "not mine"))
         testScheduler.advanceUntilIdle()
         assertEquals("typed in the editor", editor.current.body)
+    }
+
+    /** Review of #3755: a reply the sheet posted leaves the editor beside it, which never saves it back or asks about it. */
+    @Test
+    fun aReplyTheSheetPostedLeavesTheEditorBesideIt() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        val quick = w.app.env.replyModel(parent.key, parent)
+        testScheduler.advanceUntilIdle()
+        quick.setText("posted from the sheet")
+        testScheduler.advanceUntilIdle()
+        assertEquals("posted from the sheet", editor.current.body)
+        quick.send()
+        testScheduler.advanceUntilIdle()
+        assertNotNull(quick.current.sent)
+        assertEquals("", editor.current.body, "the posted reply is not left in the editor")
+        // the editor's next reply is a new one, sent under a new permlink (a minute later, as permlinks carry the time)
+        w.app.now += 60_000
+        val sent = w.app.broadcasts().size
+        editor.setBody("a second reply", TextSelection(14))
+        testScheduler.advanceUntilIdle()
+        assertEquals("a second reply", w.app.env.localDrafts.load(user, LocalDrafts.reply("alice", "root"))?.body)
+        editor.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(sent + 1, w.app.broadcasts().size, "the second reply is sent")
+        assertNotEquals(field(w.ops().first { field(it, 0, "body") == "posted from the sheet" }, 0, "permlink"), field(w.ops().last(), 0, "permlink"))
     }
 
     /** #3755: a reply on its way from the editor keeps its text whatever the sheet saves meanwhile. */
