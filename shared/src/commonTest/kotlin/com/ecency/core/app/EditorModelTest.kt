@@ -1237,6 +1237,75 @@ class EditorModelTest {
         assertEquals("an answer to my own reply", quick.current.text)
     }
 
+    /**
+     * One composer per reply (#3755, CodeRabbit on #3759): an editor kept under another screen (a link from its
+     * preview opened the post) reads the draft again when it shows again, so the quick reply saved meanwhile is what
+     * it continues, not what its next save writes over. Typing not saved yet in it is kept.
+     */
+    @Test
+    fun anEditorShownAgainContinuesTheQuickReplySavedMeanwhile() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        editor.setBody("from the editor", TextSelection(15))
+        testScheduler.advanceUntilIdle()
+        // the editor is under the post now; its quick reply continues the draft
+        val quick = w.app.env.replyModel(parent.key, parent)
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor", quick.current.text)
+        quick.setText("from the editor, then the sheet")
+        testScheduler.advanceUntilIdle()
+        // back to the editor: its screen starts it again
+        editor.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor, then the sheet", editor.current.body)
+        editor.setBody("from the editor, then the sheet, then the editor", TextSelection(0))
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor, then the sheet, then the editor", w.app.env.localDrafts.load(user, LocalDrafts.reply("alice", "root"))?.body)
+        // typing not saved yet is never replaced
+        quick.setText("the sheet again")
+        testScheduler.advanceUntilIdle()
+        editor.setBody("typed, not saved yet", TextSelection(0))
+        editor.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals("typed, not saved yet", editor.current.body)
+    }
+
+    /** Draft storage that refuses reply slot writes while [refuse] is set (a full disk). */
+    private class RefusingDrafts : DraftStorage {
+        val inner = InMemoryDraftStorage()
+        var refuse = false
+        override fun read(account: String, slot: String) = inner.read(account, slot)
+        override fun write(account: String, slot: String, value: String?) {
+            if (refuse && slot.startsWith("reply:")) throw IllegalStateException("disk full")
+            inner.write(account, slot, value)
+        }
+        override fun clear(account: String) = inner.clear(account)
+        override fun clearAll() = inner.clearAll()
+    }
+
+    /** Greptile on #3759: text whose autosave failed is still unsaved, so leaving the editor writes it. */
+    @Test
+    fun textWhoseAutosaveFailedIsWrittenOnLeaving() = runTest {
+        val w = World(this)
+        val drafts = RefusingDrafts()
+        w.app.env.draftStorage = drafts
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        drafts.refuse = true
+        editor.setBody("only in memory", TextSelection(14))
+        testScheduler.advanceUntilIdle()
+        assertTrue(editor.current.localSaveFailed)
+        drafts.refuse = false
+        editor.leave()
+        editor.close()
+        testScheduler.advanceUntilIdle()
+        assertEquals("only in memory", w.app.env.localDrafts.load(user, LocalDrafts.reply("alice", "root"))?.body)
+    }
+
     /** Greptile on #3756: the editor's send whose answer was lost is asked about from the sheet, never sent again. */
     @Test
     fun aReplyTheEditorSentIsNeverSentAgainFromTheSheet() = runTest {
