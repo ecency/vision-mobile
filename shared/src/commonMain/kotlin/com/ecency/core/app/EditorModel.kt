@@ -1102,11 +1102,14 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
      */
     internal fun draftChangedElsewhere(user: String, draft: LocalDraft?) {
         val s = current
-        if (s.owner != user || s.isSending || s.uploading > 0 || published) return
+        // a load that failed shows nothing, so its Retry stays (and reads the slot again)
+        if (s.owner != user || s.isSending || s.uploading > 0 || published || s.error != null) return
         if (s.loading || savingLocal) {
             heldFromSheet = SheetChange(draft)
             return
         }
+        // newer than anything held: a held change is never applied over it
+        heldFromSheet = null
         if (dirty) return
         applySheetDraft(draft)
     }
@@ -1139,6 +1142,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             heldFromSheet = SheetChange(null, permlink, text)
             return
         }
+        heldFromSheet = null
         applyPosted(text)
     }
 
@@ -1163,7 +1167,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         val held = heldFromSheet ?: return
         heldFromSheet = null
         val s = current
-        if (s.isSending || s.uploading > 0 || published) return
+        if (s.isSending || s.uploading > 0 || published || s.error != null) return
         val posted = held.postedPermlink
         if (posted != null) {
             // the load may have read the pending send the sheet then settled
@@ -1180,7 +1184,8 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
      */
     fun flush() {
         saveJob?.cancel()
-        if (!dirty) return
+        // an autosave cancelled here may not have written yet (it cleared dirty first): written now
+        if (!dirty && !savingLocal) return
         val s = current
         val owner = s.owner ?: return
         if (published || s.loading) return

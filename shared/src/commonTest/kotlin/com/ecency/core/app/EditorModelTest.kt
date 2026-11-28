@@ -1351,10 +1351,12 @@ class EditorModelTest {
     private class HookedDrafts : DraftStorage {
         val inner = InMemoryDraftStorage()
         var onRead: (() -> Unit)? = null
+        var beforeRead: (() -> Unit)? = null
         var beforeWrite: (() -> Unit)? = null
         var afterWrite: (() -> Unit)? = null
         var refuse = false
         override fun read(account: String, slot: String): String? {
+            if (slot.startsWith("reply:")) beforeRead?.also { beforeRead = null }?.invoke()
             val value = inner.read(account, slot)
             if (slot.startsWith("reply:")) onRead?.also { onRead = null }?.invoke()
             return value
@@ -1481,6 +1483,40 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
         assertEquals("", editor.current.body, "the posted text leaves the editor")
         assertNull(drafts.body(), "and is not left as a draft")
+    }
+
+    /** Review of #3759: a sheet save applied while the editor reads back its own save is not undone by an older held one. */
+    @Test
+    fun aNewerSheetSaveDuringTheReadBackIsNotUndoneByTheOlderHeldOne() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        drafts.beforeWrite = {
+            // held: it lands during the editor's write
+            sheetSaves(w, drafts, "first from the sheet")
+            // and a newer one commits during the read back that follows the write
+            drafts.beforeRead = { sheetSaves(w, drafts, "second from the sheet") }
+        }
+        editor.setBody("from the editor", TextSelection(15))
+        testScheduler.advanceUntilIdle()
+        assertEquals("second from the sheet", drafts.body())
+        assertEquals("second from the sheet", editor.current.body)
+    }
+
+    /** Review of #3759: a sheet save after the editor's load failed leaves Retry working, which then reads it. */
+    @Test
+    fun aSheetSaveAfterAFailedLoadLeavesRetryWorking() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        w.posts.remove("alice/root")
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        assertNotNull(editor.current.error)
+        sheetSaves(w, drafts, "from the sheet")
+        testScheduler.advanceUntilIdle()
+        assertEquals("", editor.current.body, "nothing shown over the failed load")
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        editor.retryLoad()
+        testScheduler.advanceUntilIdle()
+        assertNull(editor.current.error)
+        assertEquals("from the sheet", editor.current.body)
     }
 
     /** Review of #3759: an open preview follows a body the sheet replaced. */
