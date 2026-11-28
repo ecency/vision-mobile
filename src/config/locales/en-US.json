@@ -2253,6 +2253,7 @@
         "open_wallet": "Open Wallet",
         "your_wallet_is_on_the_wallet": "Your wallet is on the Wallet tab.",
         "user_has_no_comments": "@{username} haven't commented anything yet",
+        "cover_hint": "Best size {width} × {height} px (at least {minWidth} × {minHeight}). Keep text and logos in the centre: every screen crops the edges, the sides in narrow boxes such as phones and the profile card, the top and bottom on wider ones such as tablets.",
         "menu": "More",
         "users": "Users"
       },
@@ -2901,7 +2902,8 @@
       "failed_to_delete": "Failed to delete"
     },
     "uploads": {
-      "add_to_gallery": "Add to gallery"
+      "add_to_gallery": "Add to gallery",
+      "refused": "The image server does not accept uploads from this account."
     },
     "account_notice": {
       "manage_keys": "Settings, Manage Authorities",

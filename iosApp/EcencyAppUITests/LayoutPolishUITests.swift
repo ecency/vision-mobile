@@ -43,6 +43,14 @@ final class LayoutPolishUITests: XCTestCase {
         waitSettled(app.buttons["source-gallery"])
     }
 
+    /// #3754: the cover picker says which size stays sharp in the header.
+    func testTheCoverPickerShowsItsSizeHint() {
+        let app = launch(["-openScreen", "editProfile"])
+        let hint = app.staticTexts["cover-hint"]
+        XCTAssertTrue(hint.waitForExistence(timeout: 30), "the cover size hint")
+        XCTAssertEqual(hint.label, "Best size 2,688 × 480 px (at least 1,344 × 240). Keep text and logos in the centre: every screen crops the edges, the sides in narrow boxes such as phones and the profile card, the top and bottom on wider ones such as tablets.")
+    }
+
     /// The profile image chooser: the four routes as rows, each with what it does, and Cancel closes it.
     func testTheProfileChooserIsASheetOfRows() {
         let app = launch(["-openScreen", "editProfile"])

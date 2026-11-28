@@ -98,9 +98,9 @@ data class ProfileEditState(
         get() = value(ProfileField.AVATAR).takeIf { it.isNotEmpty() }?.let { ImageProxy(proxyBase).proxify(it, 256, 256) }
             ?: username?.let { PostCard.avatarUrl(it, proxyBase, "large") }.orEmpty()
 
-    /** RN getResizedImage(coverUrl, 600); empty for the default cover. */
+    /** The cover as the profile header asks for it (#3754; RN asked 600 wide, which blurs a wide cover); empty for the default cover. */
     val coverPreview: String
-        get() = value(ProfileField.COVER).takeIf { it.isNotEmpty() }?.let { ImageProxy(proxyBase).proxify(it, 600, 0) }.orEmpty()
+        get() = value(ProfileField.COVER).takeIf { it.isNotEmpty() }?.let { ImageProxy(proxyBase).proxify(it, 0, ProfileModel.COVER_HEIGHT_PX) }.orEmpty()
 }
 
 /**

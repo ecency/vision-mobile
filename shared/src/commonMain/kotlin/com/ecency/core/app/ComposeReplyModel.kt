@@ -68,6 +68,9 @@ class ComposeReplyModel internal constructor(
 ) : StateModel<ReplyState>(ReplyState(), env.dispatchers), AiTextTarget {
 
     private var pending: PendingPublish? = null
+
+    /** Sends started (main thread): a reload that read the draft before one ran does not apply its older record. */
+    private var sends = 0
     private var conflictChoice: Boolean? = null
 
     // ---- RN quick reply's toolbar: dictation and AI assist (the editor's models), image and clipboard (the wave composer's upload) ----
@@ -237,13 +240,41 @@ class ComposeReplyModel internal constructor(
         if (local.replyImage != null && current.imageUrl == null && !current.isAttaching) setState { it.copy(imageUrl = local.replyImage) }
     }
 
+    /**
+     * The editor's reply mode saved this reply's slot: the text, image and pending publish are read from it again, so
+     * the sheet continues the editor's text instead of writing its older copy over it. Not while this composer sends
+     * or attaches, nor while a change typed here waits to be saved (two composers written at once on a two pane
+     * window: the later save wins, as before).
+     */
+    internal fun draftChangedElsewhere() {
+        val s = current
+        if (s.isSending || s.isAttaching || saveJob?.isActive == true) return
+        val user = owner ?: return
+        scope.launch {
+            // after the first read, which would otherwise put its older text back over this one
+            draftRead.await()
+            val sendsBefore = sends
+            // the editor just saved it: none read back is a read that failed, and the sheet keeps what it shows
+            val local = env.localDrafts.load(user, slot) ?: return@launch
+            // checked again after the load: a keystroke meanwhile started a save (setText), a send or an upload began, or a
+            // send ran and ended (its newer pending record is not replaced by this older read)
+            if (sends != sendsBefore || current.isSending || current.isAttaching || saveJob?.isActive == true) return@launch
+            // a permlink a failed send left is kept until a send settles it: a read from before it was saved has none
+            pending = local.pending ?: pending
+            setState { it.copy(text = local.body, imageUrl = local.replyImage, draftPermlink = pending?.permlink, sent = null, error = null, prefillSeq = it.prefillSeq + 1) }
+        }
+    }
+
     /** The slot's draft with [text] and [image] (the attached one); the pending publish is always carried along. */
     private suspend fun store(user: String, text: String, image: String?) {
+        val base = env.localDrafts.load(user, slot)
+        // the editor's reply mode may have sent this reply since the sheet read the slot (its permlink is saved before
+        // the broadcast): kept, so a lost answer is asked about from here too and never sent twice
+        if (pending == null) pending = base?.pending
         if (text.isEmpty() && image == null && pending == null) {
             env.localDrafts.delete(user, slot)
         } else {
-            val base = env.localDrafts.load(user, slot) ?: LocalDraft()
-            env.localDrafts.save(user, slot, base.copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image))
+            env.localDrafts.save(user, slot, (base ?: LocalDraft()).copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image))
         }
     }
 
@@ -273,6 +304,8 @@ class ComposeReplyModel internal constructor(
     }
 
     fun setText(text: String) {
+        // the same text (iOS echoes a text the model set, prefillSeq): nothing typed, nothing to save over another writer
+        if (text == current.text) return
         setState { it.copy(text = text, sent = null) }
         val user = owner ?: return
         saveJob?.cancel()
@@ -324,6 +357,7 @@ class ComposeReplyModel internal constructor(
             setState { it.copy(error = AppError(ErrorKind.AUTH, ACCOUNT_CHANGED, false)) }
             return
         }
+        sends++
         setState { it.copy(isSending = true, error = null, sent = null, conflict = false, authorityPrompt = false) }
         val authorityRetry = authority.takeRetry()
         val text = bodyOf(state)
@@ -334,6 +368,9 @@ class ComposeReplyModel internal constructor(
                 val author = signedInAs ?: throw AppException(AppError(ErrorKind.AUTH, L.native.composeReply.pleaseSignInFirst, false))
                 saveJob?.cancel()
                 val hash = PendingPublish.hashOf(parent.author, parent.permlink, "", text)
+                // the editor's reply mode may have sent this reply under a permlink the sheet has not read yet (its own
+                // save was still waiting): asked about first, so a lost answer is never sent twice under a new one
+                if (pending == null) pending = env.localDrafts.load(author, slot)?.pending
                 val was = pending
                 var permlink: String? = null
                 var create = true

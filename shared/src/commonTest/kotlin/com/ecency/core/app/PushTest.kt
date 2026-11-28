@@ -218,6 +218,19 @@ class PushTest {
         assertEquals(2, p.registrations().size)
     }
 
+    /** ECENCY-MOBILE-3QZ: accounts the store could not list at launch (locked before the first unlock) register on the next foreground. */
+    @Test
+    fun accountsTheStoreCouldNotListRegisterOnTheNextForeground() = runTest {
+        val p = Push(this, listOf(alice, bob))
+        p.f.start()
+        p.f.app.store.namesUnavailable = true
+        p.push.start(); p.f.idle()
+        assertTrue(p.registrations().isEmpty())
+        p.f.app.store.namesUnavailable = false
+        p.push.onForeground(); p.f.idle()
+        assertEquals(setOf(alice, bob), p.registrations().map { it.text("username") }.toSet())
+    }
+
     @Test
     fun aRefusedAccountRegistersAgainOnlyOnceItsAccessTokenChanged() = runTest {
         val p = Push(this)

@@ -1,9 +1,16 @@
 package com.ecency.core.api.ecency
 
+import com.ecency.core.api.EcencyHttpException
 import com.ecency.core.api.rpc.HttpResult
+import com.ecency.core.app.AppError
+import com.ecency.core.app.CrashReporter
+import com.ecency.core.app.ErrorReports
+import com.ecency.core.app.RecordingReporter
+import com.ecency.core.l10n.L
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 
 /** #3722: the upload token goes in an `Authorization: Bearer` header, never in the address (imagehoster#84). */
@@ -40,6 +47,30 @@ class ImageUploaderTest {
         for ((address, authorization) in host.requests) {
             assertEquals("https://images.example/hs", address)
             assertEquals("Bearer $token", authorization)
+        }
+    }
+
+    /** ECENCY-MOBILE-3S4: the image host refused this account (403): not retried, said so, an expected warning with no code. */
+    @Test
+    fun aRefusedUploadSaysSoAndIsAnExpectedWarning() = runTest {
+        val reporter = RecordingReporter()
+        ErrorReports.install({ reporter }, { 0L })
+        try {
+            val host = Host({ HttpResult(403, """{"error":{"info":null,"name":"deplorable"}}""") })
+            val e = assertFailsWith<EcencyHttpException> { ImageUploader(host, "https://images.example") { 0 }.upload(file, token) }
+            assertEquals(1, host.requests.size)
+            assertEquals(L.native.uploads.refused, ImageUploader.message(e))
+            assertEquals(null, AppError.from(e, "profileEdit.upload").code)
+            assertEquals("warning", reporter.reports.single().level)
+            // any other refusal of the host is still a bug to look at: another status, or a 403 that is not its answer
+            val other = assertFailsWith<EcencyHttpException> { ImageUploader(Host({ HttpResult(401, "") }), "https://images.example") { 0 }.upload(file, token) }
+            AppError.from(other, "profileEdit.upload")
+            val edge = assertFailsWith<EcencyHttpException> { ImageUploader(Host({ HttpResult(403, "<html>Forbidden</html>") }), "https://images.example") { 0 }.upload(file, token) }
+            assertFalse(edge is ImageUploadRefused, "a 403 page from the edge is no refusal of the account")
+            AppError.from(edge, "editor.upload")
+            assertEquals(listOf("warning", "error", "error"), reporter.reports.map { it.level })
+        } finally {
+            ErrorReports.install({ CrashReporter.None }, { 0L })
         }
     }
 }

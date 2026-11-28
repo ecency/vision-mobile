@@ -20,7 +20,8 @@ import io.sentry.protocol.SentryException
  * Sentry as RN App.tsx sets it up, with the DSN [com.ecency.core.app.CrashDsn] picks (RN's project unless the build
  * names another): no default PII, no tracing, no session replay, errors at Sentry's default sample rate (all), the
  * release `<applicationId>@<version>+<build>` with the build number as dist (RN's CI naming). Every event and
- * breadcrumb is scrubbed ([CrashScrubber]); RN's benign errors are dropped. Without a DSN nothing starts.
+ * breadcrumb is scrubbed ([CrashScrubber]); RN's benign errors are dropped. Without a DSN, or in Firebase Test Lab
+ * ([inTestLab]), nothing starts.
  */
 object SentryReporting {
     @Volatile var started = false
@@ -28,10 +29,18 @@ object SentryReporting {
 
     /** Application.onCreate, before anything else can crash. */
     fun start(context: Context, dsn: String, applicationId: String, version: String, build: Int, debug: Boolean, mappingId: String) {
-        if (dsn.isBlank() || started) return
+        if (dsn.isBlank() || started || inTestLab(context)) return
         SentryAndroid.init(context) { o -> configure(o, dsn, applicationId, version, build, debug, mappingId) }
         started = true
     }
+
+    /**
+     * Firebase Test Lab (Play's pre-launch report) sets this system setting on its devices. Its crawler opens exported
+     * activities of libraries (Glance's trampoline, Billing's proxy) without what they need, so their crashes are the
+     * crawler's, not the users' (ECENCY-MOBILE-3R8, 3R9): nothing is sent from there. Never throws.
+     */
+    fun inTestLab(context: Context): Boolean =
+        runCatching { android.provider.Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true" }.getOrDefault(false)
 
     /** The options [start] gives Sentry. [mappingId]: CI's id for this build's R8 mapping, empty when there is none. */
     fun configure(o: SentryAndroidOptions, dsn: String, applicationId: String, version: String, build: Int, debug: Boolean, mappingId: String) {

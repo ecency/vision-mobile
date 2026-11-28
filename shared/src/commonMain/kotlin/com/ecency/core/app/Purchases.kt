@@ -342,9 +342,11 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
      * without an earlier purchase (or one with no saved target) is [target] saved, before the store sheet opens. The
      * outcome arrives on [outcomes]. Main thread. [claimOnly] never opens the store: with no earlier purchase to deliver
      * it ends with [PurchaseOutcome.NothingToClaim] (the paid account's "Claim", which skipped the name check).
+     * Returns false, with no outcome to come, when the call is dropped: an unknown product, or one already [busy][PurchaseServiceState.busy]
+     * (another buy, or a recovery sending an earlier purchase of it); a caller holding a spinner for the outcome ends it (#3751).
      */
-    fun buy(productId: String, target: PurchaseTarget, claimOnly: Boolean = false) {
-        if (productId !in PurchaseSkus.ALL || productId in current.busy) return
+    fun buy(productId: String, target: PurchaseTarget, claimOnly: Boolean = false): Boolean {
+        if (productId !in PurchaseSkus.ALL || productId in current.busy) return false
         mutableState.update { it.copy(busy = it.busy + productId) }
         env.background.launch {
             connect()?.let { e ->
@@ -396,6 +398,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                 }
             }
         }
+        return true
     }
 
     /**

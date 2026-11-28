@@ -248,4 +248,17 @@ final class NotificationTests: XCTestCase {
         XCTAssertFalse(old.hasSuffix("ago"))
         XCTAssertTrue(old.contains("2026"), old)
     }
+
+    /// Greptile on #3756: on a wide window a later link opened while the login sheet waits replaces the waiting chat
+    /// link, so a sign-in does not open the older conversation over it (the latest link wins, as `NavState.open`).
+    func testALaterLinkOnAWideWindowDropsTheChatLinkWaitingForTheSignIn() throws {
+        try make(signedIn: false)
+        app.fit(width: 1400)
+        let chat = try XCTUnwrap(ContentLinks.shared.entry(url: "https://ecency.com/chats/offtopicdemochannel0000001"))
+        app.open(entry: chat)
+        XCTAssertNotNil(app.nav.afterLogin, "the chat link waits for the sign-in")
+        let profile = try XCTUnwrap(ContentLinks.shared.entry(url: "https://ecency.com/@spike-bob"))
+        app.open(entry: profile)
+        XCTAssertNil(app.nav.afterLogin, "the later link wins")
+    }
 }

@@ -108,6 +108,23 @@ class ErrorReportsTest {
         assertEquals("error", reporter.reports.single().level, "a refusal without the server's words is still a bug")
     }
 
+    /** ECENCY-MOBILE-3RD: a signup the server refused in its own words (a 4xx with a message) is its answer, not a bug. */
+    @Test
+    fun aSignupRefusalTheServerExplainsIsAnExpectedWarningWithNoCode() {
+        val refused = AppError.from(com.ecency.core.api.ecency.SignupException(406, null, "Not accepted"), "register.signUp")
+        assertEquals(null, refused.code)
+        assertEquals("warning", reporter.reports.single().level)
+        assertEquals("true", reporter.reports.single().tags["expected"])
+        reporter.reports.clear()
+        // the user sees "unknown error" then: no words of the server, still a bug to look at
+        AppError.from(com.ecency.core.api.ecency.SignupException(406, null, ""), "register.signUp")
+        now += ErrorReports.THROTTLE_MILLIS
+        AppError.from(com.ecency.core.api.ecency.SignupException(500, null, "Internal"), "register.signUp")
+        now += ErrorReports.THROTTLE_MILLIS
+        AppError.from(com.ecency.core.api.ecency.SignupException(0, null, null, RuntimeException("lost")), "register.signUp")
+        assertEquals(listOf("error", "error", "error"), reporter.reports.map { it.level })
+    }
+
     @Test
     fun anExpiredHiveSignerLoginIsTheUsersToFixWithNoCode() {
         val error = AppError.from(AuthException.HiveSignerApi(401, "invalid_grant", "The token has invalid role"), "editor.publish")
@@ -124,6 +141,22 @@ class ErrorReportsTest {
         val r = reporter.reports.single()
         assertEquals("warning", r.level)
         assertEquals("true", r.tags["expected"])
+    }
+
+    /**
+     * ECENCY-MOBILE-3NR, 3NS, 3QZ: quiet reads the app runs again once the phone unlocked send nothing while the store
+     * is closed (as a lost connection); any other quiet one, and a shown one, is still the expected warning.
+     */
+    @Test
+    fun aQuietReadRunAgainOnUnlockSendsNothingWhileTheStoreIsClosed() {
+        val locked = SecureStoreException.Unavailable(-25308, untilUnlock = true)
+        for (where in listOf("sendJournal.read", "legacy.readNames", "push.accounts")) ErrorReports.quiet(locked, where)
+        assertEquals(emptyList(), reporter.reports)
+        ErrorReports.quiet(locked, "notifications.refresh")
+        ErrorReports.quiet(SecureStoreException.Unavailable(-25308), "push.accounts")
+        AppError.from(SecureStoreException.Unavailable(-25308, untilUnlock = true), "session.start")
+        assertEquals(listOf("notifications.refresh", "push.accounts", "session.start"), reporter.reports.map { it.tags["where"] })
+        assertEquals(listOf("warning", "warning", "warning"), reporter.reports.map { it.level })
     }
 
     @Test
@@ -297,6 +330,49 @@ class ErrorReportsTest {
         // a chat failure's text is the server's or the catalog's fallback in the app language
         AppError.from(com.ecency.core.api.chat.ChatApiException(400, "Anfrage fehlgeschlagen"), "chats.load")
         assertEquals("", reporter.reports.last().fingerprint[4])
+    }
+
+    /**
+     * ECENCY-MOBILE-3R6: the message sent (the issue's title) names no account, as its fingerprint does not: a typed
+     * @name, and the account the chain or HiveSigner names in its own words.
+     */
+    @Test
+    fun theMessageSentNamesNoAccount() {
+        AppError.from(AuthException.UnknownAccount("typed-name1"), "session.signIn")
+        AppError.from(AuthException.HiveSignerApi(500, "server_error", "Account voter-12 already submitted 5 custom json operation(s) this block."), "post.reblog")
+        AppError.from(AuthException.HiveSignerApi(500, "server_error", "Account: abc.def has 1000 RC, needs 2000 RC."), "post.reblog")
+        AppError.from(rejected("Assert Exception:Account someone does not exist"), "wallet.transfer")
+        AppError.from(rejected("Account does not have enough mana to vote. voting_mana: 1199"), "comment.vote")
+        // an e-mail address goes whole, never as its name before an @<user>
+        AppError.from(IllegalStateException("no answer for jane.doe@mail.example"), "settings.contact")
+        // quoted, as typed (any case), and the bare name in another case: gone too; apostrophes in words stay
+        AppError.from(IllegalStateException("Account \"Quoted-One\" was refused, 'single9' too"), "settings.quoted")
+        AppError.from(rejected("Assert Exception:Account CapName does not exist"), "wallet.capital")
+        AppError.from(IllegalStateException("it's the node's answer"), "settings.apostrophe")
+        // a diagnosis keeps its identifiers: JSON keys and qualified names are no typed names
+        AppError.from(IllegalStateException("""{"code":-32000,"message":"Field 'url' is required for type with serial name 'com.ecency.core.api.model.Post'"}"""), "settings.json")
+        // the out-of-RC count is an event of its own
+        val handled = reporter.reports.filter { it.tags["handled"] == "true" }
+        assertEquals(
+            listOf(
+                "account @<user> does not exist",
+                "HiveSigner error server_error: Account <user> already submitted 5 custom json operation(s) this block.",
+                "HiveSigner error server_error: Account: <user> has 1000 RC, needs 2000 RC.",
+                "Assert Exception:Account <user> does not exist",
+                "Account does not have enough mana to vote. voting_mana: 1199",
+                "no answer for <redacted-email>",
+                "Account <q> was refused, <q> too",
+                "Assert Exception:Account <user> does not exist",
+                "it's the node's answer",
+                """{"code":-32000,"message":"Field <q> is required for type with serial name 'com.ecency.core.api.model.Post'"}""",
+            ),
+            handled.map { it.message },
+        )
+        for (r in handled) {
+            for (name in listOf("typed-name1", "voter-12", "abc.def", "someone", "jane.doe", "Quoted-One", "single9", "CapName")) {
+                assertFalse(name in r.fingerprint.joinToString(" "), "${r.fingerprint}")
+            }
+        }
     }
 
     @Test

@@ -178,6 +178,49 @@ class LoginFlowsTest {
         assertEquals("tester", env.session.current.username)
     }
 
+    /** A chat link opened signed out (#3753 review): the login screen first, the conversation after the sign-in. */
+    @Test
+    fun aChatLinkOpenedSignedOutOpensItsConversationAfterSignIn() {
+        val navigator = Navigator()
+        launch(navigator)
+        compose.waitForIdle()
+        val id = "sk6xregduj81pj5hx67a3r8ath"
+        val entry = com.ecency.core.app.ContentLinks.entry("https://ecency.com/chats/$id")!!
+        compose.runOnIdle { navigator.open(entry, env.session.current.isLoggedIn) }
+        waitFor("login")
+        assertEquals(listOf<AppScreen>(AppScreen.Login), navigator.state.screens)
+        compose.onNodeWithTag("loginUser").performTextInput("tester")
+        compose.onNodeWithTag("loginKey").performTextInput(node.key.toWif())
+        compose.onNodeWithTag("loginSubmit").performClick()
+        until { env.session.current.username == "tester" && !exists("login") }
+        compose.waitForIdle()
+        assertEquals(com.ecency.core.app.AppTab.CHATS, navigator.state.tab)
+        assertEquals("the conversation, not the Chats list", listOf<AppScreen>(AppScreen.ChatThread(id)), navigator.state.screens)
+        assertNull(navigator.state.afterLogin)
+    }
+
+    /** The same link, the login closed without signing in: a sign-in later does not open the old conversation. */
+    @Test
+    fun aChatLinkWhoseLoginWasClosedOpensNothingAfterALaterSignIn() {
+        val navigator = Navigator()
+        launch(navigator)
+        compose.waitForIdle()
+        val entry = com.ecency.core.app.ContentLinks.entry("https://ecency.com/chats/sk6xregduj81pj5hx67a3r8ath")!!
+        compose.runOnIdle { navigator.open(entry, env.session.current.isLoggedIn) }
+        waitFor("login")
+        compose.runOnIdle { navigator.pop() }
+        until { !exists("login") && navigator.state.afterLogin == null }
+        compose.runOnIdle { navigator.push(AppScreen.Login) }
+        waitFor("login")
+        compose.onNodeWithTag("loginUser").performTextInput("tester")
+        compose.onNodeWithTag("loginKey").performTextInput(node.key.toWif())
+        compose.onNodeWithTag("loginSubmit").performClick()
+        until { env.session.current.username == "tester" && !exists("login") }
+        compose.waitForIdle()
+        assertEquals(com.ecency.core.app.AppTab.CHATS, navigator.state.tab)
+        assertEquals(emptyList<AppScreen>(), navigator.state.screens)
+    }
+
     /** RN #3600: the keys screen shows and copies public keys; pasting one at sign-in names it. */
     @Test
     fun aPastedPublicKeyAtLoginIsNamedNotInvalidCredentials() {

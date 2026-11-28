@@ -128,6 +128,8 @@ class SocialModelsTest {
         assertNotNull(edit.current.alert)
         edit.dismissAlert()
         assertTrue(edit.setImageUrl(ProfileField.COVER, " https://img.example/c.png "))
+        // #3754: the preview is asked by height, as the profile header asks for the cover
+        assertTrue(edit.current.coverPreview.endsWith("?format=match&mode=fit&height=480"), edit.current.coverPreview)
         edit.save()
         testScheduler.advanceUntilIdle()
         assertTrue(edit.current.saved)

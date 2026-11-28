@@ -268,8 +268,17 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
         // "Claim Paid Account" sends a purchase already paid for again, under its saved name: never charged twice, and
         // its account may exist by now (created, the answer lost), so its own name must not stop it. Claim only: with
         // nothing left to claim it goes the checked way (NothingToClaim), never to a new sheet unchecked (PR review)
-        if (s.paidWaiting) return env.purchases.buy(PurchaseSkus.ACCOUNT, accountTarget(s), claimOnly = true)
+        if (s.paidWaiting) return startBuy(accountTarget(s), claimOnly = true)
         checkedBuy(s)
+    }
+
+    /**
+     * The store buy, or, when [PurchaseService.buy] drops it (the paid account is busy: a recovery still sends an
+     * earlier purchase of it), the spinner ends at once, since no outcome comes for this tap (#3751).
+     */
+    private fun startBuy(target: PurchaseTarget, claimOnly: Boolean = false) {
+        if (env.purchases.buy(PurchaseSkus.ACCOUNT, target, claimOnly)) return
+        setState { it.copy(isRegistering = false, alert = RegisterAlert(PurchaseCopy.WARNING, PurchaseCopy.PROCESSING)) }
     }
 
     private fun accountTarget(s: RegisterState) = PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta(s.username, s.email, s.referral))
@@ -291,7 +300,7 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
                         usernameValid = false,
                     )
                 }
-                else -> env.purchases.buy(PurchaseSkus.ACCOUNT, target)
+                else -> startBuy(target)
             }
         }
     }

@@ -70,7 +70,22 @@ class KtorAuthHttp(
     @Throws(Exception::class)
     override suspend fun send(request: AuthHttpRequest): HttpResult {
         val bound = request.timeoutMillis?.coerceIn(1, MAX_TIMEOUT_MILLIS) ?: timeoutMillis
-        val result = withTimeoutOrNull(bound) {
+        val result = try {
+            exchange(request, bound)
+        } catch (e: kotlinx.io.IOException) {
+            // the platform's own I/O failure (no route, DNS, connect timeout, connection lost; Java's and Ktor's socket
+            // exceptions and Darwin's request exception are all IOExceptions): a lost connection for every caller, as
+            // `ofSendFailure` makes it (Sentry ECENCY-MOBILE-3JM: reported as unknown before). A bug in building the
+            // request (an illegal header, say) is no IOException and stays one.
+            throw EcencyHttpException.ofSendFailure(e)
+        }
+        // the address a redirect names stays out of the message: it is not ours and may carry a token
+        if (result.status in 300..399) throw EcencyHttpException(result.status, "Unexpected redirect (${result.status})")
+        return result
+    }
+
+    private suspend fun exchange(request: AuthHttpRequest, bound: Long): HttpResult =
+        withTimeoutOrNull(bound) {
             val response = client.request(request.url) {
                 method = HttpMethod.parse(request.method)
                 ClientIdentity.headers(request, userAgent).forEach { (k, v) -> header(k, v) }
@@ -84,10 +99,6 @@ class KtorAuthHttp(
             }
             HttpResult(response.status.value, response.bodyAsText(), response.headers.entries().associate { (name, values) -> name.lowercase() to values.firstOrNull().orEmpty() })
         } ?: throw EcencyTimeoutException()
-        // the address a redirect names stays out of the message: it is not ours and may carry a token
-        if (result.status in 300..399) throw EcencyHttpException(result.status, "Unexpected redirect (${result.status})")
-        return result
-    }
 
     companion object {
         /** Every call through this transport gives up after this long. */

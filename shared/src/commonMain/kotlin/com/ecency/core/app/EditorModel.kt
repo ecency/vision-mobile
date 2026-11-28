@@ -1052,6 +1052,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         if (published || s.loading) return
         dirty = false
         val ok = env.localDrafts.save(owner, slot, localDraft(s))
+        if (ok && args.kind == EditorKind.REPLY) env.replyDraftWrittenElsewhere(PostKey(args.author, args.permlink))
         // a save refused because the account left the device (logout, wipe) is the teardown at work, not a failure to report
         val failed = !ok && !env.localDrafts.hasLeft(owner)
         if (current.localSaveFailed != failed) setState { it.copy(localSaveFailed = failed) }
@@ -1070,7 +1071,11 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         dirty = false
         val draft = localDraft(s)
         val key = slot
-        env.background.launch { env.localDrafts.save(owner, key, draft) }
+        // a reply only: an edit of one writes its own slot
+        val reply = if (args.kind == EditorKind.REPLY) PostKey(args.author, args.permlink) else null
+        env.background.launch {
+            if (env.localDrafts.save(owner, key, draft) && reply != null) env.replyDraftWrittenElsewhere(reply)
+        }
     }
 
     /** Whatever removes the screen (back, an account change, the activity finishing), the text is written first. */
@@ -1411,7 +1416,9 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     private suspend fun remember(owner: String, permlink: String, hash: String) {
         val now = env.nowMillis()
         pending = pending?.takeIf { it.permlink == permlink }?.alsoSent(hash, now) ?: PendingPublish(permlink, listOf(hash), now)
-        env.localDrafts.save(owner, slot, localDraft(current))
+        val saved = env.localDrafts.save(owner, slot, localDraft(current))
+        // the quick reply sheet learns the permlink before the broadcast, so a retry there asks the chain first
+        if (saved && args.kind == EditorKind.REPLY) env.replyDraftWrittenElsewhere(PostKey(args.author, args.permlink))
     }
 
     /**

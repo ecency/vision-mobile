@@ -545,6 +545,13 @@ data class NavState(
      * that opened in turn. Empty on a phone-sized window, and on Android, which never asks for it.
      */
     val pane: List<NavItem> = emptyList(),
+    /**
+     * Where a link or notification was going when [open] put the login screen in place of a screen that needs an
+     * account (a chat link opened signed out): opened by [afterAccountChange] once someone signs in, dropped by
+     * [dropAfterLogin] when the login closes with nobody signed in. Never saved ([encode]): a restored navigation
+     * has none.
+     */
+    val afterLogin: NavEntry? = null,
 ) {
     /** The screen on top, or null when the tabs show. */
     val top: AppScreen? get() = stack.lastOrNull()?.screen
@@ -634,13 +641,19 @@ data class NavState(
 
     fun closeDrawer(): NavState = if (drawerOpen) copy(drawerOpen = false) else this
 
-    /** A deep link or notification: see [NavEntry]. Screens that need an account open the login screen when [loggedIn] is false. */
+    /**
+     * A deep link or notification: see [NavEntry]. Screens that need an account open the login screen when [loggedIn]
+     * is false, and the entry waits in [afterLogin] for the sign-in. The latest link wins: one that opens without the
+     * login screen drops an earlier one waiting.
+     */
     fun open(entry: NavEntry, loggedIn: Boolean): NavState {
         var s = if (entry.tab != null) copy(tab = entry.tab, stack = emptyList(), pane = emptyList()) else this
-        s = s.copy(drawerOpen = false)
-        for (screen in entry.screens) {
+        s = s.copy(drawerOpen = false, afterLogin = null)
+        for ((i, screen) in entry.screens.withIndex()) {
             s = s.pushGated(screen, loggedIn)
-            if (s.top == AppScreen.Login) break // nothing behind the login screen that needs the account
+            // nothing behind the login screen that needs the account; what waits for the sign-in is the entry with a
+            // tab (its stack starts over), or without one the screens not opened yet (the ones before stay open)
+            if (s.top == AppScreen.Login) return s.copy(afterLogin = if (entry.tab != null) entry else NavEntry(null, entry.screens.drop(i)))
         }
         return s
     }
@@ -660,7 +673,23 @@ data class NavState(
         // what the pane showed was opened from the previous account's list
         pane = emptyList(),
         drawerOpen = false,
+        afterLogin = null,
     )
+
+    /**
+     * [afterAccountChange]. When the change signed someone in ([signedIn]) while a link waited for it ([afterLogin]),
+     * the login screen leaves the stack and the link opens for the account that signed in, whichever it is: the
+     * reader chose it on that login screen, and what opens is that account's own (its conversation, its wallet).
+     */
+    fun afterAccountChange(signedIn: Boolean): NavState {
+        val waiting = afterLogin
+        val changed = afterAccountChange()
+        if (!signedIn || waiting == null) return changed
+        return changed.copy(stack = changed.stack.filter { it.screen != AppScreen.Login }).open(waiting, loggedIn = true)
+    }
+
+    /** The login screen (or sheet) closed with nobody signed in: [afterLogin] is not opened later. */
+    fun dropAfterLogin(): NavState = if (afterLogin == null) this else copy(afterLogin = null)
 
     /**
      * A navigation saved while [owner] was signed in (null: nobody, or unknown), restored while [current] is.
@@ -848,6 +877,9 @@ object ContentLinks {
     /** A Hive permlink as ecency.com links carry it. */
     private val PERMLINK = Regex("^[a-z0-9-]{1,256}$")
 
+    /** A Mattermost channel id, as ecency.com/chats/<id> carries it: 26 lowercase letters and digits. */
+    private val CHANNEL_ID = Regex("^[a-z0-9]{26}$")
+
     /** First-party hosts whose pages the app may be handed (App Links, universal links: ecency.com and alpha). */
     private val FIRST_PARTY_HOSTS = HOSTS + "alpha.ecency.com"
 
@@ -882,6 +914,8 @@ object ContentLinks {
             com.ecency.core.render.blocks.SafeTarget.post(reply.groupValues[1], reply.groupValues[2])
                 ?.let { NavEntry.from(LinkRouter.route(it)) }?.let { return it }
         }
+        // a conversation goes on top of the open tab, as a post does
+        if (page.tab == AppTab.CHATS) return page.screens.takeIf { it.isNotEmpty() }?.let { NavEntry(null, it) }
         return page.takeIf { it.tab == null }
     }
 
@@ -908,6 +942,17 @@ object ContentLinks {
                 }
             }
             return if (com.ecency.core.api.waves.Waves.composeText(safe) != null) NavEntry.tab(AppTab.WAVES) else null
+        }
+        // #3753: /chats is the Chats tab, /chats/<channel id> that conversation on it (RN had no chat link). Ecency's
+        // own pages only; an id that is no Mattermost channel id is left to the browser. The thread needs an account,
+        // so NavState.open puts the login screen first for a signed-out reader.
+        if (parts.firstOrNull()?.lowercase() == "chats") {
+            if (!firstParty) return null
+            return when {
+                parts.size == 1 -> NavEntry.tab(AppTab.CHATS)
+                parts.size == 2 && CHANNEL_ID.matches(parts[1]) -> NavEntry(AppTab.CHATS, listOf(AppScreen.ChatThread(parts[1])))
+                else -> null
+            }
         }
         val target: com.ecency.core.render.blocks.LinkTarget? = when {
             // /@author/followers and /following: the follows list (RN deepLinkParser)

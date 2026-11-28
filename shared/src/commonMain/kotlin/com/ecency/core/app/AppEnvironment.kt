@@ -1080,6 +1080,15 @@ class AppEnvironment(
     /** The editor's "Choose a community" sheet. */
     fun communityPickerModel(): CommunityPickerModel = CommunityPickerModel(this)
 
+    /**
+     * The editor's reply mode wrote the reply draft of [parent] (the slot the quick reply shares): a quick reply model
+     * kept from before would show its older text, or none, and write it over the editor's on the next keystroke. It
+     * reads the saved draft again in place ([ComposeReplyModel.draftChangedElsewhere]): a sheet showing it stays alive.
+     */
+    internal fun replyDraftWrittenElsewhere(parent: PostKey) {
+        replies[parent]?.draftChangedElsewhere()
+    }
+
     /** The editor posted the reply to [parent]: the quick reply sheet's model for it (same draft slot) starts fresh. */
     internal fun replyPostedElsewhere(parent: PostKey) {
         replies.remove(parent)?.dispose()

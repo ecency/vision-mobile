@@ -118,6 +118,8 @@ object ErrorReports {
             val kind = AppError.kindOf(e)
             // a refused session is not sent either: the user is asked to sign in again, and auth.renewToken says why
             if (kind == ErrorKind.NETWORK || isSessionRefused(root) || skips(e, root, kind)) return
+            // nor a read the app runs again once the phone unlocked: every one of them fails the same way until then
+            if (where in RUN_AGAIN_ON_UNLOCK && isDeviceLocked(root)) return
             send(root, where, kind.name.lowercase(), true, root, quiet = true)
         } catch (t: Throwable) {
             // not reported: reporting must never fail the caller
@@ -156,6 +158,8 @@ object ErrorReports {
         isSessionRefused(root) -> true
         isDeviceLocked(root) -> true
         isChatRefusal(root) -> true
+        isSignupRefusal(root) -> true
+        root is com.ecency.core.api.ecency.ImageUploadRefused -> true
         root is AuthException -> isUserMistake(root)
         else -> false
     }
@@ -168,9 +172,22 @@ object ErrorReports {
     private fun isDeviceLocked(root: Throwable): Boolean =
         (root as? com.ecency.core.secure.SecureStoreException.Unavailable)?.untilUnlock == true
 
+    /**
+     * Quiet reads the app runs again once the store opened (ECENCY-MOBILE-3NR, 3NS, 3QZ): the RN import's lists with the
+     * lock's start (StorageRecovery on iOS), the push accounts and the send journal at the next foreground.
+     */
+    private val RUN_AGAIN_ON_UNLOCK = setOf("sendJournal.read", "legacy.readNames", "push.accounts")
+
     /** The chat server refused in its own words ("@user is not on Ecency chat yet."): an answer, not a bug of the app. */
     private fun isChatRefusal(root: Throwable): Boolean =
         (root as? com.ecency.core.api.chat.ChatApiException)?.let { it.serverText && it.status in 400..499 } == true
+
+    /**
+     * The signup server refused in its own words (a 4xx with a message, which the user is shown): its answer, not a bug
+     * of the app (ECENCY-MOBILE-3RD). Without a message (the user sees "unknown error"), a 5xx or no answer stays an error.
+     */
+    private fun isSignupRefusal(root: Throwable): Boolean =
+        (root as? com.ecency.core.api.ecency.SignupException)?.let { it.status in 400..499 && !it.serverMessage.isNullOrEmpty() } == true
 
     /** Ecency refused the session (401) after the renewal: the user's to fix by signing in again. */
     private fun isSessionRefused(root: Throwable): Boolean = (root as? com.ecency.core.api.EcencyHttpException)?.isSessionRefused == true
@@ -226,8 +243,10 @@ object ErrorReports {
         val s = sink.load() ?: return null
         val reporter = s.reporter()
         if (reporter === CrashReporter.None) return null
-        // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI)
-        val message = withoutPlaces(e.message.orEmpty())
+        // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI), nor
+        // account names (the issue's title: a typed username, ECENCY-MOBILE-3R6); secrets first, so an e-mail address
+        // goes whole
+        val message = withoutNames(withoutPlaces(CrashScrubber.scrub(e.message.orEmpty()).orEmpty()).replace(QUOTED_IN_MESSAGE, "<q>"))
         val now = s.nowMillis()
         while (true) {
             val before = seen.load()
@@ -328,7 +347,22 @@ object ErrorReports {
     fun withoutPlaces(text: String): String = text.replace(URL, "<url>").replace(PATH, "<path>")
 
     private val URL = Regex("\\b[a-z][a-z0-9+.-]*://[^\\s,;)]*[^\\s,;):.]",RegexOption.IGNORE_CASE)
+    /**
+     * Account names replaced: @names, and the account the chain or HiveSigner names in its own words ("Account x
+     * already submitted", "Account: x has", "Account x does not exist").
+     */
+    fun withoutNames(text: String): String =
+        text.replace(AT_NAME, "@<user>").replace(ACCOUNT_NAME) { "${it.groupValues[1]}<user>" }
+
+    private val ACCOUNT_NAME = Regex("\\b([Aa]ccount:? )[A-Za-z][A-Za-z0-9.-]{2,15}(?= (?:has|already|does not exist)\\b)")
     private val QUOTED = Regex("\"[^\"]*\"|'[^']*'|`[^`]*`")
+
+    /**
+     * A quoted name in the message sent (a typed account name, as the fingerprint drops it): a name shaped word (a
+     * letter, then 2 to 15 letters, digits, dots or dashes) in double, single or back quotes, not a JSON key (no colon
+     * after it). Longer identifiers, JSON and a sentence's apostrophes stay, so the title keeps its diagnosis.
+     */
+    private val QUOTED_IN_MESSAGE = Regex("([\"'`])[A-Za-z][A-Za-z0-9.-]{2,15}\\1(?!\\s*:)")
     private val AT_NAME = Regex("@[a-z0-9][a-z0-9.-]{1,15}", RegexOption.IGNORE_CASE)
     private val HEX = Regex("\\b(?:0x)?(?=[0-9a-fA-F]*[0-9])(?=[0-9a-fA-F]*[a-fA-F])[0-9a-fA-F]{6,}\\b")
     private val NUMBER = Regex("\\d+(\\.\\d+)?")
@@ -336,7 +370,7 @@ object ErrorReports {
 
     /**
      * The message as the fingerprint keeps it: secrets scrubbed, then addresses (the node that answered last),
-     * quoted names, @names, hex and numbers replaced (an account, a node, a block number or a trx id must not split one
+     * quoted names, account names ([withoutNames]), hex and numbers replaced (an account, a node, a block number or a trx id must not split one
      * bug into many issues), cut to [MESSAGE_CHARS].
      */
     fun normalise(message: String): String {
@@ -344,7 +378,7 @@ object ErrorReports {
         return scrubbed
             .let(::withoutPlaces)
             .replace(QUOTED, "<q>")
-            .replace(AT_NAME, "@<user>")
+            .let(::withoutNames)
             .replace(HEX, "<hex>")
             .replace(NUMBER, "<n>")
             .replace(SPACES, " ")

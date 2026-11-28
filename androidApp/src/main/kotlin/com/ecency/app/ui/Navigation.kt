@@ -83,7 +83,8 @@ class Navigator(
             accountKnown = true
             if (restored) update(state.restoredFor(owner, current))
         } else if (current != owner) {
-            update(reopenAfterChange(state.afterAccountChange(), current))
+            // a link that opened the login screen (NavState.afterLogin) opens now for whoever signed in
+            update(reopenAfterChange(state.afterAccountChange(signedIn = current != null), current))
         }
         restored = false
         owner = current
@@ -165,6 +166,9 @@ class Navigator(
     fun closeDrawer() = update(state.closeDrawer())
 
     fun open(entry: NavEntry, loggedIn: Boolean) = update(state.open(entry, loggedIn))
+
+    /** The login screen left with nobody signed in: the link that waited for it ([NavState.afterLogin]) goes. */
+    fun dropAfterLogin() = update(state.dropAfterLogin())
 
     /** Another account (or none): same tab, gated screens leave the stack (their models close). */
     fun afterAccountChange() = update(state.afterAccountChange())

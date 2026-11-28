@@ -7,6 +7,7 @@ import com.ecency.core.secure.SecureStore
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -48,6 +49,9 @@ data class JournalEntry(
         }
 }
 
+/** One change to the journal's list (record, settle, forget, dismiss, an outcome): pure and idempotent. */
+private typealias Change = (List<JournalEntry>) -> List<JournalEntry>
+
 data class SendJournalState(val entries: List<JournalEntry> = emptyList(), val checking: Boolean = false) {
     /** What [account] should see: its entries, undecided first. */
     fun forAccount(account: String?): List<JournalEntry> =
@@ -68,15 +72,41 @@ data class SendJournalState(val entries: List<JournalEntry> = emptyList(), val c
 class SendJournal internal constructor(private val env: AppEnvironment) : StateModel<SendJournalState>(SendJournalState(), env.dispatchers) {
     private val store: SecureStore get() = env.vault.vault.store
     private var started = false
+    /** A start's read is in flight; [startAgain]: another start was asked meanwhile. Main only, as [start]. */
+    private var reading = false
+    private var startAgain = false
     private var resolver: Job? = null
+
+    /** Changes the store refused (read or write), oldest first, applied again at the next read that works. Main only. */
+    private val unsaved = mutableListOf<Change>()
 
     /** Reads the journal and resolves what an earlier run left. Both apps call it at launch; safe to call again. */
     fun start() {
-        if (started) return
+        if (started) {
+            // iOS starts it again on becoming active (after an unlock): one asked while the launch read is in flight
+            // reads once more if that read fails, rather than waiting for the next foreground
+            if (reading) startAgain = true
+            // after a good launch, changes the store refused since (a lock later in the run) are written now
+            else if (unsaved.isNotEmpty()) scope.launch { update(null) }
+            return
+        }
         started = true
+        reading = true
         scope.launch {
-            val entries = io { read() }
-            setState { it.copy(entries = entries) }
+            // the stored list with every change made while the store refused it ([unsaved]), written back
+            val read = update(null)
+            reading = false
+            if (!read) {
+                // the store refused (iOS before the first unlock): the next start reads it again
+                started = false
+                // once: a start asked during this read; the read it runs retries only for a start asked during it
+                if (startAgain) {
+                    startAgain = false
+                    start()
+                }
+                return@launch
+            }
+            startAgain = false
             resolve()
         }
     }
@@ -180,15 +210,31 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
     }
 
     /**
-     * Read-modify-write under the store's lock. Never throws (but cancellation): a journal the store refuses must not
-     * turn a broadcast that went through into an error, so a failed write keeps the entries in memory only.
+     * Read-modify-write under the store's lock; true when the store read and wrote it. Never throws (but
+     * cancellation): a journal the store refuses must not turn a broadcast that went through into an error, so a
+     * change the store refused is kept in memory and in [unsaved], and the next read that works applies it again to
+     * the stored list (in order) before [change] and writes the result: an entry recorded while locked is not
+     * dropped by the stored copy, and one settled, forgotten or dismissed while locked is not brought back by it.
+     * Every change is idempotent, so one applied twice (a write that failed after the read) is the same. A null
+     * [change] only reconciles ([start]).
      */
-    private suspend fun update(transform: (List<JournalEntry>) -> List<JournalEntry>) {
-        val next = try {
+    private suspend fun update(change: Change?): Boolean = updates.withLock { updateNow(change) }
+
+    /**
+     * One update at a time, from taking [unsaved] to clearing it: two at once after the unlock would both replay the
+     * same queued change, and the later write could bring back what the earlier one settled (Greptile on #3756).
+     */
+    private val updates = kotlinx.coroutines.sync.Mutex()
+
+    private suspend fun updateNow(change: Change?): Boolean {
+        val replay = withContext(env.dispatchers.main) { unsaved.toList() }
+        val saved = try {
             io {
                 store.withLock {
-                    val before = read()
-                    val updated = transform(before)
+                    // a read the store refused writes nothing: what is stored stays for the next read (a write of the
+                    // change over nothing would drop every entry the read could not see)
+                    val before = read() ?: return@withLock null
+                    val updated = (replay + listOfNotNull(change)).fold(before) { list, c -> c(list) }
                     if (updated != before) write(updated)
                     updated
                 }
@@ -197,19 +243,31 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
             throw e
         } catch (e: Exception) {
             ErrorReports.quiet(e, "sendJournal.update")
-            transform(current.entries)
+            null
         }
-        withContext(env.dispatchers.main) { setState { it.copy(entries = next) } }
+        withContext(env.dispatchers.main) {
+            if (saved != null) {
+                // by identity: a concurrent update that saved first may have taken some of them already
+                unsaved.removeAll { c -> replay.any { it === c } }
+                // what failed meanwhile stays on top of the saved list until it is written too
+                setState { it.copy(entries = unsaved.fold(saved) { list, c -> c(list) }) }
+            } else if (change != null) {
+                unsaved += change
+                setState { it.copy(entries = change(it.entries)) }
+            }
+        }
+        return saved != null
     }
 
     private suspend fun <T> io(block: () -> T): T = withContext(env.dispatchers.io) { block() }
 
-    private fun read(): List<JournalEntry> {
+    /** The stored entries; null when the store refused the read. */
+    private fun read(): List<JournalEntry>? {
         val raw = try {
             store.getString(ENTRY)
         } catch (e: Exception) {
             ErrorReports.quiet(e, "sendJournal.read")
-            null
+            return null
         } ?: return emptyList()
         val array = runCatching { Json.parseToJsonElement(raw) as? JsonArray }.getOrNull() ?: return emptyList()
         return array.mapNotNull { el ->

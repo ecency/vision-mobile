@@ -322,7 +322,7 @@ class ProfileModel internal constructor(
             website = p.website,
             websiteUrl = ProfileFormat.websiteUrl(p.website),
             // the metadata's cover, else the image server's (the account's own cover, or its default one)
-            coverUrl = p.coverImage?.takeIf { it.isNotBlank() }?.let { ImageProxy(env.proxyBase).proxify(it, 640, 320) }
+            coverUrl = p.coverImage?.takeIf { it.isNotBlank() }?.let { ImageProxy(env.proxyBase).proxify(it, 0, COVER_HEIGHT_PX) }
                 ?.takeIf { it.isNotEmpty() } ?: "${env.proxyBase.trimEnd('/')}/u/$username/cover",
             avatarUrl = env.avatars.url(username, "large", env.proxyBase),
             joined = ProfileFormat.joined(acc.created),
@@ -478,6 +478,12 @@ class ProfileModel internal constructor(
     }
 
     companion object {
+        /**
+         * The cover is asked for by height (#3754): the header is 160 dp tall at full width and crops the sides, so
+         * 480 px fills it at 3x. A width as well (`mode=fit`) shrank a wide cover to its height share and blurred it.
+         */
+        internal const val COVER_HEIGHT_PX = 480
+
         /** A session still being read (no observer known yet). */
         private const val LOADING = "\u0000loading"
 

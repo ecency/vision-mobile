@@ -826,6 +826,7 @@ fun ProfileEditScreen(env: AppEnvironment, model: ProfileEditModel, onBack: () -
                                 if (state.uploading == ProfileField.COVER) UploadingCover(Modifier.matchParentSize())
                                 EditBadge(Modifier.align(Alignment.BottomEnd).padding(8.dp))
                             }
+                            Text(ProfileUiCopy.COVER_HINT, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.padding(top = 6.dp).testTag("coverHint"))
                         }
                     }
                     items(ProfileField.form, key = { it.name }) { field ->
