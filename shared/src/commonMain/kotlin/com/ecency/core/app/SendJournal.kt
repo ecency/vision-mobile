@@ -71,6 +71,9 @@ data class SendJournalState(val entries: List<JournalEntry> = emptyList(), val c
 class SendJournal internal constructor(private val env: AppEnvironment) : StateModel<SendJournalState>(SendJournalState(), env.dispatchers) {
     private val store: SecureStore get() = env.vault.vault.store
     private var started = false
+    /** A start's read is in flight; [startAgain]: another start was asked meanwhile. Main only, as [start]. */
+    private var reading = false
+    private var startAgain = false
     private var resolver: Job? = null
 
     /** Changes the store refused (read or write), oldest first, applied again at the next read that works. Main only. */
@@ -78,15 +81,29 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
 
     /** Reads the journal and resolves what an earlier run left. Both apps call it at launch; safe to call again. */
     fun start() {
-        if (started) return
+        if (started) {
+            // iOS starts it again on becoming active (after an unlock): one asked while the launch read is in flight
+            // reads once more if that read fails, rather than waiting for the next foreground
+            if (reading) startAgain = true
+            return
+        }
         started = true
+        reading = true
         scope.launch {
             // the stored list with every change made while the store refused it ([unsaved]), written back
-            if (!update(null)) {
+            val read = update(null)
+            reading = false
+            if (!read) {
                 // the store refused (iOS before the first unlock): the next start reads it again
                 started = false
+                // once: a start asked during this read; the read it runs retries only for a start asked during it
+                if (startAgain) {
+                    startAgain = false
+                    start()
+                }
                 return@launch
             }
+            startAgain = false
             resolve()
         }
     }

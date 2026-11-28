@@ -420,6 +420,48 @@ class WalletDeltaFixesTest {
         assertEquals(setOf("a1", "b1"), storedIds(w).toSet())
     }
 
+    /** iOS starts the journal again on becoming active: one that comes while the launch read is in flight is not lost. */
+    @Test
+    fun aStartDuringAnInFlightReadThatFailsReadsOnceMore() = runTest {
+        val w = WalletWorld(this)
+        w.statusAnswer = { "\"unknown\"" }
+        w.app.store.putString(SendJournal.ENTRY, "[${storedEntry("spike-voter", "a1", "ab")}]")
+        w.app.store.failingReads[SendJournal.ENTRY] = locked
+        var reads = 0
+        w.app.store.beforeGet = { name ->
+            if (name == SendJournal.ENTRY) {
+                reads++
+                // the launch read is in flight when the app becomes active (unlocked), then it fails
+                if (reads == 1) w.env.sendJournal.start() else w.app.store.failingReads.clear()
+            }
+        }
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        assertEquals(listOf("a1"), w.env.sendJournal.current.entries.map { it.actionId })
+        assertEquals(2, reads)
+    }
+
+    /** A read that keeps failing is tried once more for a start during it, not in a loop. */
+    @Test
+    fun aStartDuringAFailingReadRetriesOnceNotForever() = runTest {
+        val w = WalletWorld(this)
+        w.app.store.putString(SendJournal.ENTRY, "[${storedEntry("spike-voter", "a1", "ab")}]")
+        w.app.store.failingReads[SendJournal.ENTRY] = locked
+        var reads = 0
+        w.app.store.beforeGet = { name ->
+            if (name == SendJournal.ENTRY) {
+                reads++
+                if (reads == 1) w.env.sendJournal.start()
+                // a loop ends here (the store opens) rather than hanging the test
+                if (reads > 5) w.app.store.failingReads.clear()
+            }
+        }
+        w.env.sendJournal.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(2, reads)
+        assertTrue(w.env.sendJournal.current.entries.isEmpty())
+    }
+
     companion object {
         private const val HAS_KEY = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e"
     }

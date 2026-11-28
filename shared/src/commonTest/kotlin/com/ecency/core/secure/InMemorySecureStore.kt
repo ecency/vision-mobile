@@ -36,8 +36,12 @@ class InMemorySecureStore : SecureStore {
         afterPut?.invoke(name)
     }
 
+    /** Runs at the start of every read (a test acts while that read is in flight, or unlocks the store before it). */
+    var beforeGet: ((String) -> Unit)? = null
+
     override fun get(name: String): ByteArray? {
         SecureStore.requireValidName(name)
+        beforeGet?.invoke(name)
         checkKey()
         failingReads[name]?.let { throw it }
         return entries[name]?.copyOf()
