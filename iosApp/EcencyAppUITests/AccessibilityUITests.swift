@@ -119,6 +119,11 @@ final class AccessibilityUITests: XCTestCase {
     /// same picture: a blinking caret changes about 100, one short fading word several hundred.
     private static let stillTolerance = 250
 
+    /// Where Esie is drawn: her own element, and the buttons she is the label of, which take her place in the
+    /// accessibility tree (the chats list's Esie button: at AX5 her resting motion changed 190 to 370 sampled pixels
+    /// between frames inside it, #3757).
+    private static let esieIdentifiers = ["esie", "chats-esie-fab"]
+
     /// The status bar's height on the test phones (points), over the clock.
     private static let statusBarHeight: CGFloat = 54
 
@@ -132,9 +137,11 @@ final class AccessibilityUITests: XCTestCase {
         var last = Self.pixels(app.screenshot().image)
         // Esie's place is looked up once per wait (she does not move about the screen)
         let scale = CGFloat(last.width) / max(app.windows.firstMatch.frame.width, 1)
-        let esie = app.descendants(matching: .any).matching(identifier: "esie").allElementsBoundByIndex.map { e -> CGRect in
-            let f = e.frame
-            return CGRect(x: f.minX * scale, y: f.minY * scale, width: f.width * scale, height: f.height * scale)
+        let esie = Self.esieIdentifiers.flatMap { id in
+            app.descendants(matching: .any).matching(identifier: id).allElementsBoundByIndex.map { e -> CGRect in
+                let f = e.frame
+                return CGRect(x: f.minX * scale, y: f.minY * scale, width: f.width * scale, height: f.height * scale)
+            }
         }
         let ignored = esie + [CGRect(x: 0, y: 0, width: CGFloat(last.width), height: Self.statusBarHeight * scale)]
         var changed = -1
