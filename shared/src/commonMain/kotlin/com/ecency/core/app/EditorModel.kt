@@ -1074,8 +1074,11 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             // the sheet's save landed during this one: shown only if it committed after it
             val stored = env.localDrafts.load(owner, slot)
             // (a post always applies: this write may have put the posted text back after the sheet removed it)
-            val mineLast = stored?.body == draft.body && stored.replyImage == draft.replyImage
-            if (mineLast && heldFromSheet?.postedPermlink == null) heldFromSheet = null else replaySheet()
+            // the whole of what the sheet keeps counts, its pending send included (the same text with a permlink)
+            val mine = LocalDraft.decode(draft.encode())
+            val mineLast = stored != null && mine != null && stored.body == mine.body && stored.replyImage == mine.replyImage && stored.pending == mine.pending
+            val held = heldFromSheet
+            if (mineLast && held != null && held.postedText == null && held.settled == null) heldFromSheet = null else replaySheet()
         }
         if (current.localSaveFailed != failed) setState { it.copy(localSaveFailed = failed) }
     }
@@ -1086,8 +1089,11 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
      */
     private var heldFromSheet: SheetChange? = null
 
-    /** The quick reply saved [draft] (null: emptied), or posted [postedText] as [postedPermlink]. */
-    private class SheetChange(val draft: LocalDraft?, val postedPermlink: String? = null, val postedText: String? = null)
+    /**
+     * The quick reply saved [draft] (null: emptied), or posted [postedText] ([postedText] set). [settled]: the permlink
+     * of a post the sheet made meanwhile, kept when a newer draft replaces that post, so it is still no pending send here.
+     */
+    private class SheetChange(val draft: LocalDraft?, val settled: String? = null, val postedText: String? = null)
 
     /** This editor's own local save is being written: a sheet save landing meanwhile may commit before or after it. */
     private var savingLocal = false
@@ -1105,7 +1111,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         // a load that failed shows nothing, so its Retry stays (and reads the slot again)
         if (s.owner != user || s.isSending || s.uploading > 0 || published || s.error != null) return
         if (s.loading || savingLocal) {
-            heldFromSheet = SheetChange(draft)
+            heldFromSheet = SheetChange(draft, settled = heldFromSheet?.settled)
             return
         }
         // newer than anything held: a held change is never applied over it
@@ -1155,7 +1161,8 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 // a save of this editor that committed after the sheet removed the slot wrote the posted text back
                 val owner = current.owner ?: return
                 val key = slot
-                scope.launch { if (env.localDrafts.load(owner, key)?.body == text) env.localDrafts.delete(owner, key) }
+                // checked and removed under one lock: a newer reply saved meanwhile is never the one removed
+                scope.launch { env.localDrafts.deleteIf(owner, key) { it?.body == text } }
             }
             // a newer reply: kept, and written back (its own save, if one is waiting, writes it too)
             else -> markChanged()
@@ -1168,11 +1175,11 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         heldFromSheet = null
         val s = current
         if (s.isSending || s.uploading > 0 || published || s.error != null) return
-        val posted = held.postedPermlink
+        // the load may have read the pending send the sheet then settled
+        if (held.settled != null && pending?.permlink == held.settled) pending = null
+        val posted = held.postedText
         if (posted != null) {
-            // the load may have read the pending send the sheet then settled
-            if (pending?.permlink == posted) pending = null
-            applyPosted(held.postedText.orEmpty())
+            applyPosted(posted)
         } else if (!dirty) {
             applySheetDraft(held.draft)
         }

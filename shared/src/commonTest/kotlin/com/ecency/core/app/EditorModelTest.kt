@@ -1519,6 +1519,46 @@ class EditorModelTest {
         assertEquals("from the sheet", editor.current.body)
     }
 
+    /** Review of #3759: the sheet's pending send, saved with the same text during the editor's save, is kept by the editor. */
+    @Test
+    fun theSheetsPendingSendSavedWithTheSameTextDuringTheEditorsSaveIsKept() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        val pending = PendingPublish("re-alice-pending", listOf("h1"), w.app.env.nowMillis())
+        // the editor's write of A commits, then the sheet's A with the permlink of a send it started
+        drafts.afterWrite = {
+            val draft = LocalDraft(body = "same text", updated = w.app.env.nowMillis(), pending = pending)
+            drafts.inner.write(user, LocalDrafts.reply("alice", "root"), draft.encode())
+            w.app.env.replyDraftWrittenBySheet(com.ecency.core.api.model.PostKey("alice", "root"), user, draft)
+        }
+        editor.setBody("same text", TextSelection(9))
+        testScheduler.advanceUntilIdle()
+        // the editor's next save keeps the permlink, so a lost answer is asked about, never sent twice
+        editor.setBody("same text, more", TextSelection(15))
+        testScheduler.advanceUntilIdle()
+        assertEquals("re-alice-pending", LocalDraft.decode(drafts.inner.read(user, LocalDrafts.reply("alice", "root")))?.pending?.permlink)
+    }
+
+    /** Review of #3759: a post held during the load and then replaced by a newer sheet draft still settles its permlink. */
+    @Test
+    fun aHeldPostReplacedByANewerDraftStillSettlesItsPermlink() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        val key = com.ecency.core.api.model.PostKey("alice", "root")
+        val pending = PendingPublish("re-alice-posted", listOf("h1"), w.app.env.nowMillis())
+        drafts.inner.write(user, LocalDrafts.reply("alice", "root"), LocalDraft(body = "posted", pending = pending).encode())
+        // the load reads the draft with the pending send; the sheet then posts it and saves a new draft
+        drafts.onRead = {
+            drafts.inner.write(user, LocalDrafts.reply("alice", "root"), null)
+            w.app.env.replyPostedBySheet(key, user, "re-alice-posted", "posted")
+            sheetSaves(w, drafts, "next reply")
+        }
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        assertEquals("next reply", editor.current.body)
+        editor.setBody("next reply!", TextSelection(11))
+        testScheduler.advanceUntilIdle()
+        assertNull(LocalDraft.decode(drafts.inner.read(user, LocalDrafts.reply("alice", "root")))?.pending, "the posted permlink is settled, not the next reply's")
+    }
+
     /** Review of #3759: an open preview follows a body the sheet replaced. */
     @Test
     fun anOpenPreviewFollowsTheSheetsText() = runTest {
