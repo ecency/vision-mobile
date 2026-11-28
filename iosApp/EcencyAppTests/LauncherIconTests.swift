@@ -17,12 +17,20 @@ final class LauncherIconTests: XCTestCase {
             return name
         }
         /// The system keeps the old icon for the next change (it then calls `refused`)
-        var refuseNext = false
+        var refuseNext: Bool {
+            get { refusals > 0 }
+            set { refusals = newValue ? 1 : 0 }
+        }
+        /// How many of the next changes the system refuses
+        var refusals = 0
+        /// When set, a refusal waits in [pendingRefusals] (the system answers later, as `setAlternateIconName` does)
+        var answerLater = false
+        var pendingRefusals: [@MainActor () -> Void] = []
         func setName(_ name: String?, refused: @escaping @MainActor () -> Void) {
             calls.append(name)
-            if refuseNext {
-                refuseNext = false
-                refused()
+            if refusals > 0 {
+                refusals -= 1
+                if answerLater { pendingRefusals.append(refused) } else { refused() }
             } else {
                 self.name = name
             }
@@ -134,21 +142,75 @@ final class LauncherIconTests: XCTestCase {
         XCTAssertEqual(icons.reads, 1)
     }
 
-    /// A change the system refused leaves the old icon: the next apply reads the system again and tries once more.
+    /// A change the system refused leaves the old icon: it is tried once more at once, and after a second refusal
+    /// the next apply reads the system again and tries again.
     func testARefusedChangeIsReadAgainOnTheNextApply() throws {
         let env = try makeEnv()
         let icons = Recorder()
-        icons.refuseNext = true
+        icons.refusals = 2
         LauncherIconSwitcher.configure(env.launcherIcons, region: "DE", language: "de")
         let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
         switcher.pick(.christmas)
         XCTAssertNil(icons.name, "the system kept the everyday icon")
+        XCTAssertEqual(icons.calls, ["AppIcon-Christmas", "AppIcon-Christmas"], "one more try after the refusal, then no more")
         switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 1))
-        XCTAssertEqual(icons.calls, ["AppIcon-Christmas", "AppIcon-Christmas"], "tried again after the refusal")
+        XCTAssertEqual(icons.calls, ["AppIcon-Christmas", "AppIcon-Christmas", "AppIcon-Christmas"], "tried again at the next foreground")
         XCTAssertEqual(icons.name, "AppIcon-Christmas")
-        XCTAssertEqual(icons.reads, 2, "the refusal forgot the remembered icon: read once more, then no more")
+        XCTAssertEqual(icons.reads, 3, "each refusal forgot the remembered icon: read again, then no more")
         switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 2))
-        XCTAssertEqual(icons.reads, 2)
+        XCTAssertEqual(icons.reads, 3)
+    }
+
+    /// Review of #3756: the system answers a change later. A foreground while the change is in flight skips it (the
+    /// icon it asked for is remembered); a refusal that comes after must apply again, not wait for the next foreground
+    /// while Settings shows the requested icon.
+    func testARefusalAfterAForegroundDuringTheChangeAppliesAgain() throws {
+        let env = try makeEnv()
+        let icons = Recorder()
+        icons.refuseNext = true
+        icons.answerLater = true
+        LauncherIconSwitcher.configure(env.launcherIcons, region: "DE", language: "de")
+        let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
+        switcher.pick(.christmas)
+        switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 1))
+        XCTAssertEqual(icons.calls, ["AppIcon-Christmas"], "in flight: no second change")
+        icons.pendingRefusals.removeFirst()()
+        XCTAssertEqual(icons.calls, ["AppIcon-Christmas", "AppIcon-Christmas"], "the refusal applies again")
+        XCTAssertEqual(icons.name, "AppIcon-Christmas")
+    }
+
+    /// A refusal that repeats is tried again at most once per foreground, never in a loop.
+    func testARepeatedRefusalRetriesOncePerForegroundNotForever() throws {
+        let env = try makeEnv()
+        let icons = Recorder()
+        icons.refusals = 100
+        icons.answerLater = true
+        LauncherIconSwitcher.configure(env.launcherIcons, region: "DE", language: "de")
+        let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
+        switcher.pick(.christmas)
+        while !icons.pendingRefusals.isEmpty { icons.pendingRefusals.removeFirst()() }
+        XCTAssertEqual(icons.calls.count, 2, "the change and one more try")
+        switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 1))
+        while !icons.pendingRefusals.isEmpty { icons.pendingRefusals.removeFirst()() }
+        XCTAssertEqual(icons.calls.count, 4, "the next foreground: once more and one more try")
+    }
+
+    /// A refusal of a change a later one replaced does not undo or repeat the later one.
+    func testARefusalOfAReplacedChangeIsIgnored() throws {
+        let env = try makeEnv()
+        let icons = Recorder()
+        icons.refuseNext = true
+        icons.answerLater = true
+        LauncherIconSwitcher.configure(env.launcherIcons, region: "DE", language: "de")
+        let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
+        switcher.pick(.christmas)
+        switcher.pick(.holi)
+        icons.pendingRefusals.removeFirst()()
+        XCTAssertEqual(icons.calls, ["AppIcon-Christmas", "AppIcon-Holi"])
+        XCTAssertEqual(icons.name, "AppIcon-Holi")
+        switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 1))
+        XCTAssertEqual(icons.calls, ["AppIcon-Christmas", "AppIcon-Holi"], "Holi is remembered: nothing to change")
+        XCTAssertEqual(icons.reads, 1)
     }
 
     /// Review of #3659: a phone on the Persian, Islamic or Buddhist calendar still gets the Gregorian day the

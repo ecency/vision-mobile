@@ -35,8 +35,11 @@ final class LauncherIconSwitcher {
     private let setting: AlternateIconSetting
     private let isActive: () -> Bool
     /// The icon the system shows, nil until first read (`.some(nil)`: the everyday icon). Only the app sets its icon,
-    /// so after one read per run this is what it set since; a refusal forgets it and the next apply reads again.
+    /// so after one read per run this is what it set since (or is setting: an apply while a change is in flight skips
+    /// it); a refusal forgets it and the next apply reads again.
     private var known: String??
+    /// Whether a refusal in this foreground already applied again: a refusal that repeats waits for the next one.
+    private var retried = false
 
     /// `AppIcon-<key>` (an icon set in Assets.xcassets), nil for the everyday icon.
     static func iconName(_ icon: LauncherIcon) -> String? { icon == .default_ ? nil : "AppIcon-\(icon.key)" }
@@ -64,6 +67,7 @@ final class LauncherIconSwitcher {
     /// The app became active: today's icon (asks first when a celebration is due and nobody answered yet).
     func foreground(today: CalendarDay) {
         model.refresh(today: today)
+        retried = false
         apply()
     }
 
@@ -90,6 +94,16 @@ final class LauncherIconSwitcher {
         if let known { shown = known } else { shown = setting.currentName }
         known = .some(want)
         guard shown != want else { return }
-        setting.setName(want) { [weak self] in self?.known = nil }
+        setting.setName(want) { [weak self] in self?.refused(want) }
+    }
+
+    /// The system kept the old icon for [name]. An apply that came while it was in flight skipped (Settings shows the
+    /// requested icon), so this applies again, once per foreground. A refusal of a change a later one replaced is moot.
+    private func refused(_ name: String?) {
+        guard known == .some(name) else { return }
+        known = nil
+        guard !retried else { return }
+        retried = true
+        apply()
     }
 }
