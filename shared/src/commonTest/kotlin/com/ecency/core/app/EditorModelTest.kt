@@ -1277,13 +1277,40 @@ class EditorModelTest {
     private class RefusingDrafts : DraftStorage {
         val inner = InMemoryDraftStorage()
         var refuse = false
-        override fun read(account: String, slot: String) = inner.read(account, slot)
+        var refuseReads = false
+        override fun read(account: String, slot: String): String? {
+            if (refuseReads && slot.startsWith("reply:")) throw IllegalStateException("unreadable")
+            return inner.read(account, slot)
+        }
         override fun write(account: String, slot: String, value: String?) {
             if (refuse && slot.startsWith("reply:")) throw IllegalStateException("disk full")
             inner.write(account, slot, value)
         }
         override fun clear(account: String) = inner.clear(account)
         override fun clearAll() = inner.clearAll()
+    }
+
+    /** Greptile and CodeRabbit on #3759: a read that fails when the editor shows again is no deleted draft: nothing is cleared. */
+    @Test
+    fun aFailedReadWhenTheEditorShowsAgainKeepsItsReply() = runTest {
+        val w = World(this)
+        val drafts = RefusingDrafts()
+        w.app.env.draftStorage = drafts
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        editor.setBody("kept", TextSelection(4))
+        testScheduler.advanceUntilIdle()
+        drafts.refuseReads = true
+        editor.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals("kept", editor.current.body)
+        // a draft confirmed gone (the quick reply sent it) does clear it
+        drafts.refuseReads = false
+        w.app.env.localDrafts.delete(user, LocalDrafts.reply("alice", "root"))
+        editor.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals("", editor.current.body)
     }
 
     /** Greptile on #3759: text whose autosave failed is still unsaved, so leaving the editor writes it. */

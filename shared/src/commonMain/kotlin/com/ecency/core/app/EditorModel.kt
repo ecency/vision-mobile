@@ -337,9 +337,11 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         val owner = current.owner ?: return
         scope.launch {
             if (!mayReadReplyAgain()) return@launch
-            val local = env.localDrafts.load(owner, slot)
-            // typing or a send may have started during the read
-            if (!mayReadReplyAgain()) return@launch
+            val before = current.body
+            // a read that failed is no deleted draft: what is shown, and its pending send, stay
+            val local = env.localDrafts.read(owner, slot).getOrElse { return@launch }
+            // typing or a send may have started during the read, or typing saved by its autosave meanwhile
+            if (!mayReadReplyAgain() || current.body != before) return@launch
             pending = local?.pending
             val body = local?.let { com.ecency.core.api.waves.WavePublish.body(it.body, it.replyImage) }.orEmpty()
             if (body == current.body) return@launch
