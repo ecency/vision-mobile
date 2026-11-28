@@ -8,11 +8,24 @@ import XCTest
 @MainActor
 final class LauncherIconTests: XCTestCase {
     private final class Recorder: AlternateIconSetting {
-        var currentName: String?
+        var name: String?
         var calls: [String?] = []
-        func setName(_ name: String?) {
+        /// How often the switcher asked the system for the icon (Sentry 3S5: a LaunchServices call that can hang main)
+        var reads = 0
+        var currentName: String? {
+            reads += 1
+            return name
+        }
+        /// The system keeps the old icon for the next change (it then calls `refused`)
+        var refuseNext = false
+        func setName(_ name: String?, refused: @escaping @MainActor () -> Void) {
             calls.append(name)
-            currentName = name
+            if refuseNext {
+                refuseNext = false
+                refused()
+            } else {
+                self.name = name
+            }
         }
     }
 
@@ -82,7 +95,7 @@ final class LauncherIconTests: XCTestCase {
         let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
         switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 1))
         switcher.pick(.christmas)
-        XCTAssertEqual(icons.currentName, "AppIcon-Christmas")
+        XCTAssertEqual(icons.name, "AppIcon-Christmas")
         switcher.pick(.default_)
         XCTAssertEqual(icons.calls, ["AppIcon-Christmas", nil])
     }
@@ -98,6 +111,44 @@ final class LauncherIconTests: XCTestCase {
         active = true
         switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 1))
         XCTAssertEqual(icons.calls, ["AppIcon-Holi"])
+    }
+
+    /// Sentry ECENCY-MOBILE-3S5: `alternateIconName` is a synchronous LaunchServices call that hung the main thread
+    /// for 2 s on a return to the foreground. Only the app sets its icon, so the system is read once per run and the
+    /// switcher remembers what it set since.
+    func testTheSystemIconIsReadOncePerRunNotOnEveryForeground() throws {
+        let env = try makeEnv()
+        let icons = Recorder()
+        icons.name = "AppIcon-HiveDay"
+        LauncherIconSwitcher.configure(env.launcherIcons, region: "DE", language: "de")
+        let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
+        switcher.foreground(today: CalendarDay(year: 2027, month: 3, day: 20))
+        switcher.foreground(today: CalendarDay(year: 2027, month: 3, day: 20))
+        XCTAssertEqual(icons.reads, 1, "two foregrounds read the system icon once")
+        XCTAssertEqual(icons.calls, [], "the icon a former run set stays")
+        switcher.foreground(today: CalendarDay(year: 2027, month: 3, day: 21))
+        XCTAssertEqual(icons.calls, [nil], "back to the everyday icon after the day")
+        switcher.foreground(today: CalendarDay(year: 2027, month: 3, day: 22))
+        switcher.foreground(today: CalendarDay(year: 2027, month: 3, day: 23))
+        XCTAssertEqual(icons.calls, [nil], "the icon it set is remembered: no second switch (and no second system alert)")
+        XCTAssertEqual(icons.reads, 1)
+    }
+
+    /// A change the system refused leaves the old icon: the next apply reads the system again and tries once more.
+    func testARefusedChangeIsReadAgainOnTheNextApply() throws {
+        let env = try makeEnv()
+        let icons = Recorder()
+        icons.refuseNext = true
+        LauncherIconSwitcher.configure(env.launcherIcons, region: "DE", language: "de")
+        let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
+        switcher.pick(.christmas)
+        XCTAssertNil(icons.name, "the system kept the everyday icon")
+        switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 1))
+        XCTAssertEqual(icons.calls, ["AppIcon-Christmas", "AppIcon-Christmas"], "tried again after the refusal")
+        XCTAssertEqual(icons.name, "AppIcon-Christmas")
+        XCTAssertEqual(icons.reads, 2, "the refusal forgot the remembered icon: read once more, then no more")
+        switcher.foreground(today: CalendarDay(year: 2027, month: 6, day: 2))
+        XCTAssertEqual(icons.reads, 2)
     }
 
     /// Review of #3659: a phone on the Persian, Islamic or Buddhist calendar still gets the Gregorian day the

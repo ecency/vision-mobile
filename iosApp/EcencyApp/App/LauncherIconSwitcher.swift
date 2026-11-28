@@ -4,8 +4,10 @@ import UIKit
 /// Where the app icon is set: the system (`UIApplication`), a recorder in tests.
 @MainActor
 protocol AlternateIconSetting: AnyObject {
+    /// A synchronous LaunchServices read that can block the main thread (Sentry 3S5): the switcher reads it once per run.
     var currentName: String? { get }
-    func setName(_ name: String?)
+    /// [refused] runs on main when the system kept the old icon.
+    func setName(_ name: String?, refused: @escaping @MainActor () -> Void)
 }
 
 /// The system's alternate icon. iOS shows its own alert on every change; nothing hides it (README "App icons").
@@ -13,11 +15,14 @@ protocol AlternateIconSetting: AnyObject {
 final class SystemAlternateIcon: AlternateIconSetting {
     var currentName: String? { UIApplication.shared.alternateIconName }
 
-    func setName(_ name: String?) {
+    func setName(_ name: String?, refused: @escaping @MainActor () -> Void) {
+        // a device without alternate icons never changes: nothing to read again
         guard UIApplication.shared.supportsAlternateIcons else { return }
         // a refusal changes nothing the person sees (the old icon stays); it reaches Sentry as a warning
         UIApplication.shared.setAlternateIconName(name) { error in
-            if let error { Reports.quiet(error, where: "launcherIcon.set") }
+            guard let error else { return }
+            Reports.quiet(error, where: "launcherIcon.set")
+            DispatchQueue.main.async { MainActor.assumeIsolated { refused() } }
         }
     }
 }
@@ -29,6 +34,9 @@ final class LauncherIconSwitcher {
     private let model: LauncherIconModel
     private let setting: AlternateIconSetting
     private let isActive: () -> Bool
+    /// The icon the system shows, nil until first read (`.some(nil)`: the everyday icon). Only the app sets its icon,
+    /// so after one read per run this is what it set since; a refusal forgets it and the next apply reads again.
+    private var known: String??
 
     /// `AppIcon-<key>` (an icon set in Assets.xcassets), nil for the everyday icon.
     static func iconName(_ icon: LauncherIcon) -> String? { icon == .default_ ? nil : "AppIcon-\(icon.key)" }
@@ -78,6 +86,10 @@ final class LauncherIconSwitcher {
         // iOS refuses a change while the app is not in front
         guard isActive() else { return }
         let want = Self.iconName(model.current.current)
-        if setting.currentName != want { setting.setName(want) }
+        let shown: String?
+        if let known { shown = known } else { shown = setting.currentName }
+        known = .some(want)
+        guard shown != want else { return }
+        setting.setName(want) { [weak self] in self?.known = nil }
     }
 }
