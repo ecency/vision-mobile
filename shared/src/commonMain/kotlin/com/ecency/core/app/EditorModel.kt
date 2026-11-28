@@ -1073,7 +1073,9 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         if (heldFromSheet != null) {
             // the sheet's save landed during this one: shown only if it committed after it
             val stored = env.localDrafts.load(owner, slot)
-            if (stored?.body == draft.body && stored.replyImage == draft.replyImage) heldFromSheet = null else replaySheet()
+            // (a post always applies: this write may have put the posted text back after the sheet removed it)
+            val mineLast = stored?.body == draft.body && stored.replyImage == draft.replyImage
+            if (mineLast && heldFromSheet?.postedPermlink == null) heldFromSheet = null else replaySheet()
         }
         if (current.localSaveFailed != failed) setState { it.copy(localSaveFailed = failed) }
     }
@@ -1144,7 +1146,13 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         val body = current.body
         when {
             body.isEmpty() -> Unit
-            !dirty && body == text -> showBody("")
+            !dirty && body == text -> {
+                showBody("")
+                // a save of this editor that committed after the sheet removed the slot wrote the posted text back
+                val owner = current.owner ?: return
+                val key = slot
+                scope.launch { if (env.localDrafts.load(owner, key)?.body == text) env.localDrafts.delete(owner, key) }
+            }
             // a newer reply: kept, and written back (its own save, if one is waiting, writes it too)
             else -> markChanged()
         }

@@ -1467,6 +1467,22 @@ class EditorModelTest {
         assertNull(LocalDraft.decode(drafts.inner.read(user, LocalDrafts.reply("alice", "root")))?.pending, "with no pending send: the next one is new")
     }
 
+    /** Review of #3759 (Qodo): the sheet posting while the editor writes that same text: it is not left as a draft. */
+    @Test
+    fun aReplyTheSheetPostsDuringTheEditorsSaveOfItIsNotLeftAsADraft() = runTest {
+        val (w, drafts) = hookedWorld(this)
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        // the sheet posts the same text while the editor's write of it is on its way, and that write commits last
+        drafts.beforeWrite = {
+            drafts.inner.write(user, LocalDrafts.reply("alice", "root"), null)
+            w.app.env.replyPostedBySheet(com.ecency.core.api.model.PostKey("alice", "root"), user, "re-alice-posted", "the same reply")
+        }
+        editor.setBody("the same reply", TextSelection(14))
+        testScheduler.advanceUntilIdle()
+        assertEquals("", editor.current.body, "the posted text leaves the editor")
+        assertNull(drafts.body(), "and is not left as a draft")
+    }
+
     /** Review of #3759: an open preview follows a body the sheet replaced. */
     @Test
     fun anOpenPreviewFollowsTheSheetsText() = runTest {
