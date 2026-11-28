@@ -15,6 +15,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -331,5 +332,37 @@ class QuickReplyToolsTest {
         testScheduler.advanceUntilIdle()
         assertEquals("from the editor", reply.current.text, "otherwise the saved draft is read again")
         assertNull(reply.current.imageUrl, "with its image: none")
+    }
+
+    /** Review of #3756: a read that brings nothing back keeps the sheet; an echo of the model's own text saves nothing. */
+    @Test
+    fun aReloadKeepsTheSheetOnAFailedReadAndAnEchoNeverBlocksTheNext() = runTest {
+        val app = signedIn()
+        val reply = app.env.replyModel(key, parent)
+        testScheduler.advanceUntilIdle()
+        reply.setText("mine")
+        testScheduler.advanceUntilIdle()
+        val slot = LocalDrafts.reply("alice", "root")
+        // nothing read back (a failed read; the editor just saved): the sheet keeps its text
+        app.env.localDrafts.delete(TestApp.USER, slot)
+        app.env.replyDraftWrittenElsewhere(key)
+        testScheduler.advanceUntilIdle()
+        assertEquals("mine", reply.current.text)
+        // a stale error goes with a reload
+        reply.setText("")
+        testScheduler.advanceUntilIdle()
+        reply.send()
+        assertNotNull(reply.current.error)
+        app.env.localDrafts.save(TestApp.USER, slot, LocalDraft(body = "from the editor", updated = 1))
+        app.env.replyDraftWrittenElsewhere(key)
+        testScheduler.advanceUntilIdle()
+        assertEquals("from the editor", reply.current.text)
+        assertNull(reply.current.error, "the error was about the text the reload replaced")
+        // iOS sets its field from prefillSeq and echoes the text back: no save starts, so the next editor save applies
+        reply.setText("from the editor")
+        app.env.localDrafts.save(TestApp.USER, slot, LocalDraft(body = "newer from the editor", updated = 2))
+        app.env.replyDraftWrittenElsewhere(key)
+        testScheduler.advanceUntilIdle()
+        assertEquals("newer from the editor", reply.current.text)
     }
 }

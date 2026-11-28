@@ -248,20 +248,27 @@ class ComposeReplyModel internal constructor(
         if (s.isSending || s.isAttaching || saveJob?.isActive == true) return
         val user = owner ?: return
         scope.launch {
-            val local = env.localDrafts.load(user, slot)
+            // after the first read, which would otherwise put its older text back over this one
+            draftRead.await()
+            // the editor just saved it: none read back is a read that failed, and the sheet keeps what it shows
+            val local = env.localDrafts.load(user, slot) ?: return@launch
+            // checked again after the load: a keystroke meanwhile started a save (setText), a send or an upload began
             if (current.isSending || current.isAttaching || saveJob?.isActive == true) return@launch
-            pending = local?.pending
-            setState { it.copy(text = local?.body.orEmpty(), imageUrl = local?.replyImage, draftPermlink = local?.pending?.permlink, sent = null, prefillSeq = it.prefillSeq + 1) }
+            pending = local.pending
+            setState { it.copy(text = local.body, imageUrl = local.replyImage, draftPermlink = local.pending?.permlink, sent = null, error = null, prefillSeq = it.prefillSeq + 1) }
         }
     }
 
     /** The slot's draft with [text] and [image] (the attached one); the pending publish is always carried along. */
     private suspend fun store(user: String, text: String, image: String?) {
+        val base = env.localDrafts.load(user, slot)
+        // the editor's reply mode may have sent this reply since the sheet read the slot (its permlink is saved before
+        // the broadcast): kept, so a lost answer is asked about from here too and never sent twice
+        if (pending == null) pending = base?.pending
         if (text.isEmpty() && image == null && pending == null) {
             env.localDrafts.delete(user, slot)
         } else {
-            val base = env.localDrafts.load(user, slot) ?: LocalDraft()
-            env.localDrafts.save(user, slot, base.copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image))
+            env.localDrafts.save(user, slot, (base ?: LocalDraft()).copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image))
         }
     }
 
@@ -291,6 +298,8 @@ class ComposeReplyModel internal constructor(
     }
 
     fun setText(text: String) {
+        // the same text (iOS echoes a text the model set, prefillSeq): nothing typed, nothing to save over another writer
+        if (text == current.text) return
         setState { it.copy(text = text, sent = null) }
         val user = owner ?: return
         saveJob?.cancel()

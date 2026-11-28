@@ -349,6 +349,8 @@ class ErrorReportsTest {
         AppError.from(IllegalStateException("Account \"Quoted-One\" was refused, 'single9' too"), "settings.quoted")
         AppError.from(rejected("Assert Exception:Account CapName does not exist"), "wallet.capital")
         AppError.from(IllegalStateException("it's the node's answer"), "settings.apostrophe")
+        // a diagnosis keeps its identifiers: JSON keys and qualified names are no typed names
+        AppError.from(IllegalStateException("""{"code":-32000,"message":"Field 'url' is required for type with serial name 'com.ecency.core.api.model.Post'"}"""), "settings.json")
         // the out-of-RC count is an event of its own
         val handled = reporter.reports.filter { it.tags["handled"] == "true" }
         assertEquals(
@@ -362,6 +364,7 @@ class ErrorReportsTest {
                 "Account <q> was refused, <q> too",
                 "Assert Exception:Account <user> does not exist",
                 "it's the node's answer",
+                """{"code":-32000,"message":"Field <q> is required for type with serial name 'com.ecency.core.api.model.Post'"}""",
             ),
             handled.map { it.message },
         )

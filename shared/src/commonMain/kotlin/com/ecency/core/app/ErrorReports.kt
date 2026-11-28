@@ -358,10 +358,11 @@ object ErrorReports {
     private val QUOTED = Regex("\"[^\"]*\"|'[^']*'|`[^`]*`")
 
     /**
-     * Quoted text in the message sent (a typed name, as the fingerprint drops it): double quotes and backticks whole,
-     * single quotes only around one word, so the apostrophes of a sentence ("it's the node's") are left alone.
+     * A quoted name in the message sent (a typed account name, as the fingerprint drops it): a name shaped word (a
+     * letter, then 2 to 15 letters, digits, dots or dashes) in double, single or back quotes, not a JSON key (no colon
+     * after it). Longer identifiers, JSON and a sentence's apostrophes stay, so the title keeps its diagnosis.
      */
-    private val QUOTED_IN_MESSAGE = Regex("\"[^\"]*\"|`[^`]*`|'[^'\\s]{1,40}'")
+    private val QUOTED_IN_MESSAGE = Regex("([\"'`])[A-Za-z][A-Za-z0-9.-]{2,15}\\1(?!\\s*:)")
     private val AT_NAME = Regex("@[a-z0-9][a-z0-9.-]{1,15}", RegexOption.IGNORE_CASE)
     private val HEX = Regex("\\b(?:0x)?(?=[0-9a-fA-F]*[0-9])(?=[0-9a-fA-F]*[a-fA-F])[0-9a-fA-F]{6,}\\b")
     private val NUMBER = Regex("\\d+(\\.\\d+)?")

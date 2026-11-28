@@ -1237,6 +1237,64 @@ class EditorModelTest {
         assertEquals("an answer to my own reply", quick.current.text)
     }
 
+    /** Greptile on #3756: the editor's send whose answer was lost is asked about from the sheet, never sent again. */
+    @Test
+    fun aReplyTheEditorSentIsNeverSentAgainFromTheSheet() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val quick = w.app.env.replyModel(parent.key, parent)
+        quick.setText("first thought")
+        testScheduler.advanceUntilIdle()
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        assertEquals("first thought", editor.current.body)
+        // the answer is lost and the node does not show the reply yet: the editor says it failed
+        w.broadcastAnswer = { throw IllegalStateException("timeout") }
+        editor.submit()
+        testScheduler.advanceUntilIdle()
+        assertNull(editor.current.done, "the editor's send failed")
+        val link = field(w.ops().last(), 0, "permlink")
+        // it had landed: the node shows it now
+        w.posts["$user/$link"] = replyEntry(link, "first thought")
+        editor.leave()
+        editor.close()
+        testScheduler.advanceUntilIdle()
+        w.broadcastAnswer = { FakeTransport.result(it, "{}") }
+        val sent = w.app.broadcasts().size
+        quick.send()
+        testScheduler.advanceUntilIdle()
+        assertEquals(sent, w.app.broadcasts().size, "the reply is on chain under the editor's permlink: nothing sent again")
+        assertEquals(link, quick.current.sent?.permlink)
+    }
+
+    /** The sheet's own save, typed while the editor's send failed, keeps the editor's permlink instead of none. */
+    @Test
+    fun theSheetsOwnSaveKeepsThePermlinkTheEditorSentUnder() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val quick = w.app.env.replyModel(parent.key, parent)
+        quick.setText("first thought")
+        testScheduler.advanceUntilIdle()
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        w.broadcastAnswer = { throw IllegalStateException("timeout") }
+        // typed in the sheet (another pane) just before: its save is still waiting when the editor's send fails
+        quick.setText("first thought, more")
+        editor.submit()
+        testScheduler.advanceUntilIdle()
+        assertNull(editor.current.done, "the editor's send failed")
+        val link = field(w.ops().last(), 0, "permlink")
+        w.posts["$user/$link"] = replyEntry(link, "first thought")
+        w.broadcastAnswer = { FakeTransport.result(it, "{}") }
+        val sent = w.app.broadcasts().size
+        quick.send()
+        testScheduler.advanceUntilIdle()
+        assertEquals(sent, w.app.broadcasts().size, "asked about first, never a second reply under a new permlink")
+        assertTrue(quick.current.conflict, "the text changed since: the user chooses")
+    }
+
     // ---- fields ----
 
     @Test
