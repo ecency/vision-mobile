@@ -350,6 +350,76 @@ class WalletDeltaFixesTest {
         assertEquals(stored, w.app.store.getString(SendJournal.ENTRY), "the stored entry the read could not see is not written over")
     }
 
+    private fun storedIds(w: WalletWorld): List<String> =
+        w.app.store.getString(SendJournal.ENTRY)?.let { raw ->
+            (kotlinx.serialization.json.Json.parseToJsonElement(raw) as kotlinx.serialization.json.JsonArray)
+                .map { (it as kotlinx.serialization.json.JsonObject)["actionId"].toString().trim('"') }
+        }.orEmpty()
+
+    private val locked = com.ecency.core.secure.SecureStoreException.Unavailable(-25308, untilUnlock = true)
+
+    private fun storedEntry(account: String, actionId: String, tx: String) =
+        """{"account":"$account","actionId":"$actionId","txId":"${tx.repeat(20)}","expiration":"2026-10-06T11:45:00","operation":"transfer"}"""
+
+    /** A send journaled while the store was locked is not dropped by the next start's read of the stored list. */
+    @Test
+    fun aSendRecordedWhileLockedSurvivesTheStartAfterTheUnlock() = runTest {
+        val w = WalletWorld(this)
+        w.statusAnswer = { "\"unknown\"" }
+        w.app.store.putString(SendJournal.ENTRY, "[${storedEntry("spike-voter", "a1", "ab")}]")
+        w.app.store.failingReads[SendJournal.ENTRY] = locked
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        w.env.sendJournal.record("spike-voter", "b1", "transfer", "cd".repeat(20), "2026-10-06T11:46:00")
+        testScheduler.runCurrent()
+        // unlocked: the app comes to the front and starts the journal again
+        w.app.store.failingReads.clear()
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        assertEquals(setOf("a1", "b1"), w.env.sendJournal.current.entries.map { it.actionId }.toSet(), "the locked send still has its notice")
+        assertEquals(setOf("a1", "b1"), storedIds(w).toSet(), "and is written once the store reads again")
+    }
+
+    /** The first change after the unlock writes the locked changes too, not only its own. */
+    @Test
+    fun theFirstChangeAfterTheUnlockKeepsTheSendRecordedWhileLocked() = runTest {
+        val w = WalletWorld(this)
+        w.app.store.putString(SendJournal.ENTRY, "[${storedEntry("spike-voter", "a1", "ab")}]")
+        w.app.store.failingReads[SendJournal.ENTRY] = locked
+        w.env.sendJournal.record("spike-voter", "b1", "transfer", "cd".repeat(20), "2026-10-06T11:46:00")
+        testScheduler.runCurrent()
+        w.app.store.failingReads.clear()
+        w.env.sendJournal.record("spike-voter", "c1", "transfer", "ef".repeat(20), "2026-10-06T11:47:00")
+        testScheduler.runCurrent()
+        assertEquals(setOf("a1", "b1", "c1"), w.env.sendJournal.current.entries.map { it.actionId }.toSet())
+        assertEquals(setOf("a1", "b1", "c1"), storedIds(w).toSet())
+    }
+
+    /** What was removed while locked (a settled send, an account that left) is not brought back by the stored copy. */
+    @Test
+    fun removalsWhileLockedAreNotBroughtBackByTheStoredCopy() = runTest {
+        val w = WalletWorld(this)
+        w.statusAnswer = { "\"unknown\"" }
+        w.app.store.putString(
+            SendJournal.ENTRY,
+            "[${storedEntry("spike-voter", "a1", "ab")},${storedEntry("spike-voter", "a2", "aa")},${storedEntry("spike-bob", "z1", "bb")}]",
+        )
+        w.app.store.failingReads[SendJournal.ENTRY] = locked
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        w.env.sendJournal.record("spike-voter", "b1", "transfer", "cd".repeat(20), "2026-10-06T11:46:00")
+        w.env.sendJournal.record("spike-voter", "b2", "transfer", "ce".repeat(20), "2026-10-06T11:46:00")
+        w.env.sendJournal.settle("spike-voter", "b2")
+        w.env.sendJournal.settle("spike-voter", "a2")
+        w.env.sendJournal.forget(listOf("spike-bob"))
+        testScheduler.runCurrent()
+        w.app.store.failingReads.clear()
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        assertEquals(setOf("a1", "b1"), w.env.sendJournal.current.entries.map { it.actionId }.toSet())
+        assertEquals(setOf("a1", "b1"), storedIds(w).toSet())
+    }
+
     companion object {
         private const val HAS_KEY = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e"
     }

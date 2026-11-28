@@ -48,6 +48,9 @@ data class JournalEntry(
         }
 }
 
+/** One change to the journal's list (record, settle, forget, dismiss, an outcome): pure and idempotent. */
+private typealias Change = (List<JournalEntry>) -> List<JournalEntry>
+
 data class SendJournalState(val entries: List<JournalEntry> = emptyList(), val checking: Boolean = false) {
     /** What [account] should see: its entries, undecided first. */
     fun forAccount(account: String?): List<JournalEntry> =
@@ -70,17 +73,20 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
     private var started = false
     private var resolver: Job? = null
 
+    /** Changes the store refused (read or write), oldest first, applied again at the next read that works. Main only. */
+    private val unsaved = mutableListOf<Change>()
+
     /** Reads the journal and resolves what an earlier run left. Both apps call it at launch; safe to call again. */
     fun start() {
         if (started) return
         started = true
         scope.launch {
-            val entries = io { read() } ?: run {
+            // the stored list with every change made while the store refused it ([unsaved]), written back
+            if (!update(null)) {
                 // the store refused (iOS before the first unlock): the next start reads it again
                 started = false
                 return@launch
             }
-            setState { it.copy(entries = entries) }
             resolve()
         }
     }
@@ -184,28 +190,45 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
     }
 
     /**
-     * Read-modify-write under the store's lock. Never throws (but cancellation): a journal the store refuses must not
-     * turn a broadcast that went through into an error, so a failed write keeps the entries in memory only.
+     * Read-modify-write under the store's lock; true when the store read and wrote it. Never throws (but
+     * cancellation): a journal the store refuses must not turn a broadcast that went through into an error, so a
+     * change the store refused is kept in memory and in [unsaved], and the next read that works applies it again to
+     * the stored list (in order) before [change] and writes the result: an entry recorded while locked is not
+     * dropped by the stored copy, and one settled, forgotten or dismissed while locked is not brought back by it.
+     * Every change is idempotent, so one applied twice (a write that failed after the read) is the same. A null
+     * [change] only reconciles ([start]).
      */
-    private suspend fun update(transform: (List<JournalEntry>) -> List<JournalEntry>) {
-        val next = try {
+    private suspend fun update(change: Change?): Boolean {
+        val replay = withContext(env.dispatchers.main) { unsaved.toList() }
+        val saved = try {
             io {
                 store.withLock {
                     // a read the store refused writes nothing: what is stored stays for the next read (a write of the
                     // change over nothing would drop every entry the read could not see)
                     val before = read() ?: return@withLock null
-                    val updated = transform(before)
+                    val updated = (replay + listOfNotNull(change)).fold(before) { list, c -> c(list) }
                     if (updated != before) write(updated)
                     updated
                 }
-            } ?: transform(current.entries)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             ErrorReports.quiet(e, "sendJournal.update")
-            transform(current.entries)
+            null
         }
-        withContext(env.dispatchers.main) { setState { it.copy(entries = next) } }
+        withContext(env.dispatchers.main) {
+            if (saved != null) {
+                // by identity: a concurrent update that saved first may have taken some of them already
+                unsaved.removeAll { c -> replay.any { it === c } }
+                // what failed meanwhile stays on top of the saved list until it is written too
+                setState { it.copy(entries = unsaved.fold(saved) { list, c -> c(list) }) }
+            } else if (change != null) {
+                unsaved += change
+                setState { it.copy(entries = change(it.entries)) }
+            }
+        }
+        return saved != null
     }
 
     private suspend fun <T> io(block: () -> T): T = withContext(env.dispatchers.io) { block() }
