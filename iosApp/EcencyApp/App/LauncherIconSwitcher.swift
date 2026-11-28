@@ -94,13 +94,18 @@ final class LauncherIconSwitcher {
         if let known { shown = known } else { shown = setting.currentName }
         known = .some(want)
         guard shown != want else { return }
-        setting.setName(want) { [weak self] in self?.refused(want) }
+        request += 1
+        let sent = request
+        setting.setName(want) { [weak self] in self?.refused(sent) }
     }
 
-    /// The system kept the old icon for [name]. An apply that came while it was in flight skipped (Settings shows the
-    /// requested icon), so this applies again, once per foreground. A refusal of a change a later one replaced is moot.
-    private func refused(_ name: String?) {
-        guard known == .some(name) else { return }
+    /// The last change asked of the system: a refusal is about that request only, not any earlier one for the same icon.
+    private var request = 0
+
+    /// The system kept the old icon for request [sent]. An apply that came while it was in flight skipped (Settings
+    /// shows the requested icon), so this applies again, once per foreground. A refusal of an earlier request is moot.
+    private func refused(_ sent: Int) {
+        guard sent == request else { return }
         known = nil
         guard !retried else { return }
         retried = true

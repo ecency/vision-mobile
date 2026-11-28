@@ -213,6 +213,29 @@ final class LauncherIconTests: XCTestCase {
         XCTAssertEqual(icons.reads, 1)
     }
 
+    /// CodeRabbit on #3756: a late refusal of an earlier request for the same icon is moot once a later one succeeded;
+    /// it neither forgets the icon nor spends the foreground's one retry.
+    func testALateRefusalOfAnEarlierRequestForTheSameIconIsIgnored() throws {
+        let env = try makeEnv()
+        let icons = Recorder()
+        icons.refuseNext = true
+        icons.answerLater = true
+        LauncherIconSwitcher.configure(env.launcherIcons, region: "DE", language: "de")
+        let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
+        switcher.pick(.christmas)
+        switcher.pick(.holi)
+        switcher.pick(.christmas)
+        XCTAssertEqual(icons.name, "AppIcon-Christmas", "the second Christmas went through")
+        let reads = icons.reads
+        icons.pendingRefusals.removeFirst()()
+        XCTAssertEqual(icons.reads, reads, "the old refusal does not make the switcher read the system again")
+        // the foreground's retry is still there for a refusal of the current request
+        icons.refuseNext = true
+        icons.answerLater = false
+        switcher.pick(.holi)
+        XCTAssertEqual(icons.calls, ["AppIcon-Christmas", "AppIcon-Holi", "AppIcon-Christmas", "AppIcon-Holi", "AppIcon-Holi"], "refused, then applied again at once")
+    }
+
     /// Review of #3659: a phone on the Persian, Islamic or Buddhist calendar still gets the Gregorian day the
     /// celebration table uses, in its own time zone.
     func testTodayIsTheGregorianDayWhateverThePhonesCalendar() throws {

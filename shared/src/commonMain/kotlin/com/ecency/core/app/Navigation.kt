@@ -649,9 +649,11 @@ data class NavState(
     fun open(entry: NavEntry, loggedIn: Boolean): NavState {
         var s = if (entry.tab != null) copy(tab = entry.tab, stack = emptyList(), pane = emptyList()) else this
         s = s.copy(drawerOpen = false, afterLogin = null)
-        for (screen in entry.screens) {
+        for ((i, screen) in entry.screens.withIndex()) {
             s = s.pushGated(screen, loggedIn)
-            if (s.top == AppScreen.Login) return s.copy(afterLogin = entry) // nothing behind the login screen that needs the account
+            // nothing behind the login screen that needs the account; what waits for the sign-in is the entry with a
+            // tab (its stack starts over), or without one the screens not opened yet (the ones before stay open)
+            if (s.top == AppScreen.Login) return s.copy(afterLogin = if (entry.tab != null) entry else NavEntry(null, entry.screens.drop(i)))
         }
         return s
     }

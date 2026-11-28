@@ -227,6 +227,11 @@ class NavigationTest {
         val pushed = NavState().push(post).open(NavEntry.screen(editor), loggedIn = false)
         assertEquals(listOf(post, AppScreen.Login), pushed.screens)
         assertEquals(listOf(post, editor), pushed.afterAccountChange(signedIn = true).screens)
+        // CodeRabbit on #3756: the public screens in front of the gated one open once, not again after the sign-in
+        val profile = AppScreen.Profile("alice")
+        val mixed = NavState().open(NavEntry(null, listOf(profile, post, editor)), loggedIn = false)
+        assertEquals(listOf(profile, post, AppScreen.Login), mixed.screens)
+        assertEquals(listOf(profile, post, editor), mixed.afterAccountChange(signedIn = true).screens)
     }
 
     @Test

@@ -254,8 +254,9 @@ class ComposeReplyModel internal constructor(
             val local = env.localDrafts.load(user, slot) ?: return@launch
             // checked again after the load: a keystroke meanwhile started a save (setText), a send or an upload began
             if (current.isSending || current.isAttaching || saveJob?.isActive == true) return@launch
-            pending = local.pending
-            setState { it.copy(text = local.body, imageUrl = local.replyImage, draftPermlink = local.pending?.permlink, sent = null, error = null, prefillSeq = it.prefillSeq + 1) }
+            // a permlink a failed send left is kept until a send settles it: a read from before it was saved has none
+            pending = local.pending ?: pending
+            setState { it.copy(text = local.body, imageUrl = local.replyImage, draftPermlink = pending?.permlink, sent = null, error = null, prefillSeq = it.prefillSeq + 1) }
         }
     }
 
@@ -361,6 +362,9 @@ class ComposeReplyModel internal constructor(
                 val author = signedInAs ?: throw AppException(AppError(ErrorKind.AUTH, L.native.composeReply.pleaseSignInFirst, false))
                 saveJob?.cancel()
                 val hash = PendingPublish.hashOf(parent.author, parent.permlink, "", text)
+                // the editor's reply mode may have sent this reply under a permlink the sheet has not read yet (its own
+                // save was still waiting): asked about first, so a lost answer is never sent twice under a new one
+                if (pending == null) pending = env.localDrafts.load(author, slot)?.pending
                 val was = pending
                 var permlink: String? = null
                 var create = true

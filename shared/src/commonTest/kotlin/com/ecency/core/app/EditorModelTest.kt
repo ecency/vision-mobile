@@ -1317,6 +1317,55 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
     }
 
+    /** CodeRabbit on #3756: Send right after the editor's failed send, while the sheet's own save still waits. */
+    @Test
+    fun aSendWhileTheSheetsSaveWaitsAsksAboutTheEditorsPermlinkFirst() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val quick = w.app.env.replyModel(parent.key, parent)
+        quick.setText("first thought")
+        testScheduler.advanceUntilIdle()
+        val editor = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        w.broadcastAnswer = { throw IllegalStateException("timeout") }
+        // typed in the sheet (another pane): its save waits while the editor's send fails, and Send comes before it
+        quick.setText("first thought, more")
+        editor.submit()
+        testScheduler.advanceTimeBy(EditorModel.LOCAL_SAVE_DELAY_MILLIS / 2)
+        testScheduler.runCurrent()
+        assertFalse(editor.current.isSending, "the editor's send is over")
+        assertNull(editor.current.done, "the editor's send failed")
+        val link = field(w.ops().last(), 0, "permlink")
+        w.posts["$user/$link"] = replyEntry(link, "first thought")
+        w.broadcastAnswer = { FakeTransport.result(it, "{}") }
+        val sent = w.app.broadcasts().size
+        quick.send()
+        testScheduler.advanceUntilIdle()
+        assertEquals(sent, w.app.broadcasts().size, "asked about the editor's permlink, never sent under a new one")
+        assertTrue(quick.current.conflict)
+    }
+
+    /** CodeRabbit on #3756: a reload of a draft saved without a permlink keeps the one the sheet's failed send left. */
+    @Test
+    fun aReloadKeepsThePermlinkOfTheSheetsFailedSend() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val quick = w.app.env.replyModel(parent.key, parent)
+        quick.setText("first thought")
+        w.broadcastAnswer = { throw IllegalStateException("timeout") }
+        quick.send()
+        testScheduler.advanceUntilIdle()
+        val link = assertNotNull(quick.current.draftPermlink, "the failed send left its permlink")
+        // the draft as a writer from before that send saved it: no permlink
+        w.app.env.localDrafts.save(user, LocalDrafts.reply("alice", "root"), LocalDraft(body = "first thought", updated = 1))
+        w.app.env.replyDraftWrittenElsewhere(parent.key)
+        testScheduler.advanceUntilIdle()
+        assertEquals(link, quick.current.draftPermlink, "kept until a send settles it")
+    }
+
     // ---- fields ----
 
     @Test
