@@ -68,6 +68,9 @@ class ComposeReplyModel internal constructor(
 ) : StateModel<ReplyState>(ReplyState(), env.dispatchers), AiTextTarget {
 
     private var pending: PendingPublish? = null
+
+    /** Sends started (main thread): a reload that read the draft before one ran does not apply its older record. */
+    private var sends = 0
     private var conflictChoice: Boolean? = null
 
     // ---- RN quick reply's toolbar: dictation and AI assist (the editor's models), image and clipboard (the wave composer's upload) ----
@@ -250,10 +253,12 @@ class ComposeReplyModel internal constructor(
         scope.launch {
             // after the first read, which would otherwise put its older text back over this one
             draftRead.await()
+            val sendsBefore = sends
             // the editor just saved it: none read back is a read that failed, and the sheet keeps what it shows
             val local = env.localDrafts.load(user, slot) ?: return@launch
-            // checked again after the load: a keystroke meanwhile started a save (setText), a send or an upload began
-            if (current.isSending || current.isAttaching || saveJob?.isActive == true) return@launch
+            // checked again after the load: a keystroke meanwhile started a save (setText), a send or an upload began, or a
+            // send ran and ended (its newer pending record is not replaced by this older read)
+            if (sends != sendsBefore || current.isSending || current.isAttaching || saveJob?.isActive == true) return@launch
             // a permlink a failed send left is kept until a send settles it: a read from before it was saved has none
             pending = local.pending ?: pending
             setState { it.copy(text = local.body, imageUrl = local.replyImage, draftPermlink = pending?.permlink, sent = null, error = null, prefillSeq = it.prefillSeq + 1) }
@@ -352,6 +357,7 @@ class ComposeReplyModel internal constructor(
             setState { it.copy(error = AppError(ErrorKind.AUTH, ACCOUNT_CHANGED, false)) }
             return
         }
+        sends++
         setState { it.copy(isSending = true, error = null, sent = null, conflict = false, authorityPrompt = false) }
         val authorityRetry = authority.takeRetry()
         val text = bodyOf(state)

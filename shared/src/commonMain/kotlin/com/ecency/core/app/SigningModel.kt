@@ -142,7 +142,9 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
         send: suspend () -> com.ecency.core.api.broadcast.BroadcastResult,
     ): com.ecency.core.api.broadcast.BroadcastResult {
         try {
-            return send().also { env.sendJournal.settle(username, actionId) }
+            // not cancellable, as the failure paths: a settle cut off after its write would leave the queued record
+            // of this send to be replayed over it (CodeRabbit on #3756)
+            return send().also { withContext(kotlinx.coroutines.NonCancellable) { env.sendJournal.settle(username, actionId) } }
         } catch (e: com.ecency.core.api.broadcast.BroadcastException.Network) {
             val pending = e.pending
             val tx = pending?.signed

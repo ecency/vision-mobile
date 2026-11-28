@@ -443,6 +443,27 @@ class WalletDeltaFixesTest {
         assertEquals(setOf("a1", "c1"), w.env.sendJournal.current.entries.map { it.actionId }.toSet())
     }
 
+    /** CodeRabbit on #3756: a change the store refused after a good launch is written at the next start (the unlock). */
+    @Test
+    fun aChangeRefusedAfterAGoodLaunchIsWrittenAtTheNextStart() = runTest {
+        val w = WalletWorld(this)
+        w.statusAnswer = { "\"unknown\"" }
+        w.app.store.putString(SendJournal.ENTRY, "[${storedEntry("spike-voter", "a1", "ab")},${storedEntry("spike-voter", "a2", "aa")}]")
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        assertEquals(setOf("a1", "a2"), w.env.sendJournal.current.entries.map { it.actionId }.toSet())
+        // locked later: the settle of a2 is kept in memory only
+        w.app.store.failingReads[SendJournal.ENTRY] = locked
+        w.env.sendJournal.settle("spike-voter", "a2")
+        testScheduler.runCurrent()
+        // unlocked: nothing else changes the journal, the app comes to the front
+        w.app.store.failingReads.clear()
+        assertEquals(setOf("a1", "a2"), storedIds(w).toSet(), "not written while locked")
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        assertEquals(setOf("a1"), storedIds(w).toSet(), "the settle is written once the store reads again")
+    }
+
     /** iOS starts the journal again on becoming active: one that comes while the launch read is in flight is not lost. */
     @Test
     fun aStartDuringAnInFlightReadThatFailsReadsOnceMore() = runTest {

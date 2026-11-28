@@ -86,6 +86,8 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
             // iOS starts it again on becoming active (after an unlock): one asked while the launch read is in flight
             // reads once more if that read fails, rather than waiting for the next foreground
             if (reading) startAgain = true
+            // after a good launch, changes the store refused since (a lock later in the run) are written now
+            else if (unsaved.isNotEmpty()) scope.launch { update(null) }
             return
         }
         started = true
