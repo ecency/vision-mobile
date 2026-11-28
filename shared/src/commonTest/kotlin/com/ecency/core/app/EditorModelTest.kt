@@ -1151,6 +1151,68 @@ class EditorModelTest {
         assertEquals("half a thought", m.current.body)
     }
 
+    /** Android report on 4.0.0: a reply continued in the editor came back empty (or older) in the quick reply sheet. */
+    @Test
+    fun theQuickReplySheetShowsWhatTheEditorWroteAfterIt() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        for (start in listOf("", "one")) {
+            val quick = w.app.env.replyModel(parent.key, parent)
+            quick.setText(start)
+            testScheduler.advanceUntilIdle()
+            var args: EditorArgs? = null
+            quick.expand { args = it }
+            testScheduler.advanceUntilIdle()
+            val m = w.newPost(this, args!!)
+            val body = "$start two".trim()
+            m.setBody(body, TextSelection(body.length))
+            // the first saved by the editor's autosave, the second by leaving before it ran
+            if (start.isEmpty()) testScheduler.advanceUntilIdle() else testScheduler.runCurrent()
+            m.leave()
+            m.close()
+            testScheduler.advanceUntilIdle()
+            val again = w.app.env.replyModel(parent.key, parent)
+            testScheduler.advanceUntilIdle()
+            assertEquals(body, again.current.text, "the quick reply continues what the editor wrote (started with '$start')")
+            // typing on keeps the editor's text instead of writing the stale copy over it
+            again.setText("$body three")
+            testScheduler.advanceUntilIdle()
+            assertEquals("$body three", w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root")).current.body)
+            again.setText("")
+            testScheduler.advanceUntilIdle()
+        }
+    }
+
+    @Test
+    fun aQuickReplyBeingSentKeepsItsModelWhenTheEditorSaves() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        testScheduler.advanceUntilIdle()
+        val parent = w.app.env.api.posts.getPost("alice", "root")!!
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        w.broadcastAnswer = { gate.await(); FakeTransport.result(it, "{}") }
+        val quick = w.app.env.replyModel(parent.key, parent)
+        quick.setText("on its way")
+        quick.send()
+        testScheduler.runCurrent()
+        assertTrue(quick.current.isSending)
+        val m = w.app.env.editorModel(EditorArgs(EditorKind.REPLY, "alice", "root"))
+        m.start()
+        testScheduler.advanceTimeBy(100)
+        testScheduler.runCurrent()
+        m.setBody("another go", TextSelection(10))
+        // the editor's autosave runs, the send still waits (a run to idle would time the broadcast out)
+        testScheduler.advanceTimeBy(EditorModel.LOCAL_SAVE_DELAY_MILLIS + 100)
+        testScheduler.runCurrent()
+        assertTrue(quick.current.isSending)
+        assertTrue(w.app.env.replyModel(parent.key, parent) === quick, "the sending sheet keeps its model")
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertNotNull(quick.current.sent, "the send was not cancelled")
+    }
+
     // ---- fields ----
 
     @Test
@@ -2131,16 +2193,19 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
         assertTrue(editor.current.publishConflict)
         assertEquals(sent, w.app.broadcasts().size)
-        // and so does the sheet; "update" edits that reply without options
-        quick.send()
+        // and so does the sheet opened again (a new model: the editor wrote the slot); "update" edits that reply without options
+        val again = w.app.env.replyModel(parent.key, parent)
         testScheduler.advanceUntilIdle()
-        assertTrue(quick.current.conflict)
-        quick.resolveConflict(update = true)
+        assertEquals("first thought, edited", again.current.text)
+        again.send()
+        testScheduler.advanceUntilIdle()
+        assertTrue(again.current.conflict)
+        again.resolveConflict(update = true)
         testScheduler.advanceUntilIdle()
         val ops = w.ops().last()
         assertEquals(listOf("comment"), opNames(ops))
         assertEquals(link, field(ops, 0, "permlink"))
-        assertNotNull(quick.current.sent)
+        assertNotNull(again.current.sent)
     }
 
     @Test

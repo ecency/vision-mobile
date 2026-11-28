@@ -1052,6 +1052,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         if (published || s.loading) return
         dirty = false
         val ok = env.localDrafts.save(owner, slot, localDraft(s))
+        if (ok && s.isReply) env.replyDraftWrittenElsewhere(PostKey(args.author, args.permlink))
         // a save refused because the account left the device (logout, wipe) is the teardown at work, not a failure to report
         val failed = !ok && !env.localDrafts.hasLeft(owner)
         if (current.localSaveFailed != failed) setState { it.copy(localSaveFailed = failed) }
@@ -1070,7 +1071,10 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         dirty = false
         val draft = localDraft(s)
         val key = slot
-        env.background.launch { env.localDrafts.save(owner, key, draft) }
+        val reply = if (s.isReply) PostKey(args.author, args.permlink) else null
+        env.background.launch {
+            if (env.localDrafts.save(owner, key, draft) && reply != null) env.replyDraftWrittenElsewhere(reply)
+        }
     }
 
     /** Whatever removes the screen (back, an account change, the activity finishing), the text is written first. */
