@@ -118,6 +118,8 @@ object ErrorReports {
             val kind = AppError.kindOf(e)
             // a refused session is not sent either: the user is asked to sign in again, and auth.renewToken says why
             if (kind == ErrorKind.NETWORK || isSessionRefused(root) || skips(e, root, kind)) return
+            // nor a read the app runs again once the phone unlocked: every one of them fails the same way until then
+            if (where in RUN_AGAIN_ON_UNLOCK && isDeviceLocked(root)) return
             send(root, where, kind.name.lowercase(), true, root, quiet = true)
         } catch (t: Throwable) {
             // not reported: reporting must never fail the caller
@@ -168,6 +170,12 @@ object ErrorReports {
      */
     private fun isDeviceLocked(root: Throwable): Boolean =
         (root as? com.ecency.core.secure.SecureStoreException.Unavailable)?.untilUnlock == true
+
+    /**
+     * Quiet reads the app runs again once the store opened (ECENCY-MOBILE-3NR, 3NS, 3QZ): the RN import's lists with the
+     * lock's start (StorageRecovery on iOS), the push accounts and the send journal at the next foreground.
+     */
+    private val RUN_AGAIN_ON_UNLOCK = setOf("sendJournal.read", "legacy.readNames", "push.accounts")
 
     /** The chat server refused in its own words ("@user is not on Ecency chat yet."): an answer, not a bug of the app. */
     private fun isChatRefusal(root: Throwable): Boolean =

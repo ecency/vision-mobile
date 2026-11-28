@@ -613,6 +613,8 @@ final class AppContainer: ObservableObject {
                     self?.env.isForeground = true
                     // a start the Keychain refused before the first unlock runs again now (StorageRecovery)
                     if let self, let launch = ProtectedDataFlag.launch { self.recoverStorageStart(launch) }
+                    // a journal the closed store refused at launch is read now (no-op once read)
+                    self?.env.sendJournal.start()
                     // a session that expires within a day is refreshed (Android: ON_START)
                     self?.env.session.onForeground()
                     self?.env.notifications.onForeground()

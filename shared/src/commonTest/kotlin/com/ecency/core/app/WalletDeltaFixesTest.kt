@@ -317,6 +317,26 @@ class WalletDeltaFixesTest {
         assertTrue(w.app.broadcasts().isEmpty())
     }
 
+    /** ECENCY-MOBILE-3NR: a launch read the store refused before the first unlock is read again at the next start. */
+    @Test
+    fun aJournalTheLockedStoreRefusedAtLaunchIsReadAgainAtTheNextStart() = runTest {
+        val w = WalletWorld(this)
+        w.app.store.putString(
+            SendJournal.ENTRY,
+            """[{"account":"spike-voter","actionId":"a1","txId":"${"ab".repeat(20)}","expiration":"2026-10-06T11:45:00","operation":"transfer"}]""",
+        )
+        w.statusAnswer = { "\"unknown\"" }
+        w.app.store.failingReads[SendJournal.ENTRY] = com.ecency.core.secure.SecureStoreException.Unavailable(-25308, untilUnlock = true)
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        assertTrue(w.env.sendJournal.current.entries.isEmpty())
+        // unlocked: the app comes to the front and starts the journal again
+        w.app.store.failingReads.clear()
+        w.env.sendJournal.start()
+        testScheduler.runCurrent()
+        assertEquals(listOf("a1"), w.env.sendJournal.current.entries.map { it.actionId })
+    }
+
     companion object {
         private const val HAS_KEY = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e"
     }

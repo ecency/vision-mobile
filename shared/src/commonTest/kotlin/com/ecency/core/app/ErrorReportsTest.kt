@@ -143,6 +143,22 @@ class ErrorReportsTest {
         assertEquals("true", r.tags["expected"])
     }
 
+    /**
+     * ECENCY-MOBILE-3NR, 3NS, 3QZ: quiet reads the app runs again once the phone unlocked send nothing while the store
+     * is closed (as a lost connection); any other quiet one, and a shown one, is still the expected warning.
+     */
+    @Test
+    fun aQuietReadRunAgainOnUnlockSendsNothingWhileTheStoreIsClosed() {
+        val locked = SecureStoreException.Unavailable(-25308, untilUnlock = true)
+        for (where in listOf("sendJournal.read", "legacy.readNames", "push.accounts")) ErrorReports.quiet(locked, where)
+        assertEquals(emptyList(), reporter.reports)
+        ErrorReports.quiet(locked, "notifications.refresh")
+        ErrorReports.quiet(SecureStoreException.Unavailable(-25308), "push.accounts")
+        AppError.from(SecureStoreException.Unavailable(-25308, untilUnlock = true), "session.start")
+        assertEquals(listOf("notifications.refresh", "push.accounts", "session.start"), reporter.reports.map { it.tags["where"] })
+        assertEquals(listOf("warning", "warning", "warning"), reporter.reports.map { it.level })
+    }
+
     @Test
     fun aKeychainCallRefusedWithTheLockedStatusStaysAnErrorWithACode() {
         // a write, delete or wipe the Keychain itself refused: the store was open, so this is not the locked launch

@@ -75,7 +75,11 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
         if (started) return
         started = true
         scope.launch {
-            val entries = io { read() }
+            val entries = io { read() } ?: run {
+                // the store refused (iOS before the first unlock): the next start reads it again
+                started = false
+                return@launch
+            }
             setState { it.copy(entries = entries) }
             resolve()
         }
@@ -187,7 +191,7 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
         val next = try {
             io {
                 store.withLock {
-                    val before = read()
+                    val before = read().orEmpty()
                     val updated = transform(before)
                     if (updated != before) write(updated)
                     updated
@@ -204,12 +208,13 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
 
     private suspend fun <T> io(block: () -> T): T = withContext(env.dispatchers.io) { block() }
 
-    private fun read(): List<JournalEntry> {
+    /** The stored entries; null when the store refused the read. */
+    private fun read(): List<JournalEntry>? {
         val raw = try {
             store.getString(ENTRY)
         } catch (e: Exception) {
             ErrorReports.quiet(e, "sendJournal.read")
-            null
+            return null
         } ?: return emptyList()
         val array = runCatching { Json.parseToJsonElement(raw) as? JsonArray }.getOrNull() ?: return emptyList()
         return array.mapNotNull { el ->

@@ -280,6 +280,8 @@ class PushModel internal constructor(private val env: AppEnvironment) : StateMod
         throw e
     } catch (e: Exception) {
         ErrorReports.quiet(e, "push.accounts")
+        // nothing registered: the next foreground tries again (iOS before the first unlock)
+        lastRegistration = null
         emptyList()
     }
 
