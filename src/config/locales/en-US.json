@@ -2902,7 +2902,8 @@
       "failed_to_delete": "Failed to delete"
     },
     "uploads": {
-      "add_to_gallery": "Add to gallery"
+      "add_to_gallery": "Add to gallery",
+      "refused": "The image server does not accept uploads from this account."
     },
     "account_notice": {
       "manage_keys": "Settings, Manage Authorities",

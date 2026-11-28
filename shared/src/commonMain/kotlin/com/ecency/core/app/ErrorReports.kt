@@ -159,6 +159,7 @@ object ErrorReports {
         isDeviceLocked(root) -> true
         isChatRefusal(root) -> true
         isSignupRefusal(root) -> true
+        root is com.ecency.core.api.ecency.ImageUploadRefused -> true
         root is AuthException -> isUserMistake(root)
         else -> false
     }

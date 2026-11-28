@@ -36,6 +36,12 @@ class UploadFile(val bytes: ByteArray, val name: String, val mime: String)
 /** The account cannot sign uploads (RN SIGN_IMAGE_UNAVAILABLE): no posting key and no token. */
 class ImageSigningUnavailable : EcencyException("SIGN_IMAGE_UNAVAILABLE")
 
+/**
+ * The image host refused uploads from this account (403, ECENCY-MOBILE-3S4): its answer about the account, not a bug of
+ * the app; never retried. RN has no case of its own for it.
+ */
+class ImageUploadRefused : EcencyHttpException(403, "image upload refused")
+
 /** RN `signImage`: the upload token, sent as `Authorization: Bearer <token>` (#3722). */
 object ImageSigning {
     /**
@@ -132,7 +138,7 @@ class ImageUploader(
                     return runCatching { Json.parseToJsonElement(response.body) }.getOrNull().obj()?.str("url")?.takeIf { it.isNotEmpty() }
                         ?: throw EcencyHttpException(response.status, "Returning response missing media data")
                 }
-                EcencyHttpException(response.status)
+                if (response.status == 403) ImageUploadRefused() else EcencyHttpException(response.status)
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
                 EcencyHttpException(0, "timeout", e)
             } catch (e: UploadStalled) {
@@ -208,12 +214,13 @@ class ImageUploader(
         const val MAX_RETRIES = 2
         private val RETRY_STATUSES = setOf(502, 503, 504)
 
-        /** RN's upload error copy (`alert.decrypt_fail_alert`, `payloadTooLarge`, `quotaExceeded`, `invalidImage`, `fail`). */
+        /** RN's upload error copy (`alert.decrypt_fail_alert`, `payloadTooLarge`, `quotaExceeded`, `invalidImage`, `fail`), and a refused account. */
         fun message(e: Throwable): String = when {
             e is ImageSigningUnavailable -> L.alert.decryptFailAlert
             e is EcencyHttpException && e.status == 413 -> L.alert.payloadTooLarge
             e is EcencyHttpException && e.status == 429 -> L.alert.qoutaExceeded
             e is EcencyHttpException && e.status == 400 -> L.alert.invalidImage
+            e is ImageUploadRefused -> L.native.uploads.refused
             else -> L.alert.fail
         }
     }
